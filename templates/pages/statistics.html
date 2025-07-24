@@ -1,0 +1,240 @@
+{% extends "base/base.html" %}
+
+{% block title %}Statistics - {{ site_config.title }}{% endblock %}
+{% block description %}Comprehensive statistics and insights about self-hosted applications{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            📊 Application Statistics
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300">
+            Insights and trends from the awesome-selfhosted ecosystem
+        </p>
+    </div>
+
+    <!-- Overall Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Applications</dt>
+                        <dd class="text-3xl font-bold text-gray-900 dark:text-white">{{ statistics.total_apps }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Categories</dt>
+                        <dd class="text-3xl font-bold text-gray-900 dark:text-white">{{ statistics.categories_count }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Stars</dt>
+                        <dd class="text-3xl font-bold text-gray-900 dark:text-white">{{ format_stars(statistics.total_stars) }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-md flex items-center justify-center">
+                        <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">With GitHub Data</dt>
+                        <dd class="text-3xl font-bold text-gray-900 dark:text-white">{{ statistics.apps_with_github }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Statistics Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Top Languages/Technologies -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    🔥 Most Popular Technologies
+                </h3>
+            </div>
+            <div class="p-6">
+                {% if statistics.top_languages %}
+                <div class="space-y-4">
+                    {% for language, count in statistics.top_languages[:10] %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full mr-3" style="background-color: {{ get_language_color(language) }};"></div>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ language }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                                <div class="bg-primary-600 h-2 rounded-full" style="width: {{ (count / statistics.top_languages[0][1] * 100) }}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 w-8 text-right">{{ count }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 dark:text-gray-400">No language data available</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Top Platforms -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    🖥️ Most Supported Platforms
+                </h3>
+            </div>
+            <div class="p-6">
+                {% if statistics.top_platforms %}
+                <div class="space-y-4">
+                    {% for platform, count in statistics.top_platforms[:10] %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ platform }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: {{ (count / statistics.top_platforms[0][1] * 100) }}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 w-8 text-right">{{ count }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 dark:text-gray-400">No platform data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- License Distribution -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-12">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                ⚖️ License Distribution
+            </h3>
+        </div>
+        <div class="p-6">
+            {% if statistics.top_licenses %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for license_id, count in statistics.top_licenses[:12] %}
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div class="flex-1">
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ format_license(license_id) }}</span>
+                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ (count / statistics.top_licenses[0][1] * 100) }}%"></div>
+                        </div>
+                    </div>
+                    <span class="text-lg font-bold text-gray-900 dark:text-white ml-4">{{ count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400">No license data available</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                {{ statistics.apps_with_multiple_licenses or 0 }}
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Apps with Multiple Licenses
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+            <div class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                {{ statistics.apps_with_multiple_platforms or 0 }}
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Multi-Platform Apps
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                {{ statistics.tags_count }}
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Total Tags
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+            <div class="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                {{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Average Stars per App
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="mt-12 text-center">
+        <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+            <h3 class="text-2xl font-bold mb-2">Ready to Explore?</h3>
+            <p class="text-blue-100 mb-4">
+                Discover amazing self-hosted applications from {{ statistics.total_apps }} options
+            </p>
+            <a href="/" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200">
+                Browse Applications
+                <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

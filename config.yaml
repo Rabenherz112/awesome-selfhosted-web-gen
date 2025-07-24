@@ -1,0 +1,45 @@
+# Awesome Self-Hosted Website Generator Configuration
+
+site:
+  title: "Awesome Selfhosted"
+  description: "Discover and explore self-hosted applications"
+  url: "https://awesome-selfhosted.net"
+  author: "Awesome Self-Hosted Community"
+  
+# Data sources
+data:
+  awesome_selfhosted_data_dir: "awesome-selfhosted-data"
+  software_dir: "software"
+  tags_dir: "tags"
+  platforms_dir: "platforms"
+  licenses_file: "licenses.yml"
+  
+# Build settings
+build:
+  output_dir: "output"
+  template_dir: "templates"
+  static_dir: "static"
+  data_cache_dir: "data"
+  
+# Site generation options
+generation:
+  items_per_page: 24
+  enable_search_index: true
+  minify_html: false
+  generate_sitemap: true
+  
+# Search settings
+search:
+  fuzzy_threshold: 0.3
+  max_results: 100
+  search_fields:
+    - name
+    - description
+    - tags
+    - categories
+    
+# Performance settings
+performance:
+  lazy_load_images: true
+  generate_webp: false
+  inline_critical_css: true 

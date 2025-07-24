@@ -1,0 +1,124 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            Browse Applications
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">
+            Discover {{ total_applications }} self-hosted applications
+        </p>
+    </div>
+
+    <!-- Filter Sidebar and Content -->
+    <div class="lg:grid lg:grid-cols-5 lg:gap-8">
+        <!-- Filters Sidebar -->
+        <div class="lg:col-span-1 mb-8 lg:mb-0 space-y-6">
+
+            <!-- Platform Filter -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Platforms
+                </h3>
+                
+                <div class="space-y-2 max-h-64 overflow-y-auto" id="platformFilters">
+                    <!-- Platform checkboxes will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- License Filter -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Licenses
+                </h3>
+                
+                <div class="flex items-center space-x-3 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="showNonFree" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Include Non-Free</span>
+                </div>
+                
+                <div class="space-y-2 max-h-64 overflow-y-auto" id="licenseFilters">
+                    <!-- License checkboxes will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Category Filter -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Categories
+                </h3>
+                
+                <div class="space-y-2 max-h-96 overflow-y-auto" id="categoryFilters">
+                    <!-- Category checkboxes will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications Grid -->
+        <div class="lg:col-span-4">
+            <!-- Sort Controls -->
+            <div class="flex justify-between items-center mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Showing <span id="visibleCount">Loading...</span> of <span id="totalCount">{{ total_applications }}</span> applications
+                </div>
+                <div class="flex space-x-2">
+                    <button id="sortName" class="px-3 py-1 text-sm bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded">
+                        Name
+                    </button>
+                    <button id="sortStars" class="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                        Stars
+                    </button>
+                    <button id="sortUpdated" class="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                        Updated
+                    </button>
+                </div>
+            </div>
+
+            <!-- Applications Grid -->
+            <div id="applicationsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                <!-- Applications will be populated by JavaScript -->
+                <div id="loadingMessage" class="col-span-full text-center py-12">
+                    <div class="text-gray-500 dark:text-gray-400">Loading applications...</div>
+                </div>
+            </div>
+
+            <!-- Client-side Pagination -->
+            <div id="paginationContainer" class="hidden">
+                <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button id="prevPage" class="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            Previous
+                        </button>
+                        <button id="nextPage" class="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add line-clamp support -->
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/browse.js"></script>
+{% endblock %} 
