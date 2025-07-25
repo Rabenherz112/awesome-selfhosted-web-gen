@@ -144,22 +144,22 @@ class TemplateHelpers:
         
         return " ".join(html_parts)
     
-    def get_tags_badges_html(self, tags) -> str:
-        """Generate HTML badges for tags."""
-        if not tags:
+    def get_tags_badges_html(self, categories) -> str:
+        """Generate HTML badges for categories."""
+        if not categories:
             return ""
         
         # Handle both list and string cases  
-        if isinstance(tags, str):
-            tags = [tags]
-        elif not isinstance(tags, list):
+        if isinstance(categories, str):
+            categories = [categories]
+        elif not isinstance(categories, list):
             return ""
         
         html_parts = []
-        for tag in tags:
-            if tag:
+        for category in categories:
+            if category:
                 html_parts.append(
-                    f'<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm px-3 py-1 rounded-full">{tag}</span>'
+                    f'<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm px-3 py-1 rounded-full">{category}</span>'
                 )
         
         return " ".join(html_parts)
@@ -169,34 +169,57 @@ class TemplateHelpers:
         return sorted(apps, key=lambda x: x.stars or 0, reverse=reverse)
     
     def get_language_color(self, language: str) -> str:
-        """Get color code for programming language."""
-        if not language:
-            return "#586069"
-        
-        # GitHub language colors
+        """Get color for programming language."""
+        # Common language colors (GitHub-style)
         colors = {
+            'python': '#3572A5',
             'javascript': '#f1e05a',
-            'python': '#3572a5',
-            'java': '#b07219',
             'typescript': '#2b7489',
-            'c#': '#239120',
-            'php': '#4f5d95',
-            'c++': '#f34b7d',
-            'c': '#555555',
-            'shell': '#89e051',
-            'go': '#00add8',
+            'java': '#b07219',
+            'go': '#00ADD8',
             'rust': '#dea584',
+            'php': '#4F5D95',
+            'c': '#555555',
+            'c++': '#f34b7d',
+            'c#': '#239120',
             'ruby': '#701516',
-            'swift': '#ffac45',
-            'kotlin': '#f18e33',
-            'dart': '#00b4ab',
+            'shell': '#89e051',
+            'docker': '#384d54',
             'html': '#e34c26',
             'css': '#563d7c',
-            'vue': '#2c3e50',
-            'dockerfile': '#384d54',
+            'vue': '#4FC08D',
+            'react': '#61DAFB',
+            'node.js': '#43853d',
+            'dart': '#00B4AB',
+            'kotlin': '#F18E33',
+            'swift': '#FA7343',
+            'scala': '#c22d40'
         }
         
-        return colors.get(language.lower(), '#586069')
+        if not language:
+            return '#6b7280'  # gray-500
+            
+        return colors.get(language.lower(), '#6b7280')
+    
+    def render_template_string(self, template_str: str, context: dict = None) -> str:
+        """Render a template string with given context."""
+        if not template_str:
+            return ""
+        
+        # Create a simple template from string
+        from jinja2 import Template
+        
+        # Merge with site config by default
+        full_context = {'site': self.config.get_site_config()}
+        if context:
+            full_context.update(context)
+        
+        try:
+            template = Template(template_str)
+            return template.render(**full_context)
+        except Exception as e:
+            print(f"Warning: Could not render template string '{template_str}': {e}")
+            return template_str
     
     def format_github_url(self, repo_url: str) -> str:
         """Format GitHub repository URL."""
@@ -210,20 +233,20 @@ class TemplateHelpers:
         return repo_url
     
     def get_app_tags_html(self, app: Any, max_tags: int = 5) -> str:
-        """Generate HTML for application tags."""
-        if not app.tags:
+        """Generate HTML for application categories (displayed as tags)."""
+        if not app.categories:
             return ""
         
         html_parts = []
-        tags_to_show = app.tags[:max_tags]
+        categories_to_show = app.categories[:max_tags]
         
-        for tag in tags_to_show:
+        for category in categories_to_show:
             html_parts.append(
-                f'<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">{tag}</span>'
+                f'<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">{category}</span>'
             )
         
-        if len(app.tags) > max_tags:
-            remaining = len(app.tags) - max_tags
+        if len(app.categories) > max_tags:
+            remaining = len(app.categories) - max_tags
             html_parts.append(
                 f'<span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full mr-1 mb-1">+{remaining} more</span>'
             )

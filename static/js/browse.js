@@ -15,7 +15,7 @@ class BrowsePage {
         
         // Pagination settings
         this.currentPage = 1;
-        this.itemsPerPage = 60;
+        this.itemsPerPage = 24; // Will be updated from config
         this.totalPages = 1;
         
         this.init();
@@ -24,6 +24,7 @@ class BrowsePage {
     async init() {
         await this.loadSearchData();
         await this.loadLicenseData();
+        await this.loadConfig();
         this.extractPlatforms();
         this.extractLicenses();
         this.extractCategories();
@@ -33,6 +34,20 @@ class BrowsePage {
         this.setupCategoryFilters();
         this.setupPaginationEventListeners();
         this.filterSortAndRender();
+    }
+
+    async loadConfig() {
+        // Load items per page from config
+        try {
+            // Get items per page from meta tag
+            const itemsPerPageMeta = document.querySelector('meta[name="items-per-page"]');
+            if (itemsPerPageMeta) {
+                this.itemsPerPage = parseInt(itemsPerPageMeta.content) || 60;
+                console.log(`Loaded items per page from config: ${this.itemsPerPage}`);
+            }
+        } catch (error) {
+            console.log('Using default items per page: 60');
+        }
     }
 
     async loadSearchData() {
@@ -47,25 +62,24 @@ class BrowsePage {
     }
 
     async loadLicenseData() {
-        // Non-free license identifiers from licenses-nonfree.yml
-        const nonFreeLicenseIds = [
-            'BSD-3-Clause-No-Military-License',
-            'BUSL-1.1',
-            'CC-BY-NC-SA-3.0', 
-            'CC-BY-NC-SA-4.0',
-            'CC-BY-ND-3.0',
-            'CC-BY-NC-4.0',
-            'Commons-Clause',
-            'DPL',
-            'Elastic-2.0',
-            'NPOSL-3.0',
-            'SSPL-1.0',
-            '⊘ Proprietary'
-        ];
-        
-        nonFreeLicenseIds.forEach(license => {
-            this.nonFreeLicenses.add(license);
-        });
+        // Load non-free license identifiers from search data
+        try {
+            const response = await fetch('/static/data/search.json');
+            const data = await response.json();
+            
+            if (data.nonfree_licenses && Array.isArray(data.nonfree_licenses)) {
+                data.nonfree_licenses.forEach(license => {
+                    this.nonFreeLicenses.add(license);
+                });
+            } else {
+                // Fallback to basic proprietary check if data not available
+                this.nonFreeLicenses.add('⊘ Proprietary');
+            }
+        } catch (error) {
+            console.error('Failed to load license data:', error);
+            // Fallback to basic proprietary check
+            this.nonFreeLicenses.add('⊘ Proprietary');
+        }
     }
 
     extractPlatforms() {
@@ -111,6 +125,10 @@ class BrowsePage {
             showNonFreeToggle.addEventListener('change', (e) => {
                 this.showNonFreeOnly = e.target.checked;
                 this.currentPage = 1; // Reset to first page
+                
+                // Re-setup license filters when toggle changes
+                this.setupLicenseFilters();
+                
                 this.filterSortAndRender();
             });
         }
@@ -146,18 +164,18 @@ class BrowsePage {
                 app.platforms && app.platforms.includes(platform)
             ).length;
 
-            const filterDiv = document.createElement('div');
-            filterDiv.className = 'flex items-center space-x-2';
+            const filterDiv = document.createElement('label');
+            filterDiv.className = 'filter-label cursor-pointer';
+            filterDiv.setAttribute('for', `platform-${this.sanitizeId(platform)}`);
             
             filterDiv.innerHTML = `
                 <input type="checkbox" id="platform-${this.sanitizeId(platform)}" 
-                       class="rounded text-primary-600 focus:ring-primary-500" 
+                       class="filter-checkbox" 
                        data-platform="${platform}">
-                <label for="platform-${this.sanitizeId(platform)}" 
-                       class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <span class="flex-1">
                     ${platform}
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(${platformCount})</span>
-                </label>
+                    <span class="text-xs opacity-70 ml-1">(${platformCount})</span>
+                </span>
             `;
 
             const checkbox = filterDiv.querySelector('input');
@@ -179,28 +197,45 @@ class BrowsePage {
         const licenseFiltersContainer = document.getElementById('licenseFilters');
         if (!licenseFiltersContainer) return;
 
-        const sortedLicenses = Array.from(this.licenses).sort();
+        // Clear existing filters
+        licenseFiltersContainer.innerHTML = '';
+
+        // Filter licenses based on the non-free toggle state
+        const allLicenses = Array.from(this.licenses).sort();
+        const filteredLicenses = allLicenses.filter(license => {
+            // If non-free toggle is OFF, hide non-free licenses
+            if (!this.showNonFreeOnly && this.isNonFreeLicense([license])) {
+                return false;
+            }
+            return true;
+        });
         
-        sortedLicenses.forEach(license => {
+        filteredLicenses.forEach(license => {
             const licenseCount = this.applications.filter(app => 
                 app.license && app.license.includes(license)
             ).length;
 
-            const filterDiv = document.createElement('div');
-            filterDiv.className = 'flex items-center space-x-2';
+            const filterDiv = document.createElement('label');
+            filterDiv.className = 'filter-label cursor-pointer';
+            filterDiv.setAttribute('for', `license-${this.sanitizeId(license)}`);
             
             filterDiv.innerHTML = `
                 <input type="checkbox" id="license-${this.sanitizeId(license)}" 
-                       class="rounded text-primary-600 focus:ring-primary-500" 
+                       class="filter-checkbox" 
                        data-license="${license}">
-                <label for="license-${this.sanitizeId(license)}" 
-                       class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <span class="flex-1">
                     ${license}
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(${licenseCount})</span>
-                </label>
+                    <span class="text-xs opacity-70 ml-1">(${licenseCount})</span>
+                </span>
             `;
 
             const checkbox = filterDiv.querySelector('input');
+            
+            // Restore selected state if license was previously selected
+            if (this.selectedLicenses.has(license)) {
+                checkbox.checked = true;
+            }
+            
             checkbox.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     this.selectedLicenses.add(license);
@@ -226,18 +261,18 @@ class BrowsePage {
                 app.categories && app.categories.includes(category)
             ).length;
 
-            const filterDiv = document.createElement('div');
-            filterDiv.className = 'flex items-center space-x-2';
+            const filterDiv = document.createElement('label');
+            filterDiv.className = 'filter-label cursor-pointer';
+            filterDiv.setAttribute('for', `category-${this.sanitizeId(category)}`);
             
             filterDiv.innerHTML = `
                 <input type="checkbox" id="category-${this.sanitizeId(category)}" 
-                       class="rounded text-primary-600 focus:ring-primary-500" 
+                       class="filter-checkbox" 
                        data-category="${category}">
-                <label for="category-${this.sanitizeId(category)}" 
-                       class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <span class="flex-1">
                     ${category}
-                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(${categoryCount})</span>
-                </label>
+                    <span class="text-xs opacity-70 ml-1">(${categoryCount})</span>
+                </span>
             `;
 
             const checkbox = filterDiv.querySelector('input');
@@ -291,9 +326,9 @@ class BrowsePage {
             const button = document.getElementById(buttonId);
             if (button) {
                 if (buttonId === activeButtonId) {
-                    button.className = 'px-3 py-1 text-sm bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded';
+                    button.className = 'sort-button active';
                 } else {
-                    button.className = 'px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded';
+                    button.className = 'sort-button';
                 }
             }
         });
@@ -456,8 +491,8 @@ class BrowsePage {
             </div>
         ` : '';
         
-        const tagsHtml = app.tags ? app.tags.slice(0, 2).map(tag => 
-            `<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${tag}</span>`
+        const categoriesHtml = app.tags ? app.tags.slice(0, 2).map(category => 
+            `<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
         ).join('') + (app.tags.length > 2 ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.tags.length - 2}</span>` : '') : '';
         
         // Platform badges (show up to 3 platforms)
@@ -507,7 +542,7 @@ class BrowsePage {
                     ${this.truncateDescription(app.description, 80)}
                 </p>
                 
-                ${tagsHtml ? `<div class="mb-3">${tagsHtml}</div>` : ''}
+                ${categoriesHtml ? `<div class="mb-3">${categoriesHtml}</div>` : ''}
                 ${platformsHtml ? `<div class="mb-3">${platformsHtml}</div>` : ''}
                 
                 <div class="flex items-end justify-between text-xs mt-auto pt-2">

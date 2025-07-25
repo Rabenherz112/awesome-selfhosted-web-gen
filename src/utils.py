@@ -7,8 +7,6 @@ import shutil
 import json
 from pathlib import Path
 from typing import Dict, Any, Optional
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-import threading
 import time
 
 
@@ -75,60 +73,6 @@ def get_directory_size(directory: Path) -> int:
             total_size += file_path.stat().st_size
     
     return total_size
-
-
-class DevServer:
-    """Simple development server for testing the generated site."""
-    
-    def __init__(self, directory: Path, port: int = 8000):
-        """Initialize development server."""
-        self.directory = directory.resolve()
-        self.port = port
-        self.server = None
-        self.thread = None
-    
-    def start(self) -> None:
-        """Start the development server."""
-        if self.server:
-            print("Server is already running")
-            return
-        
-        if not self.directory.exists():
-            print(f"Directory not found: {self.directory}")
-            return
-        
-        # Change to the output directory
-        original_cwd = os.getcwd()
-        os.chdir(self.directory)
-        
-        try:
-            self.server = HTTPServer(('localhost', self.port), SimpleHTTPRequestHandler)
-            self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-            self.thread.start()
-            
-            print(f"Development server started at http://localhost:{self.port}")
-            print(f"Serving directory: {self.directory}")
-            print("Press Ctrl+C to stop the server")
-            
-        except OSError as e:
-            print(f"Failed to start server on port {self.port}: {e}")
-            os.chdir(original_cwd)
-            raise
-        finally:
-            # Always change back to original directory
-            if os.getcwd() != original_cwd:
-                os.chdir(original_cwd)
-    
-    def stop(self) -> None:
-        """Stop the development server."""
-        if self.server:
-            self.server.shutdown()
-            self.server = None
-            print("Development server stopped")
-    
-    def is_running(self) -> bool:
-        """Check if server is running."""
-        return self.server is not None
 
 
 def validate_url(url: str) -> bool:

@@ -22,7 +22,6 @@ class Application:
     repo_url: Optional[str] = None
     demo_url: Optional[str] = None
     categories: List[str] = None
-    tags: List[str] = None
     license: List[str] = None  # Changed to list to support multiple licenses
     language: Optional[str] = None
     platforms: List[str] = None  # Added to store all platforms
@@ -37,8 +36,6 @@ class Application:
         """Initialize default values."""
         if self.categories is None:
             self.categories = []
-        if self.tags is None:
-            self.tags = []
         if self.license is None:
             self.license = []
         if self.platforms is None:
@@ -82,7 +79,6 @@ class DataProcessor:
         return {
             'apps': apps_data,
             'categories': tags_data,  # Using tags as categories
-            'tags': tags_data,
             'platforms': platforms_data,
             'licenses': licenses_data
         }
@@ -244,7 +240,6 @@ class DataProcessor:
                 repo_url=repo_url,
                 demo_url=app_data.get('demo_url'),
                 categories=app_data.get('tags', []),  # Using tags as categories
-                tags=app_data.get('tags', []),
                 license=licenses,  # Store all licenses as list
                 language=primary_language,
                 platforms=platforms,  # Store all platforms
@@ -277,7 +272,6 @@ class DataProcessor:
                 'description': app.description,
                 'url': app.url,
                 'categories': app.categories,
-                'tags': app.tags,
                 'license': app.license,
                 'language': app.language,
                 'stars': app.stars or 0,
@@ -320,31 +314,31 @@ class DataProcessor:
                 'count': count
             }
         
-        # Also create categories for tags that don't have dedicated files
-        all_tags = set()
+        # Also create categories that don't have dedicated files
+        all_categories = set()
         for app in applications:
-            all_tags.update(app.categories)
+            all_categories.update(app.categories)
         
-        for tag in all_tags:
-            tag_key = tag.lower().replace(' ', '-').replace('&', '').replace('(', '').replace(')', '').replace(',', '').replace('/', '-').replace('--', '-').strip('-')
-            if tag_key not in categories:
-                categories[tag_key] = {
-                    'id': tag_key,
-                    'name': tag,
-                    'description': f'Applications tagged with {tag}',
-                    'count': category_counts.get(tag, 0)
+        for category in all_categories:
+            category_key = category.lower().replace(' ', '-').replace('&', '').replace('(', '').replace(')', '').replace(',', '').replace('/', '-').replace('--', '-').strip('-')
+            if category_key not in categories:
+                categories[category_key] = {
+                    'id': category_key,
+                    'name': category,
+                    'description': f'Applications in category {category}',
+                    'count': category_counts.get(category, 0)
                 }
         
         return categories
     
-    def generate_statistics(self, applications: List[Application], categories: Dict, tags: Dict) -> Dict[str, Any]:
+    def generate_statistics(self, applications: List[Application], categories: Dict) -> Dict[str, Any]:
         """Generate site statistics."""
         language_counts = {}
         license_counts = {}
         platform_counts = {}
         
         for app in applications:
-            # Count primary languages
+            # Count all languages
             if app.language:
                 language_counts[app.language] = language_counts.get(app.language, 0) + 1
             
@@ -360,7 +354,7 @@ class DataProcessor:
                     if license_id:  # Make sure license is not empty
                         license_counts[license_id] = license_counts.get(license_id, 0) + 1
         
-        # Calculate multi-platform and multi-license counts more carefully
+        # Calculate multi-platform and multi-license counts
         apps_with_multiple_licenses = sum(1 for app in applications 
                                         if hasattr(app, 'license') and app.license and len(app.license) > 1)
         apps_with_multiple_platforms = sum(1 for app in applications 
@@ -369,7 +363,7 @@ class DataProcessor:
         return {
             'total_apps': len(applications),
             'categories_count': len([c for c in categories.values() if c['count'] > 0]),
-            'tags_count': len(tags),
+            'categories_count': len(categories),
             'top_languages': sorted(language_counts.items(), key=lambda x: x[1], reverse=True)[:10],
             'top_platforms': sorted(platform_counts.items(), key=lambda x: x[1], reverse=True)[:10],
             'top_licenses': sorted(license_counts.items(), key=lambda x: x[1], reverse=True)[:10],

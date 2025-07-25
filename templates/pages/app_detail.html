@@ -6,7 +6,7 @@
     <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-8">
         <a href="/" class="hover:text-primary-600 dark:hover:text-primary-400">Home</a>
         <span class="mx-2">/</span>
-        <a href="/browse.html" class="hover:text-primary-600 dark:hover:text-primary-400">Browse</a>
+        <a href="/" class="hover:text-primary-600 dark:hover:text-primary-400">Browse</a>
         <span class="mx-2">/</span>
         <span>{{ app.name }}</span>
     </div>
@@ -71,12 +71,12 @@
             <p class="text-lg text-gray-700 dark:text-gray-300">{{ app.description }}</p>
         </div>
 
-        <!-- Tags -->
-        {% if app.tags %}
+        <!-- Categories -->
+        {% if app.categories %}
         <div class="mb-6">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Tags</h3>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Categories</h3>
             <div class="flex flex-wrap gap-2">
-                {{ get_tags_badges_html(app.tags) | safe }}
+                {{ get_tags_badges_html(app.categories) | safe }}
             </div>
         </div>
         {% endif %}
@@ -139,7 +139,7 @@
     {% if app.commit_history %}
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Commit Activity</h2>
-        <div id="commit-activity-graph" class="w-full" data-commit-history="{{ app.commit_history | tojson | escape }}">
+        <div id="commit-activity-graph" class="w-full" data-commit-history="{{ (app.commit_history or {}) | tojson | escape }}">
             <!-- Graph will be rendered by JavaScript -->
         </div>
     </div>
@@ -173,11 +173,11 @@
                     {{ truncate_description(related_app.description, 100) }}
                 </p>
                 
-                {% if related_app.tags %}
+                {% if related_app.categories %}
                 <div class="flex flex-wrap gap-1">
-                    {% for tag in related_app.tags[:2] %}
+                    {% for category in related_app.categories[:2] %}
                     <span class="inline-block bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded">
-                        {{ tag }}
+                        {{ category }}
                     </span>
                     {% endfor %}
                 </div>
@@ -190,7 +190,7 @@
 
     <!-- Back Navigation -->
     <div class="mt-8 text-center">
-        <a href="/browse.html" class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+        <a href="/" class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
             <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>

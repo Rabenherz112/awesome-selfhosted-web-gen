@@ -25,46 +25,48 @@
     // Initialize search inputs
     function initializeSearchInputs() {
         const searchInputs = [
-            document.getElementById('search-input'),
-            document.getElementById('mobile-search-input'),
-            document.getElementById('hero-search')
+            { input: document.getElementById('search-input'), results: 'search-results' },
+            { input: document.getElementById('mobile-search-input'), results: 'mobile-search-results' },
+            { input: document.getElementById('hero-search'), results: null }
         ];
         
-        searchInputs.forEach(input => {
+        searchInputs.forEach(({ input, results }) => {
             if (input) {
-                input.addEventListener('input', handleSearch);
-                input.addEventListener('focus', showSearchResults);
-                input.addEventListener('blur', hideSearchResults);
+                input.addEventListener('input', (e) => handleSearch(e, results));
+                input.addEventListener('focus', () => showSearchResults(results));
+                input.addEventListener('blur', () => hideSearchResults(results));
             }
         });
         
         // Close search results when clicking outside
         document.addEventListener('click', function(event) {
-            const searchResults = document.getElementById('search-results');
-            if (searchResults && !searchResults.contains(event.target)) {
-                hideSearchResults();
-            }
+            ['search-results', 'mobile-search-results'].forEach(resultsId => {
+                const searchResults = document.getElementById(resultsId);
+                if (searchResults && !searchResults.contains(event.target)) {
+                    hideSearchResults(resultsId);
+                }
+            });
         });
     }
     
     // Handle search input
-    function handleSearch(event) {
+    function handleSearch(event, resultsId = 'search-results') {
         const query = event.target.value.trim();
         
         if (query.length < 2) {
-            hideSearchResults();
+            hideSearchResults(resultsId);
             return;
         }
         
         if (!searchData) {
             // If search data not loaded, show basic message
-            showSearchMessage('Search data loading...');
+            showSearchMessage('Search data loading...', resultsId);
             return;
         }
         
         // Perform search
         const results = performSearch(query);
-        displaySearchResults(results, query);
+        displaySearchResults(results, query, resultsId);
     }
     
     // Perform basic search (simple text matching for now)
@@ -84,18 +86,18 @@
     }
     
     // Display search results
-    function displaySearchResults(results, query) {
-        const searchResults = document.getElementById('search-results');
+    function displaySearchResults(results, query, resultsId = 'search-results') {
+        const searchResults = document.getElementById(resultsId);
         if (!searchResults) return;
         
         if (results.length === 0) {
-            showSearchMessage(`No results found for "${query}"`);
+            showSearchMessage(`No results found for "${query}"`, resultsId);
             return;
         }
         
         const html = results.map(app => `
             <div class="search-result-item">
-                <a href="${app.url}" class="block">
+                <a href="/apps/${app.id}.html" class="block">
                     <div class="font-medium text-gray-900 dark:text-white">${highlightMatch(app.name, query)}</div>
                     <div class="text-sm text-gray-600 dark:text-gray-300 truncate">${highlightMatch(app.description.substring(0, 100), query)}...</div>
                     ${app.stars ? `<div class="text-xs text-yellow-600 mt-1">⭐ ${app.stars}</div>` : ''}
@@ -108,8 +110,8 @@
     }
     
     // Show search message
-    function showSearchMessage(message) {
-        const searchResults = document.getElementById('search-results');
+    function showSearchMessage(message, resultsId = 'search-results') {
+        const searchResults = document.getElementById(resultsId);
         if (!searchResults) return;
         
         searchResults.innerHTML = `
@@ -121,17 +123,17 @@
     }
     
     // Show search results
-    function showSearchResults() {
-        const searchResults = document.getElementById('search-results');
+    function showSearchResults(resultsId = 'search-results') {
+        const searchResults = document.getElementById(resultsId);
         if (searchResults && searchResults.innerHTML.trim()) {
             searchResults.classList.remove('hidden');
         }
     }
     
     // Hide search results
-    function hideSearchResults() {
+    function hideSearchResults(resultsId = 'search-results') {
         setTimeout(() => {
-            const searchResults = document.getElementById('search-results');
+            const searchResults = document.getElementById(resultsId);
             if (searchResults) {
                 searchResults.classList.add('hidden');
             }

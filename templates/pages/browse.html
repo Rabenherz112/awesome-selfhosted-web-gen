@@ -35,9 +35,9 @@
                 </h3>
                 
                 <div class="flex items-center space-x-3 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="showNonFree" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <label class="custom-toggle">
+                        <input type="checkbox" id="showNonFree">
+                        <span class="toggle-slider"></span>
                     </label>
                     <span class="text-sm text-gray-700 dark:text-gray-300">Include Non-Free</span>
                 </div>
@@ -67,13 +67,13 @@
                     Showing <span id="visibleCount">Loading...</span> of <span id="totalCount">{{ total_applications }}</span> applications
                 </div>
                 <div class="flex space-x-2">
-                    <button id="sortName" class="px-3 py-1 text-sm bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300 rounded">
+                    <button id="sortName" class="sort-button active">
                         Name
                     </button>
-                    <button id="sortStars" class="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                    <button id="sortStars" class="sort-button">
                         Stars
                     </button>
-                    <button id="sortUpdated" class="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                    <button id="sortUpdated" class="sort-button">
                         Updated
                     </button>
                 </div>

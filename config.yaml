@@ -6,6 +6,66 @@ site:
   url: "https://awesome-selfhosted.net"
   author: "Awesome Self-Hosted Community"
   
+# UI Configuration
+ui:
+  # Page title formatting
+  title_format: "{page_title} - {site_title}"  # Format for page titles
+  title_separator: " - "  # Separator between page title and site title
+  
+  # Navigation menu items
+  navigation:
+    - title: "Browse"
+      url: "/"
+    - title: "Statistics" 
+      url: "/statistics.html"
+  
+  # Footer configuration
+  footer:
+    logo_text: "{{ site.title }}"
+    tagline: "{{ site.description }}"
+    credit_text: "Built with ❤️ for the self-hosting community"
+    copyright_text: "Copyright © 2015-2025, the {{ site.title }} community. Data from"
+    data_source_text: "awesome-selfhosted-data"
+    data_source_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
+    license_text: "Content under CC-BY-SA 3.0 license"
+    license_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE"
+    
+    # Footer sections
+    sections:
+      navigation:
+        title: "Navigation"
+        links:
+          - title: "Home"
+            url: "/"
+          - title: "Statistics"
+            url: "/statistics.html"
+      
+      resources:
+        title: "Resources"
+        links:
+          - title: "GitHub"
+            url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+            external: true
+          - title: "Data Source"
+            url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
+            external: true
+          - title: "Sitemap"
+            url: "/sitemap.xml"
+  
+  # Page titles and descriptions
+  pages:
+    browse:
+      title: "Browse Applications"
+      description: "Discover {total_applications} self-hosted applications"
+    
+    statistics:
+      title: "Statistics"
+      description: "Explore trends and insights from the self-hosted community"
+    
+    home:
+      meta_title: "Discover Self-Hosted Applications"
+      meta_description: "Find the perfect self-hosted applications for your needs"
+
 # Data sources
 data:
   awesome_selfhosted_data_dir: "awesome-selfhosted-data"
@@ -23,7 +83,7 @@ build:
   
 # Site generation options
 generation:
-  items_per_page: 24
+  items_per_page: 60
   enable_search_index: true
   minify_html: false
   generate_sitemap: true
@@ -37,6 +97,7 @@ search:
     - description
     - tags
     - categories
+  placeholder_text: "Search applications..."
     
 # Performance settings
 performance:

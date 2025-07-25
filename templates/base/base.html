@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ page_title or site_config.title }}{% endblock %}</title>
+    <title>{% block title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}</title>
     
     <!-- Meta tags -->
     <meta name="description" content="{% block description %}{{ site_config.description }}{% endblock %}">
     <meta name="author" content="{{ site_config.author }}">
+    <meta name="items-per-page" content="{{ items_per_page|default(24) }}">
     
     <!-- Open Graph tags -->
-    <meta property="og:title" content="{% block og_title %}{{ page_title or site_config.title }}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ site_config.description }}{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ site_config.url }}{% block og_url %}{% endblock %}">
     
     <!-- Twitter Card tags -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}{{ page_title or site_config.title }}{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ site_config.description }}{% endblock %}">
     
     <!-- Tailwind CSS -->
@@ -78,12 +79,11 @@
                     
                     <!-- Main Navigation -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
-                        <a href="/" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
-                            Browse
+                        {% for nav_item in ui_config.navigation %}
+                        <a href="{{ nav_item.url }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
+                            {{ nav_item.title }}
                         </a>
-                        <a href="/statistics.html" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
-                            Statistics
-                        </a>
+                        {% endfor %}
                     </div>
                 </div>
                 
@@ -94,7 +94,7 @@
                         <div class="relative">
                             <input type="text" 
                                    id="search-input" 
-                                   placeholder="Search applications..." 
+                                   placeholder="{{ ui_config.get('search', {}).get('placeholder_text', 'Search applications...') }}" 
                                    class="w-64 px-4 py-2 pl-10 pr-4 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
                             <div class="absolute left-3 top-2.5">
                                 <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,11 +138,15 @@
                     Statistics
                 </a>
                 <!-- Mobile Search -->
-                <div class="px-3 py-2">
+                <div class="px-3 py-2 relative">
                     <input type="text" 
                            id="mobile-search-input" 
-                           placeholder="Search applications..." 
+                           placeholder="{{ ui_config.get('search', {}).get('placeholder_text', 'Search applications...') }}" 
                            class="w-full px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
+                    <!-- Mobile Search Results Dropdown -->
+                    <div id="mobile-search-results" class="absolute mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden z-50 max-h-64 overflow-y-auto">
+                        <!-- Search results will be populated by JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,47 +163,46 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-2 mb-4">
-                        <svg class="h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4l4 4"/>
-                        </svg>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ site_config.title }}</span>
+                        <img src="/static/images/logo.svg" alt="Logo" class="h-8 w-8">
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ render_template_string(ui_config.footer.logo_text) or site_config.title }}</span>
                     </div>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
-                        {{ site_config.description }}
+                        {{ render_template_string(ui_config.footer.tagline) or site_config.description }}
                     </p>
                     <p class="text-sm text-gray-500 dark:text-gray-500">
-                        Built with ❤️ for the self-hosting community
+                        {{ render_template_string(ui_config.footer.credit_text) or 'Built with ❤️ for the self-hosting community' }}
                     </p>
                 </div>
                 
+                {% for section_id, section in ui_config.footer.sections.items() %}
                 <div>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-                        Navigation
+                        {{ section.title }}
                     </h3>
                     <ul class="space-y-2">
-                        <li><a href="/" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Home</a></li>
-                        <li><a href="/browse.html" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Browse Apps</a></li>
-                        <li><a href="/browse.html#categories" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Categories</a></li>
+                        {% for link in section.links %}
+                        <li>
+                            <a href="{{ link.url }}" 
+                               {% if link.external %}target="_blank" rel="noopener"{% endif %}
+                               class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+                                {{ link.title }}
+                            </a>
+                        </li>
+                        {% endfor %}
                     </ul>
                 </div>
-                
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-                        Resources
-                    </h3>
-                    <ul class="space-y-2">
-                        <li><a href="https://github.com/awesome-selfhosted/awesome-selfhosted" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">GitHub</a></li>
-                        <li><a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Data Source</a></li>
-                        <li><a href="/sitemap.xml" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Sitemap</a></li>
-                    </ul>
-                </div>
+                {% endfor %}
             </div>
             
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                 <p class="text-center text-sm text-gray-500 dark:text-gray-500">
-                    &copy; 2024 {{ site_config.title }}. Data from 
-                    <a href="https://github.com/awesome-selfhosted/awesome-selfhosted" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-500">
-                        awesome-selfhosted
+                    {{ render_template_string(ui_config.footer.copyright_text) or '&copy; 2025 ' + site_config.title + '. Data from' }} 
+                    <a href="{{ ui_config.footer.data_source_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data' }}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-500">
+                        {{ ui_config.footer.data_source_text or 'awesome-selfhosted' }}
+                    </a>
+                    <br>
+                    <a href="{{ ui_config.footer.license_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE' }}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-500">
+                        {{ ui_config.footer.license_text or 'Content under CC-BY-SA 3.0 license' }}
                     </a>
                 </p>
             </div>

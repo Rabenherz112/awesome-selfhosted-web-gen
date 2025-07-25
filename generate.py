@@ -7,7 +7,7 @@ Command-line interface for generating a static website from awesome-selfhosted d
 
 import sys
 import time
-import click
+import argparse
 from pathlib import Path
 
 # Add src directory to path
@@ -16,60 +16,80 @@ sys.path.insert(0, str(Path(__file__).parent / 'src'))
 from src.config import Config
 from src.data_processor import DataProcessor
 from src.site_generator import SiteGenerator
-from src.utils import DevServer, print_build_stats, timer_decorator
+from src.utils import print_build_stats, timer_decorator
 
 
-@click.group()
-@click.option('--config', '-c', default='config.yaml', help='Configuration file path')
-@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
-@click.pass_context
-def cli(ctx, config, verbose):
-    """Awesome Self-Hosted Website Generator
+def create_parser():
+    """Create the argument parser."""
+    parser = argparse.ArgumentParser(
+        description='Awesome Self-Hosted Website Generator - Generate a beautiful static website from the awesome-selfhosted dataset.'
+    )
     
-    Generate a beautiful static website from the awesome-selfhosted dataset.
-    """
-    # Ensure context object exists
-    ctx.ensure_object(dict)
+    parser.add_argument('--config', '-c', 
+                       default='config.yaml', 
+                       help='Configuration file path (default: config.yaml)')
+    parser.add_argument('--verbose', '-v', 
+                       action='store_true', 
+                       help='Enable verbose output')
     
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Fetch command
+    fetch_parser = subparsers.add_parser('fetch', help='Fetch and process awesome-selfhosted data')
+    
+    # Build command
+    build_parser = subparsers.add_parser('build', help='Build the complete static website')
+    build_parser.add_argument('--fetch-first', action='store_true',
+                             help='Fetch fresh data before building')
+    
+    # Watch command
+    watch_parser = subparsers.add_parser('watch', help='Watch for changes and rebuild automatically')
+    watch_parser.add_argument('--interval', '-i', type=int, default=5,
+                             help='Watch interval in seconds (default: 5)')
+    
+    # Clean command
+    clean_parser = subparsers.add_parser('clean', help='Clean output and cache directories')
+    
+    # Info command
+    info_parser = subparsers.add_parser('info', help='Show configuration and system information')
+    
+    return parser
+
+
+def load_config(config_path, verbose=False):
+    """Load configuration and handle errors."""
     try:
-        ctx.obj['config'] = Config(config)
-        ctx.obj['verbose'] = verbose
-        
+        config = Config(config_path)
         if verbose:
-            click.echo(f"Using configuration: {config}")
-            
+            print(f"Using configuration: {config_path}")
+        return config
     except FileNotFoundError as e:
-        click.echo(f"Error: {e}", err=True)
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 
-@cli.command()
-@click.pass_context
-def fetch(ctx):
+def cmd_fetch(config, verbose=False):
     """Fetch and process awesome-selfhosted data."""
-    config = ctx.obj['config']
-    
-    click.echo("🌐 Fetching awesome-selfhosted data...")
+    print("🌐 Fetching awesome-selfhosted data...")
     
     try:
         processor = DataProcessor(config)
         
         # Fetch raw data
-        with click.progressbar(length=4, label='Fetching data files') as bar:
-            raw_data = processor.fetch_awesome_data()
-            bar.update(4)
+        print("Fetching data files...")
+        raw_data = processor.fetch_awesome_data()
         
         # Process applications
-        click.echo("📊 Processing application data...")
+        print("📊 Processing application data...")
         applications = processor.process_applications(raw_data['apps'])
         
-        click.echo(f"✅ Processed {len(applications)} applications")
+        print(f"✅ Processed {len(applications)} applications")
         
         # Generate additional data structures
         categories = processor.create_category_hierarchy(applications, raw_data['categories'])
-        statistics = processor.generate_statistics(applications, categories, raw_data['tags'])
+        statistics = processor.generate_statistics(applications, categories)
         
-        click.echo(f"📈 Statistics: {statistics['total_apps']} apps, {statistics['categories_count']} categories")
+        print(f"📈 Statistics: {statistics['total_apps']} apps, {statistics['categories_count']} categories")
         
         # Cache processed data
         cache_file = config.data_cache_dir / 'processed_data.json'
@@ -83,7 +103,7 @@ def fetch(ctx):
         processed_data = {
             'applications': [asdict(app) for app in applications],
             'categories': categories,
-            'tags': raw_data['tags'],
+
             'licenses': raw_data['licenses'],
             'statistics': statistics,
             'processed_at': time.strftime('%Y-%m-%d %H:%M:%S')
@@ -92,36 +112,31 @@ def fetch(ctx):
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump(processed_data, f, indent=2, ensure_ascii=False)
         
-        click.echo(f"💾 Cached processed data to {cache_file}")
+        print(f"💾 Cached processed data to {cache_file}")
         
     except Exception as e:
-        click.echo(f"❌ Error fetching data: {e}", err=True)
-        if ctx.obj['verbose']:
+        print(f"❌ Error fetching data: {e}", file=sys.stderr)
+        if verbose:
             import traceback
             traceback.print_exc()
         sys.exit(1)
 
 
-@cli.command()
-@click.option('--fetch-first', is_flag=True, help='Fetch fresh data before building')
-@click.pass_context
-def build(ctx, fetch_first):
+def cmd_build(config, fetch_first=False, verbose=False):
     """Build the complete static website."""
-    config = ctx.obj['config']
-    
-    click.echo("🏗️ Building awesome-selfhosted website...")
+    print("🏗️ Building awesome-selfhosted website...")
     
     try:
         # Fetch data if requested
         if fetch_first:
-            ctx.invoke(fetch)
+            cmd_fetch(config, verbose)
         
         # Load processed data
         cache_file = config.data_cache_dir / 'processed_data.json'
         
         if not cache_file.exists():
-            click.echo("⚠️ No cached data found. Running fetch first...")
-            ctx.invoke(fetch)
+            print("⚠️ No cached data found. Running fetch first...")
+            cmd_fetch(config, verbose)
         
         # Load the data
         import json
@@ -132,73 +147,35 @@ def build(ctx, fetch_first):
         from src.data_processor import Application
         applications = [Application(**app_data) for app_data in data['applications']]
         categories = data['categories']
-        tags = data['tags']
+
         statistics = data['statistics']
         
-        click.echo(f"📚 Loaded {len(applications)} applications from cache")
+        print(f"📚 Loaded {len(applications)} applications from cache")
         
         # Generate the site
         generator = SiteGenerator(config)
         
-        with click.progressbar(length=5, label='Generating site') as bar:
-            generator.generate_site(applications, categories, tags, statistics, data.get('licenses', {}))
-            bar.update(5)
+        print("Generating site...")
+        generator.generate_site(applications, categories, statistics, data.get('licenses', {}))
         
         # Print build statistics
         print_build_stats(config.output_dir)
         
-        click.echo(f"✅ Website generated successfully!")
-        click.echo(f"📁 Output directory: {config.output_dir}")
+        print(f"✅ Website generated successfully!")
+        print(f"📁 Output directory: {config.output_dir}")
         
     except Exception as e:
-        click.echo(f"❌ Error building site: {e}", err=True)
-        if ctx.obj['verbose']:
+        print(f"❌ Error building site: {e}", file=sys.stderr)
+        if verbose:
             import traceback
             traceback.print_exc()
         sys.exit(1)
 
 
-@cli.command()
-@click.option('--port', '-p', default=8000, help='Port to serve on')
-@click.option('--build-first', is_flag=True, help='Build the site before serving')
-@click.pass_context
-def serve(ctx, port, build_first):
-    """Start a local development server."""
-    config = ctx.obj['config']
-    
-    if build_first:
-        ctx.invoke(build)
-    
-    if not config.output_dir.exists():
-        click.echo("❌ Output directory not found. Run 'generate.py build' first.")
-        sys.exit(1)
-    
-    try:
-        server = DevServer(config.output_dir, port)
-        server.start()
-        
-        # Keep the server running
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            server.stop()
-            click.echo("\n👋 Server stopped")
-            
-    except Exception as e:
-        click.echo(f"❌ Error starting server: {e}", err=True)
-        sys.exit(1)
-
-
-@cli.command()
-@click.option('--interval', '-i', default=5, help='Watch interval in seconds')
-@click.pass_context
-def watch(ctx, interval):
+def cmd_watch(config, interval=5, verbose=False):
     """Watch for changes and rebuild automatically."""
-    config = ctx.obj['config']
-    
-    click.echo(f"👀 Watching for changes (checking every {interval}s)...")
-    click.echo("Press Ctrl+C to stop")
+    print(f"👀 Watching for changes (checking every {interval}s)...")
+    print("Press Ctrl+C to stop")
     
     # Get initial modification times
     watch_files = [
@@ -234,65 +211,57 @@ def watch(ctx, interval):
                     changed_files.append(file_path)
             
             if changed_files:
-                click.echo(f"\n🔄 Changes detected in {len(changed_files)} files")
+                print(f"\n🔄 Changes detected in {len(changed_files)} files")
                 for file_path in changed_files[:3]:  # Show first 3
-                    click.echo(f"   • {Path(file_path).name}")
+                    print(f"   • {Path(file_path).name}")
                 if len(changed_files) > 3:
-                    click.echo(f"   • ... and {len(changed_files) - 3} more")
+                    print(f"   • ... and {len(changed_files) - 3} more")
                 
                 # Rebuild the site
-                ctx.invoke(build)
+                cmd_build(config, verbose=verbose)
                 last_times = current_times
-                click.echo("✅ Rebuild complete. Watching for more changes...")
+                print("✅ Rebuild complete. Watching for more changes...")
                 
     except KeyboardInterrupt:
-        click.echo("\n👋 Watch stopped")
+        print("\n👋 Watch stopped")
 
 
-@cli.command()
-@click.pass_context
-def clean(ctx):
+def cmd_clean(config):
     """Clean output and cache directories."""
-    config = ctx.obj['config']
-    
-    click.echo("🧹 Cleaning directories...")
+    print("🧹 Cleaning directories...")
     
     # Clean output directory
     if config.output_dir.exists():
         import shutil
         shutil.rmtree(config.output_dir)
-        click.echo(f"   • Removed {config.output_dir}")
+        print(f"   • Removed {config.output_dir}")
     
     # Clean cache directory
     if config.data_cache_dir.exists():
         import shutil
         shutil.rmtree(config.data_cache_dir)
-        click.echo(f"   • Removed {config.data_cache_dir}")
+        print(f"   • Removed {config.data_cache_dir}")
     
-    click.echo("✅ Cleanup complete")
+    print("✅ Cleanup complete")
 
 
-@cli.command()
-@click.pass_context
-def info(ctx):
+def cmd_info(config):
     """Show configuration and system information."""
-    config = ctx.obj['config']
-    
-    click.echo("ℹ️  Configuration Information:")
-    click.echo(f"   Config file: {config.config_path}")
-    click.echo(f"   Template directory: {config.template_dir}")
-    click.echo(f"   Static directory: {config.static_dir}")
-    click.echo(f"   Output directory: {config.output_dir}")
-    click.echo(f"   Data cache directory: {config.data_cache_dir}")
+    print("ℹ️  Configuration Information:")
+    print(f"   Config file: {config.config_path}")
+    print(f"   Template directory: {config.template_dir}")
+    print(f"   Static directory: {config.static_dir}")
+    print(f"   Output directory: {config.output_dir}")
+    print(f"   Data cache directory: {config.data_cache_dir}")
     
     site_config = config.get_site_config()
-    click.echo(f"\n🌐 Site Configuration:")
-    click.echo(f"   Title: {site_config.get('title', 'N/A')}")
-    click.echo(f"   Description: {site_config.get('description', 'N/A')}")
-    click.echo(f"   URL: {site_config.get('url', 'N/A')}")
+    print(f"\n🌐 Site Configuration:")
+    print(f"   Title: {site_config.get('title', 'N/A')}")
+    print(f"   Description: {site_config.get('description', 'N/A')}")
+    print(f"   URL: {site_config.get('url', 'N/A')}")
     
     # Check if directories exist
-    click.echo(f"\n📁 Directory Status:")
+    print(f"\n📁 Directory Status:")
     directories = [
         ('Templates', config.template_dir),
         ('Static files', config.static_dir),
@@ -302,7 +271,7 @@ def info(ctx):
     
     for name, path in directories:
         status = "✅ Exists" if path.exists() else "❌ Missing"
-        click.echo(f"   {name}: {status} ({path})")
+        print(f"   {name}: {status} ({path})")
     
     # Check cached data
     cache_file = config.data_cache_dir / 'processed_data.json'
@@ -312,15 +281,44 @@ def info(ctx):
             with open(cache_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            click.echo(f"\n💾 Cached Data:")
-            click.echo(f"   Applications: {len(data.get('applications', []))}")
-            click.echo(f"   Categories: {len(data.get('categories', {}))}")
-            click.echo(f"   Processed at: {data.get('processed_at', 'Unknown')}")
+            print(f"\n💾 Cached Data:")
+            print(f"   Applications: {len(data.get('applications', []))}")
+            print(f"   Categories: {len(data.get('categories', {}))}")
+            print(f"   Processed at: {data.get('processed_at', 'Unknown')}")
         except:
-            click.echo(f"\n💾 Cached Data: ❌ Corrupted")
+            print(f"\n💾 Cached Data: ❌ Corrupted")
     else:
-        click.echo(f"\n💾 Cached Data: ❌ Not found")
+        print(f"\n💾 Cached Data: ❌ Not found")
+
+
+def main():
+    """Main entry point."""
+    parser = create_parser()
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    # Load configuration
+    config = load_config(args.config, args.verbose)
+    
+    # Execute command
+    if args.command == 'fetch':
+        cmd_fetch(config, args.verbose)
+    
+    elif args.command == 'build':
+        cmd_build(config, args.fetch_first, args.verbose)
+    
+    elif args.command == 'watch':
+        cmd_watch(config, args.interval, args.verbose)
+    
+    elif args.command == 'clean':
+        cmd_clean(config)
+    
+    elif args.command == 'info':
+        cmd_info(config)
 
 
 if __name__ == '__main__':
-    cli() 
+    main() 

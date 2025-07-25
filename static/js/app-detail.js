@@ -13,21 +13,41 @@ class AppDetail {
         if (!graphContainer) return;
 
         const commitHistoryData = graphContainer.getAttribute('data-commit-history');
-        if (!commitHistoryData) return;
+        
+        // Debug logging for raw data
+        console.log('Raw commit history data:', commitHistoryData);
+        
+        if (!commitHistoryData || commitHistoryData.trim() === '' || commitHistoryData === 'null') {
+            graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">No commit data available</div>';
+            return;
+        }
 
         try {
             const commitHistory = JSON.parse(commitHistoryData);
-            this.createCommitGraph(graphContainer, commitHistory);
+            
+            // Debug logging
+            console.log('Parsed commit history:', commitHistory);
+            console.log('Number of months:', Object.keys(commitHistory || {}).length);
+            
+            // Only render if we have at least 3 months of data
+            if (!commitHistory || typeof commitHistory !== 'object' || Object.keys(commitHistory).length < 3) {
+                graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">Not enough commit data to display graph (minimum 3 months required)</div>';
+                return;
+            }
+            
+            this.createCommitLineGraph(graphContainer, commitHistory);
         } catch (error) {
             console.error('Error parsing commit history data:', error);
+            console.error('Raw data was:', commitHistoryData);
+            graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">Not enough commit data to display graph (minimum 3 months required)</div>';
         }
     }
 
-    createCommitGraph(container, commitHistory) {
+    createCommitLineGraph(container, commitHistory) {
         // Sort months chronologically
         const sortedMonths = Object.keys(commitHistory).sort();
         
-        if (sortedMonths.length === 0) return;
+        if (sortedMonths.length < 3) return;
 
         // Calculate max commits for scaling
         const maxCommits = Math.max(...Object.values(commitHistory));
@@ -50,68 +70,113 @@ class AppDetail {
         `;
         graph.appendChild(stats);
 
-        // Create the bar chart
-        const chartContainer = document.createElement('div');
-        chartContainer.className = 'flex items-end space-x-1 h-32 overflow-x-auto pb-2';
+        // Create SVG line chart
+        const svgWidth = Math.max(600, sortedMonths.length * 50);
+        const svgHeight = 200;
+        const padding = { top: 20, right: 30, bottom: 40, left: 40 };
+        const chartWidth = svgWidth - padding.left - padding.right;
+        const chartHeight = svgHeight - padding.top - padding.bottom;
         
-        sortedMonths.forEach(month => {
-            const commits = commitHistory[month];
-            
-            // Create bar wrapper
-            const barWrapper = document.createElement('div');
-            barWrapper.className = 'flex flex-col items-center min-w-[24px]';
-            
-            // Create bar
-            const bar = document.createElement('div');
-            const height = maxCommits > 0 ? Math.max(2, (commits / maxCommits) * 100) : 2;
-            const intensity = commits === 0 ? 0 : Math.ceil((commits / maxCommits) * 4);
-            
-            bar.className = `w-3 rounded-sm transition-all duration-200 hover:opacity-80 cursor-help ${this.getBarColor(intensity)}`;
-            bar.style.height = `${height}%`;
-            bar.title = `${this.formatMonth(month)}: ${commits} commits`;
-            
-            // Create month label
-            const label = document.createElement('div');
-            label.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1 transform -rotate-45 origin-top-left whitespace-nowrap';
-            label.textContent = this.formatMonth(month);
-            
-            barWrapper.appendChild(bar);
-            barWrapper.appendChild(label);
-            chartContainer.appendChild(barWrapper);
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', svgHeight);
+        svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+        svg.setAttribute('class', 'overflow-visible');
+        
+        // Create points for the line
+        const points = sortedMonths.map((month, index) => {
+            const x = padding.left + (index / (sortedMonths.length - 1)) * chartWidth;
+            const y = padding.top + chartHeight - ((commitHistory[month] / maxCommits) * chartHeight);
+            return { x, y, month, commits: commitHistory[month] };
         });
         
-        graph.appendChild(chartContainer);
+        // Create the line path
+        const pathData = points.map((point, index) => 
+            `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+        ).join(' ');
         
-        // Add legend
-        const legend = document.createElement('div');
-        legend.className = 'flex items-center justify-center space-x-4 text-xs text-gray-500 dark:text-gray-400 mt-4';
-        legend.innerHTML = `
-            <div class="flex items-center space-x-1">
-                <span>Less</span>
-                <div class="w-2 h-2 rounded-sm bg-gray-200 dark:bg-gray-700"></div>
-                <div class="w-2 h-2 rounded-sm bg-green-200 dark:bg-green-900"></div>
-                <div class="w-2 h-2 rounded-sm bg-green-400 dark:bg-green-700"></div>
-                <div class="w-2 h-2 rounded-sm bg-green-600 dark:bg-green-500"></div>
-                <div class="w-2 h-2 rounded-sm bg-green-800 dark:bg-green-400"></div>
-                <span>More</span>
-            </div>
-        `;
-        graph.appendChild(legend);
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathData);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'rgb(34, 197, 94)'); // green-500
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('class', 'transition-all duration-200');
+        svg.appendChild(path);
+        
+        // Add area under the curve
+        const areaData = pathData + ` L ${points[points.length - 1].x} ${padding.top + chartHeight} L ${points[0].x} ${padding.top + chartHeight} Z`;
+        const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        area.setAttribute('d', areaData);
+        area.setAttribute('fill', 'rgba(34, 197, 94, 0.1)'); // green-500 with opacity
+        area.setAttribute('class', 'transition-all duration-200');
+        svg.insertBefore(area, path);
+        
+        // Add data points
+        points.forEach(point => {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', point.x);
+            circle.setAttribute('cy', point.y);
+            circle.setAttribute('r', '4');
+            circle.setAttribute('fill', 'rgb(34, 197, 94)'); // green-500
+            circle.setAttribute('stroke', 'white');
+            circle.setAttribute('stroke-width', '2');
+            circle.setAttribute('class', 'cursor-pointer hover:r-6 transition-all duration-200');
+            
+            // Add tooltip
+            const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+            title.textContent = `${this.formatMonth(point.month)}: ${point.commits} commits`;
+            circle.appendChild(title);
+            
+            svg.appendChild(circle);
+        });
+        
+        // Add X-axis labels
+        points.forEach((point, index) => {
+            if (index % Math.ceil(points.length / 8) === 0 || index === points.length - 1) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', point.x);
+                text.setAttribute('y', svgHeight - 10);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('class', 'text-xs fill-gray-500 dark:fill-gray-400');
+                text.textContent = this.formatMonth(point.month);
+                svg.appendChild(text);
+            }
+        });
+        
+        // Add Y-axis labels
+        const yTicks = 5;
+        for (let i = 0; i <= yTicks; i++) {
+            const value = Math.round((maxCommits / yTicks) * i);
+            const y = padding.top + chartHeight - (i / yTicks) * chartHeight;
+            
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', padding.left - 10);
+            text.setAttribute('y', y + 4);
+            text.setAttribute('text-anchor', 'end');
+            text.setAttribute('class', 'text-xs fill-gray-500 dark:fill-gray-400');
+            text.textContent = value;
+            svg.appendChild(text);
+            
+            // Add grid lines
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', padding.left);
+            line.setAttribute('y1', y);
+            line.setAttribute('x2', padding.left + chartWidth);
+            line.setAttribute('y2', y);
+            line.setAttribute('stroke', 'rgba(156, 163, 175, 0.2)'); // gray-400 with opacity
+            line.setAttribute('stroke-dasharray', '2,2');
+            svg.insertBefore(line, area);
+        }
+        
+        // Add chart container with overflow scroll
+        const chartContainer = document.createElement('div');
+        chartContainer.className = 'w-full overflow-x-auto';
+        chartContainer.appendChild(svg);
+        graph.appendChild(chartContainer);
         
         // Clear container and add graph
         container.innerHTML = '';
         container.appendChild(graph);
-    }
-
-    getBarColor(intensity) {
-        const colors = [
-            'bg-gray-200 dark:bg-gray-700',      // 0 commits
-            'bg-green-200 dark:bg-green-900',    // Low activity
-            'bg-green-400 dark:bg-green-700',    // Medium-low activity
-            'bg-green-600 dark:bg-green-500',    // Medium-high activity
-            'bg-green-800 dark:bg-green-400'     // High activity
-        ];
-        return colors[intensity] || colors[0];
     }
 
     formatMonth(monthStr) {

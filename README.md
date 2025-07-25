@@ -5,12 +5,15 @@ A Python-based static site generator that creates a beautiful, interactive websi
 ## ✨ Features
 
 - **📊 Data-Driven**: Automatically processes data from awesome-selfhosted-data repository
-- **🎨 Modern UI**: Beautiful, responsive design with dark/light themes
-- **🔍 Powerful Search**: Real-time fuzzy search with filtering capabilities
+- **🎨 Modern UI**: Beautiful, responsive design with dark/light themes and enhanced filters
+- **🔍 Powerful Search**: Real-time fuzzy search with mobile support and intelligent filtering
 - **⚡ Static & Fast**: Pre-compiled HTML for lightning-fast loading
-- **📱 Mobile-First**: Fully responsive design that works on all devices
+- **📱 Mobile-First**: Fully responsive design with mobile-optimized search and navigation
 - **🌐 SEO Optimized**: Pre-rendered content with proper meta tags and sitemaps
-- **♿ Accessible**: WCAG 2.1 AA compliant with keyboard navigation support
+- **♿ Accessible**: WCAG 2.1 AA compliant with keyboard navigation and clickable filter labels
+- **⚙️ Highly Configurable**: Extensive configuration options for UI, navigation, and content
+- **📈 Enhanced Analytics**: Line chart commit graphs with smart data requirements
+- **🏷️ Smart Licensing**: Automatic non-free license detection using upstream data
 
 ## 🚀 Quick Start
 
@@ -49,13 +52,8 @@ pip install -r requirements.txt
 python generate.py build --fetch-first
 ```
 
-6. **Start the development server:**
-```bash
-python generate.py serve --port 8000
-```
-
-7. **Open your browser:**
-   Visit http://localhost:8000 to see your generated website!
+6. **View your website:**
+   Open the `output/index.html` file in your browser to see your generated website!
 
 ## 📋 CLI Commands
 
@@ -67,9 +65,6 @@ python generate.py fetch
 
 # Build the complete website
 python generate.py build
-
-# Serve the website locally
-python generate.py serve --port 8000
 
 # Watch for changes and rebuild automatically
 python generate.py watch
@@ -86,9 +81,6 @@ python generate.py info
 ```bash
 # Build with fresh data
 python generate.py build --fetch-first
-
-# Serve and build in one command
-python generate.py serve --build-first
 
 # Watch with custom interval
 python generate.py watch --interval 3
@@ -109,19 +101,21 @@ awesome-selfhosted-generator/
 │   └── utils.py                  # Utility functions
 ├── templates/                    # Jinja2 templates
 │   ├── base/
-│   │   └── base.html            # Base template
+│   │   └── base.html            # Base template with navigation
 │   ├── pages/
 │   │   ├── index.html           # Homepage
 │   │   ├── browse.html          # Browse page
-│   │   ├── category.html        # Category pages
+│   │   ├── statistics.html      # Statistics page
 │   │   └── app_detail.html      # App detail pages
 │   └── sitemap.xml              # Sitemap template
 ├── static/                       # Static assets
 │   ├── css/
-│   │   └── custom.css           # Custom styles
+│   │   └── custom.css           # Custom styles and enhanced filters
 │   ├── js/
 │   │   ├── app.js               # Main application JS
-│   │   ├── search.js            # Search functionality
+│   │   ├── app-detail.js        # Commit graph and detail page logic
+│   │   ├── browse.js            # Browse page filtering and pagination
+│   │   ├── search.js            # Search functionality with mobile support
 │   │   └── theme.js             # Theme toggle
 │   └── images/                  # Static images
 ├── output/                       # Generated website (created after build)
@@ -136,68 +130,141 @@ awesome-selfhosted-generator/
 
 The generator processes data from awesome-selfhosted-data in several stages:
 
-1. **Fetch**: Loads YAML data from the cloned repository
-2. **Process**: Converts raw data into structured Application objects  
-3. **Generate**: Creates search indexes and statistics
-4. **Build**: Renders HTML templates with processed data
+1. **Fetch**: Loads YAML data from the cloned repository including license information
+2. **Process**: Converts raw data into structured Application objects with category-based organization
+3. **Enhance**: Determines non-free applications using upstream `licenses-nonfree.yml` data
+4. **Generate**: Creates search indexes, statistics, and related application suggestions
+5. **Build**: Renders HTML templates with processed data and configurable UI elements
+
+### Related Applications Algorithm
+
+The system uses an intelligent scoring algorithm to suggest related applications based on:
+- **Common Categories** (+4 points per shared category)
+- **Platform Compatibility** (+2 points per shared platform)
+- **Programming Language** (+3 points for same language)
+- **License Type** (+2 points for same license category: free/non-free)
+- **Popularity Tier** (+1 point for similar star count ranges)
+- **Dependency Status** (+1 point for matching third-party dependency requirements)
 
 ## ⚙️ Configuration
 
-Edit `config.yaml` to customize your website:
+Edit `config.yaml` to extensively customize your website:
 
 ```yaml
 site:
-  title: "Your Site Title"
-  description: "Your description"
+  title: "Awesome Self-Hosted"
+  description: "Discover amazing self-hosted applications"
   url: "https://your-domain.com"
+  author: "Your Name"
 
+# Generation settings
 generation:
-  items_per_page: 24
+  items_per_page: 60
   enable_search_index: true
   minify_html: false
 
+# Search configuration
 search:
   fuzzy_threshold: 0.3
   max_results: 100
-```
+  placeholder_text: "Search applications..."
 
-## 🎨 Customization
+# Extensive UI configuration
+ui:
+  # Page title formatting
+  title_format: "{page_title} - {site_title}"
+  title_separator: " - "
+  
+  # Navigation menu items
+  navigation:
+    - title: "Browse"
+      url: "/"
+    - title: "Statistics"
+      url: "/statistics.html"
+  
+  # Footer configuration
+  footer:
+    logo_text: "{{ site.title }}"
+    tagline: "{{ site.description }}"
+    credit_text: "Built with ❤️ for the self-hosting community"
+    copyright_text: "Copyright © 2015-2025, the {{ site.title }} community. Data from"
+    data_source_text: "awesome-selfhosted-data"
+    data_source_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
+    license_text: "Content under CC-BY-SA 3.0 license"
+    license_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE"
+    
+    # Footer sections with links
+    sections:
+      navigation:
+        title: "Navigation"
+        links:
+          - title: "Home"
+            url: "/"
+          - title: "Statistics"
+            url: "/statistics.html"
+      resources:
+        title: "Resources"
+        links:
+          - title: "GitHub"
+            url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+            external: true
+          - title: "Data Source"
+            url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
+            external: true
+  
+  # Page-specific configuration
+  pages:
+    browse:
+      title: "Browse Applications"
+      description: "Discover {total_applications} self-hosted applications"
+    statistics:
+      title: "Statistics"
+      description: "Explore trends and insights from the self-hosted community"
+    home:
+      meta_title: "Discover Self-Hosted Applications"
+      meta_description: "Find the perfect self-hosted applications for your needs"
+```
 
 ### Templates
 
-Templates are located in the `templates/` directory and use Jinja2 syntax:
+Templates use Jinja2 with extensive helper functions:
 
-- `base/base.html` - Main layout template
-- `pages/index.html` - Homepage template
-- `pages/browse.html` - Application listing template
-- `pages/category.html` - Category-specific template
-- `pages/app_detail.html` - Individual app template
+- `base/base.html` - Configurable layout with dynamic navigation and footer
+- `pages/index.html` - Homepage with featured applications
+- `pages/browse.html` - Enhanced filtering and pagination
+- `pages/statistics.html` - Data insights and trends
+- `pages/app_detail.html` - Detailed app information with commit graphs and related apps
 
 ### Styling
 
-The website uses Tailwind CSS with custom styles in `static/css/custom.css`. You can:
+The website uses Tailwind CSS with custom enhancements:
 
-- Modify the Tailwind configuration in `base.html`
-- Add custom CSS in `custom.css`
-- Customize color schemes and themes
+- Enhanced filter styling in `custom.css`
+- Dark/light theme support
+- Mobile-responsive design
+- Custom color schemes configurable via templates
 
-### JavaScript
+### JavaScript Modules
 
-Client-side functionality is split into modules:
+Client-side functionality is organized into specialized modules:
 
-- `app.js` - Main application logic
-- `search.js` - Search and filtering
+- `app.js` - Main application logic and initialization
+- `browse.js` - Advanced filtering, sorting, and pagination
+- `search.js` - Real-time search with mobile support
+- `app-detail.js` - Commit graphs and detail page interactions
 - `theme.js` - Dark/light theme toggle
 
-## 🔍 Search Features
+## 🔍 Enhanced Search Features
 
 The website includes powerful search capabilities:
 
 - **Fuzzy Search**: Finds results even with typos
-- **Multi-field**: Searches names, descriptions, tags, and categories
+- **Multi-field**: Searches names, descriptions, and categories
 - **Real-time**: Instant results as you type
-- **Filtering**: Filter by category, language, license, etc.
-- **Sorting**: Sort by name, stars, activity, relevance
+- **Mobile Support**: Dedicated mobile search interface
+- **Smart Linking**: Search results link to detail pages instead of external sites
+- **Filtering**: Advanced filters with dynamic license options
+- **Sorting**: Multiple sorting options with visual feedback
 
 ## 🚀 Deployment
 
@@ -206,7 +273,7 @@ The website includes powerful search capabilities:
 The generated website can be deployed to any static hosting service:
 
 - **GitHub Pages**: Push the `output/` directory to a gh-pages branch
-- **Netlify**: Connect your repository and set build command to `python generate.py build`
+- **Netlify**: Connect your repository and set build command to `python generate.py build --fetch-first`
 - **Vercel**: Similar to Netlify with automatic deployments
 - **AWS S3**: Upload the `output/` directory to an S3 bucket
 - **Any CDN**: The site is just static HTML/CSS/JS files
@@ -232,6 +299,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.11'
+      - name: Clone data repository
+        run: git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data/
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build website
@@ -240,84 +309,15 @@ jobs:
         # Deploy the output/ directory to your hosting service
 ```
 
-## 🔧 Development
-
-### Development Workflow
-
-1. **Make changes** to templates, styles, or Python code
-2. **Use watch mode** for automatic rebuilds:
-   ```bash
-   python generate.py watch
-   ```
-3. **Test locally** with the development server:
-   ```bash
-   python generate.py serve
-   ```
-
-### Adding Features
-
-1. **Templates**: Add new Jinja2 templates in `templates/`
-2. **Styles**: Modify `static/css/custom.css` or Tailwind config
-3. **JavaScript**: Add functionality to appropriate JS modules
-4. **Python**: Extend functionality in the `src/` modules
-
-### Testing
-
-Run basic tests:
-
-```bash
-# Test configuration loading
-python generate.py info
-
-# Test data fetching
-python generate.py fetch
-
-# Test site generation
-python generate.py build
-
-# Validate output
-python generate.py serve --port 8000
-```
-
-## 📈 Performance
-
-The generated website is optimized for performance:
-
-- **Static Files**: No server-side processing required
-- **Optimized Assets**: Minified CSS/JS, compressed images
-- **CDN Ready**: All assets can be cached and distributed globally
-- **Progressive Enhancement**: Core functionality works without JavaScript
-- **Lazy Loading**: Images and content loaded on demand
-
-## 🤝 Contributing
-
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test them
-4. Submit a pull request with a clear description
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the AGPL-3.0 License - see the LICENSE file for details.
+
+The generated content includes data from [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) which is licensed under [CC-BY-SA 3.0](https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE).
 
 ## 🙏 Acknowledgments
 
 - [awesome-selfhosted](https://github.com/awesome-selfhosted/awesome-selfhosted) - For the amazing curated list
-- [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the structured data
+- [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the structured data and license information
 - [Tailwind CSS](https://tailwindcss.com/) - For the utility-first CSS framework
 - [Jinja2](https://jinja.palletsprojects.com/) - For the powerful templating engine
-
-## 🆘 Support
-
-If you encounter issues:
-
-1. Check the [documentation](#-configuration)
-2. Run `python generate.py info` to verify your setup
-3. Check the console output for error messages
-4. Open an issue on GitHub with details about your problem
-
----
-
-**Happy self-hosting! 🏠✨** 

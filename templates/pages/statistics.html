@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 
-{% block title %}Statistics - {{ site_config.title }}{% endblock %}
+{% block title %}{% if ui_config.get('title_format') %}{{ ui_config.title_format.replace('{page_title}', 'Statistics').replace('{site_title}', site_config.title) }}{% else %}Statistics - {{ site_config.title }}{% endif %}{% endblock %}
 {% block description %}Comprehensive statistics and insights about self-hosted applications{% endblock %}
 
 {% block content %}
@@ -8,7 +8,7 @@
     <!-- Page Header -->
     <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            📊 Application Statistics
+            📊 Awesome Selfhosted Statistics
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-300">
             Insights and trends from the awesome-selfhosted ecosystem
@@ -204,10 +204,10 @@
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
             <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                {{ statistics.tags_count }}
+                {{ statistics.categories_count }}
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400">
-                Total Tags
+                Total Categories
             </div>
         </div>
 
