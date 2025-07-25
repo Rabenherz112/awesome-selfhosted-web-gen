@@ -13,11 +13,18 @@ class BrowsePage {
         this.showNonFreeOnly = false;
         this.currentSort = 'name';
         
+        // Sort direction tracking
+        this.sortDirections = {
+            'name': 'asc',      // asc = A-Z, desc = Z-A
+            'stars': 'desc',    // desc = highest first, asc = lowest first
+            'updated': 'desc'   // desc = newest first, asc = oldest first
+        };
+        
         // Pagination settings
         this.currentPage = 1;
-        this.itemsPerPage = 24; // Will be updated from config
+        this.itemsPerPage = 24;
         this.totalPages = 1;
-        
+        this.enablePagination = true;
         this.init();
     }
 
@@ -32,7 +39,10 @@ class BrowsePage {
         this.setupPlatformFilters();
         this.setupLicenseFilters();
         this.setupCategoryFilters();
-        this.setupPaginationEventListeners();
+        if (this.enablePagination) {
+            this.setupPaginationEventListeners();
+        }
+        this.updateSortButtons('sortName');
         this.filterSortAndRender();
     }
 
@@ -45,8 +55,15 @@ class BrowsePage {
                 this.itemsPerPage = parseInt(itemsPerPageMeta.content) || 60;
                 console.log(`Loaded items per page from config: ${this.itemsPerPage}`);
             }
+            
+            // Get enable pagination setting from meta tag
+            const enablePaginationMeta = document.querySelector('meta[name="enable-pagination"]');
+            if (enablePaginationMeta) {
+                this.enablePagination = enablePaginationMeta.content.toLowerCase() === 'true';
+                console.log(`Pagination enabled: ${this.enablePagination}`);
+            }
         } catch (error) {
-            console.log('Using default items per page: 60');
+            console.log('Using default items per page: 60 and pagination enabled');
         }
     }
 
@@ -144,7 +161,14 @@ class BrowsePage {
             const button = document.getElementById(buttonId);
             if (button) {
                 button.addEventListener('click', () => {
-                    this.currentSort = sortType;
+                    // If clicking the same sort button, toggle direction
+                    if (this.currentSort === sortType) {
+                        this.sortDirections[sortType] = this.sortDirections[sortType] === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // If clicking a different sort button, set it as current
+                        this.currentSort = sortType;
+                    }
+                    
                     this.updateSortButtons(buttonId);
                     this.currentPage = 1; // Reset to first page
                     this.filterSortAndRender();
@@ -299,7 +323,9 @@ class BrowsePage {
                 if (this.currentPage > 1) {
                     this.currentPage--;
                     this.renderCurrentPage();
-                    this.updatePaginationControls();
+                    if (this.enablePagination) {
+                        this.updatePaginationControls();
+                    }
                 }
             });
         }
@@ -309,7 +335,9 @@ class BrowsePage {
                 if (this.currentPage < this.totalPages) {
                     this.currentPage++;
                     this.renderCurrentPage();
-                    this.updatePaginationControls();
+                    if (this.enablePagination) {
+                        this.updatePaginationControls();
+                    }
                 }
             });
         }
@@ -320,15 +348,27 @@ class BrowsePage {
     }
 
     updateSortButtons(activeButtonId) {
-        const sortButtons = ['sortName', 'sortStars', 'sortUpdated'];
+        const sortButtons = {
+            'sortName': 'name',
+            'sortStars': 'stars', 
+            'sortUpdated': 'updated'
+        };
         
-        sortButtons.forEach(buttonId => {
+        Object.entries(sortButtons).forEach(([buttonId, sortType]) => {
             const button = document.getElementById(buttonId);
             if (button) {
+                // Get the base text without any arrows
+                let baseText = button.textContent.replace(/[↑↓]/g, '').trim();
+                
                 if (buttonId === activeButtonId) {
                     button.className = 'sort-button active';
+                    // Add arrow indicator based on current direction
+                    const direction = this.sortDirections[sortType];
+                    const arrow = direction === 'asc' ? '↑' : '↓';
+                    button.textContent = `${baseText} ${arrow}`;
                 } else {
                     button.className = 'sort-button';
+                    button.textContent = baseText;
                 }
             }
         });
@@ -391,14 +431,23 @@ class BrowsePage {
         // Render current page
         this.renderCurrentPage();
         this.updateCounts();
-        this.updatePaginationControls();
+        if (this.enablePagination) {
+            this.updatePaginationControls();
+        }
     }
 
     sortApplications() {
         this.filteredApplications.sort((a, b) => {
-            switch (this.currentSort) {
+            const sortType = this.currentSort;
+            const direction = this.sortDirections[sortType];
+            let comparison = 0;
+
+            switch (sortType) {
                 case 'stars':
-                    return (b.stars || 0) - (a.stars || 0);
+                    const starsA = a.stars || 0;
+                    const starsB = b.stars || 0;
+                    comparison = direction === 'asc' ? starsA - starsB : starsB - starsA;
+                    break;
                 case 'updated':
                     // Handle different date formats
                     const parseDate = (dateStr) => {
@@ -413,11 +462,19 @@ class BrowsePage {
                     
                     const dateA = parseDate(a.last_updated);
                     const dateB = parseDate(b.last_updated);
-                    return dateB.getTime() - dateA.getTime();
+                    comparison = direction === 'asc' ? 
+                        dateA.getTime() - dateB.getTime() : 
+                        dateB.getTime() - dateA.getTime();
+                    break;
                 case 'name':
                 default:
-                    return a.name.localeCompare(b.name);
+                    comparison = direction === 'asc' ? 
+                        a.name.localeCompare(b.name) : 
+                        b.name.localeCompare(a.name);
+                    break;
             }
+            
+            return comparison;
         });
     }
 
@@ -428,10 +485,15 @@ class BrowsePage {
         // Clear existing content
         gridContainer.innerHTML = '';
 
-        // Calculate start and end indices for current page
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredApplications.length);
-        const pageApplications = this.filteredApplications.slice(startIndex, endIndex);
+        // Calculate start and end indices for current page (or show all if pagination disabled)
+        let pageApplications;
+        if (this.enablePagination) {
+            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+            const endIndex = Math.min(startIndex + this.itemsPerPage, this.filteredApplications.length);
+            pageApplications = this.filteredApplications.slice(startIndex, endIndex);
+        } else {
+            pageApplications = this.filteredApplications; // Show all applications
+        }
 
         // Render applications for current page
         pageApplications.forEach(app => {

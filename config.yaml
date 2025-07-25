@@ -87,6 +87,7 @@ generation:
   enable_search_index: true
   minify_html: false
   generate_sitemap: true
+  enable_pagination: true  # Set to false to disable pagination completely
   
 # Search settings
 search:

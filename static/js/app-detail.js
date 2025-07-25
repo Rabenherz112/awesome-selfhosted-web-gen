@@ -14,9 +14,6 @@ class AppDetail {
 
         const commitHistoryData = graphContainer.getAttribute('data-commit-history');
         
-        // Debug logging for raw data
-        console.log('Raw commit history data:', commitHistoryData);
-        
         if (!commitHistoryData || commitHistoryData.trim() === '' || commitHistoryData === 'null') {
             graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">No commit data available</div>';
             return;
@@ -24,10 +21,6 @@ class AppDetail {
 
         try {
             const commitHistory = JSON.parse(commitHistoryData);
-            
-            // Debug logging
-            console.log('Parsed commit history:', commitHistory);
-            console.log('Number of months:', Object.keys(commitHistory || {}).length);
             
             // Only render if we have at least 3 months of data
             if (!commitHistory || typeof commitHistory !== 'object' || Object.keys(commitHistory).length < 3) {
@@ -39,7 +32,7 @@ class AppDetail {
         } catch (error) {
             console.error('Error parsing commit history data:', error);
             console.error('Raw data was:', commitHistoryData);
-            graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">Not enough commit data to display graph (minimum 3 months required)</div>';
+            graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">No commit data available (an error occurred)</div>';
         }
     }
 
@@ -49,9 +42,11 @@ class AppDetail {
         
         if (sortedMonths.length < 3) return;
 
-        // Calculate max commits for scaling
+        // Calculate max commits for scaling and average for display
         const maxCommits = Math.max(...Object.values(commitHistory));
         const minCommits = Math.min(...Object.values(commitHistory));
+        const totalCommits = Object.values(commitHistory).reduce((sum, commits) => sum + commits, 0);
+        const averageCommits = Math.round(totalCommits / sortedMonths.length);
         
         // Create graph container
         const graph = document.createElement('div');
@@ -65,13 +60,13 @@ class AppDetail {
                 <span class="font-medium">${sortedMonths.length}</span> months of activity
             </div>
             <div>
-                Peak: <span class="font-medium text-green-600 dark:text-green-400">${maxCommits} commits/month</span>
+                Average: <span class="font-medium text-blue-600 dark:text-blue-400">${averageCommits} commits/month</span>
             </div>
         `;
         graph.appendChild(stats);
 
-        // Create SVG line chart
-        const svgWidth = Math.max(600, sortedMonths.length * 50);
+        // Create SVG line chart (made wider)
+        const svgWidth = Math.max(800, sortedMonths.length * 70);
         const svgHeight = 200;
         const padding = { top: 20, right: 30, bottom: 40, left: 40 };
         const chartWidth = svgWidth - padding.left - padding.right;

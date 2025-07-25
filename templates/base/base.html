@@ -9,6 +9,7 @@
     <meta name="description" content="{% block description %}{{ site_config.description }}{% endblock %}">
     <meta name="author" content="{{ site_config.author }}">
     <meta name="items-per-page" content="{{ items_per_page|default(24) }}">
+    <meta name="enable-pagination" content="{{ generation_config.get('enable_pagination', true) }}">
     
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">

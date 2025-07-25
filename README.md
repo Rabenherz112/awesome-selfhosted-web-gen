@@ -321,3 +321,15 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the structured data and license information
 - [Tailwind CSS](https://tailwindcss.com/) - For the utility-first CSS framework
 - [Jinja2](https://jinja.palletsprojects.com/) - For the powerful templating engine
+
+## TOODs
+
+- Check if in `data_processor.py` the `alternative_to` and `documentation_language` are correctly parsed from the description.
+  - Currently doesn't seem to work (exampel are `ACP Admin, ...)
+  - Check if `documentation_language` can be multiple languages.
+  - Add small icons simalar to `depends_3rdparty` in the browse page for documentation_language. (to warn the user that the documentation is in a different language)
+- Replace `cdn.tailwindcss.com` with local files if possible.
+- Maybe remove current tag from browse page.
+- Check if I can show 250 characters of the description in the browse page.
+- Build a new Index Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page.
+- Test if no pagination works and if the performance changes.

@@ -22,15 +22,19 @@ class Application:
     repo_url: Optional[str] = None
     demo_url: Optional[str] = None
     categories: List[str] = None
-    license: List[str] = None  # Changed to list to support multiple licenses
+    license: List[str] = None
     language: Optional[str] = None
-    platforms: List[str] = None  # Added to store all platforms
+    platforms: List[str] = None
     stars: Optional[int] = None
     forks: Optional[int] = None
     last_updated: Optional[str] = None
-    depends_3rdparty: bool = False  # Added to track third-party dependencies
-    current_release: Optional[Dict[str, str]] = None  # Added to store current release info
-    commit_history: Optional[Dict[str, int]] = None  # Added to store monthly commit history
+    depends_3rdparty: bool = False
+    current_release: Optional[Dict[str, str]] = None
+    commit_history: Optional[Dict[str, int]] = None
+    # Special annotations parsed from description
+    fork_of: Optional[str] = None
+    alternative_to: List[str] = None
+    documentation_language: Optional[str] = None
     
     def __post_init__(self):
         """Initialize default values."""
@@ -40,6 +44,8 @@ class Application:
             self.license = []
         if self.platforms is None:
             self.platforms = []
+        if self.alternative_to is None:
+            self.alternative_to = []
 
 
 class DataProcessor:
@@ -78,7 +84,7 @@ class DataProcessor:
         
         return {
             'apps': apps_data,
-            'categories': tags_data,  # Using tags as categories
+            'categories': tags_data,
             'platforms': platforms_data,
             'licenses': licenses_data
         }
@@ -232,22 +238,30 @@ class DataProcessor:
             # Ensure licenses is always a list (handle legacy cached data)
             if isinstance(licenses, str):
                 licenses = [licenses] if licenses else []
+            
+            # Parse description annotations
+            desc_data = self._parse_description_annotations(app_data.get('description', ''))
+            
             app = Application(
                 id=app_id,
                 name=app_data.get('name', ''),
-                description=app_data.get('description', ''),
+                description=desc_data['description'],
                 url=app_data.get('website_url', ''),
                 repo_url=repo_url,
                 demo_url=app_data.get('demo_url'),
-                categories=app_data.get('tags', []),  # Using tags as categories
-                license=licenses,  # Store all licenses as list
+                categories=app_data.get('tags', []),
+                license=licenses,
                 language=primary_language,
-                platforms=platforms,  # Store all platforms
+                platforms=platforms,
                 stars=app_data.get('stargazers_count'),
                 last_updated=app_data.get('updated_at'),
                 depends_3rdparty=app_data.get('depends_3rdparty', False),
-                current_release=app_data.get('current_release'),  # Extract release info
-                commit_history=app_data.get('commit_history')  # Extract commit history
+                current_release=app_data.get('current_release'),
+                commit_history=app_data.get('commit_history'),
+                # Parsed annotations
+                fork_of=desc_data['fork_of'],
+                alternative_to=desc_data['alternative_to'],
+                documentation_language=desc_data['documentation_language']
             )
             
             applications.append(app)
@@ -260,6 +274,53 @@ class DataProcessor:
         # Convert to lowercase, replace spaces/special chars with hyphens
         app_id = re.sub(r'[^a-z0-9]+', '-', name.lower().strip())
         return app_id.strip('-')
+    
+    def _parse_description_annotations(self, description: str) -> Dict[str, Any]:
+        """Parse special annotations from description and return cleaned description with extracted data."""
+        import re
+        
+        if not description:
+            return {
+                'description': '',
+                'fork_of': None,
+                'alternative_to': [],
+                'documentation_language': None
+            }
+        
+        cleaned_description = description
+        fork_of = None
+        alternative_to = []
+        documentation_language = None
+        
+        # Parse (fork of $PROJECT)
+        fork_match = re.search(r'\s*\(fork of ([^)]+)\)\s*$', cleaned_description, re.IGNORECASE)
+        if fork_match:
+            fork_of = fork_match.group(1).strip()
+            cleaned_description = re.sub(r'\s*\(fork of [^)]+\)\s*$', '', cleaned_description, flags=re.IGNORECASE)
+        
+        # Parse (alternative to $PRODUCT1, $PRODUCT2)
+        alt_match = re.search(r'\s*\(alternative to ([^)]+)\)\s*$', cleaned_description, re.IGNORECASE)
+        if alt_match:
+            alternatives_str = alt_match.group(1).strip()
+            # Split by commas and clean up each alternative
+            alternative_to = [alt.strip() for alt in alternatives_str.split(',') if alt.strip()]
+            cleaned_description = re.sub(r'\s*\(alternative to [^)]+\)\s*$', '', cleaned_description, flags=re.IGNORECASE)
+        
+        # Parse (documentation in $LANGUAGE)
+        doc_match = re.search(r'\s*\(documentation in ([^)]+)\)\s*$', cleaned_description, re.IGNORECASE)
+        if doc_match:
+            documentation_language = doc_match.group(1).strip()
+            cleaned_description = re.sub(r'\s*\(documentation in [^)]+\)\s*$', '', cleaned_description, flags=re.IGNORECASE)
+        
+        # Clean up any trailing whitespace or punctuation
+        cleaned_description = cleaned_description.strip().rstrip('.')
+        
+        return {
+            'description': cleaned_description,
+            'fork_of': fork_of,
+            'alternative_to': alternative_to,
+            'documentation_language': documentation_language
+        }
     
     def generate_search_index(self, applications: List[Application]) -> Dict[str, Any]:
         """Generate search index for client-side search."""

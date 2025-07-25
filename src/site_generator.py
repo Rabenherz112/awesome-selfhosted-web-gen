@@ -39,6 +39,7 @@ class SiteGenerator:
         self.jinja_env.globals.update({
             'site_config': self.config.get_site_config(),
             'ui_config': self.config.get('ui', {}),
+            'generation_config': self.config.get_generation_config(),
             'format_stars': self.template_helpers.format_stars,
             'format_date': self.template_helpers.format_date,
             'format_license': self.template_helpers.format_license,

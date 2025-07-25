@@ -16,7 +16,16 @@
     <div class="lg:grid lg:grid-cols-5 lg:gap-8">
         <!-- Filters Sidebar -->
         <div class="lg:col-span-1 mb-8 lg:mb-0 space-y-6">
-
+            <!-- Category Filter -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Categories
+                </h3>
+                
+                <div class="space-y-2 max-h-96 overflow-y-auto" id="categoryFilters">
+                    <!-- Category checkboxes will be populated by JavaScript -->
+                </div>
+            </div>
             <!-- Platform Filter -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -27,7 +36,6 @@
                     <!-- Platform checkboxes will be populated by JavaScript -->
                 </div>
             </div>
-
             <!-- License Filter -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -44,17 +52,6 @@
                 
                 <div class="space-y-2 max-h-64 overflow-y-auto" id="licenseFilters">
                     <!-- License checkboxes will be populated by JavaScript -->
-                </div>
-            </div>
-            
-            <!-- Category Filter -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Categories
-                </h3>
-                
-                <div class="space-y-2 max-h-96 overflow-y-auto" id="categoryFilters">
-                    <!-- Category checkboxes will be populated by JavaScript -->
                 </div>
             </div>
         </div>
