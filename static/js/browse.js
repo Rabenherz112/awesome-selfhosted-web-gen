@@ -568,7 +568,29 @@ class BrowsePage {
         const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, 3).map(platform => 
             `<span class="inline-block bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${platform}</span>`
         ).join('') + (app.platforms.length > 3 ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.platforms.length - 3}</span>` : '') : '';
-        
+
+        // License display (first license + count if multiple)
+        let licenseBadge = '';
+        let licenseText = '';
+        let licenseClass = '';
+        if (app.license && app.license.length > 0) {
+            const firstLicense = app.license[0];
+            if (app.license.length === 1) {
+                licenseText = firstLicense;
+            } else {
+                licenseText = `${firstLicense} (+${app.license.length - 1})`;
+            }
+            
+            // Check if it's a non-free license
+            const isNonFree = this.isNonFreeLicense(app.license);
+            if (isNonFree) {
+                licenseClass = 'inline-block text-xs px-2 py-1 ml-3 border border-orange-300 dark:border-orange-600 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 rounded';
+            } else {
+                licenseClass = 'inline-block text-xs px-2 py-1 ml-3 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded';
+            }
+            licenseBadge = `<span class="${licenseClass}">${licenseText}</span>`;
+        };
+
         // Only show buttons when they have valid URLs
         const demoLink = (app.demo_url && app.demo_url.trim()) ? `
             <a href="${app.demo_url}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
@@ -593,11 +615,14 @@ class BrowsePage {
             <div class="p-4 flex flex-col flex-grow">
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex-1 min-w-0">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                            <a href="/apps/${app.id}.html" class="hover:text-primary-600 dark:hover:text-primary-400">
-                                ${app.name}
-                            </a>
-                        </h3>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                <a href="/apps/${app.id}.html" class="hover:text-primary-600 dark:hover:text-primary-400">
+                                    ${app.name}
+                                </a>
+                            </h3>
+                            ${licenseBadge}
+                        </div>
                     </div>
                     <div class="flex items-center space-x-2 ml-2">
                         ${dependsIcon}
