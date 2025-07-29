@@ -33,6 +33,7 @@ class Application:
     commit_history: Optional[Dict[str, int]] = None
     # Special annotations parsed from description
     fork_of: Optional[str] = None
+    fork_url: Optional[str] = None
     alternative_to: List[str] = None
     documentation_language: Optional[str] = None
     
@@ -260,6 +261,7 @@ class DataProcessor:
                 commit_history=app_data.get('commit_history'),
                 # Parsed annotations
                 fork_of=desc_data['fork_of'],
+                fork_url=desc_data['fork_url'],
                 alternative_to=desc_data['alternative_to'],
                 documentation_language=desc_data['documentation_language']
             )
@@ -283,41 +285,72 @@ class DataProcessor:
             return {
                 'description': '',
                 'fork_of': None,
+                'fork_url': None,
                 'alternative_to': [],
-                'documentation_language': None
+                'documentation_language': []
             }
         
         cleaned_description = description
         fork_of = None
+        fork_url = None
         alternative_to = []
-        documentation_language = None
+        documentation_language = []
         
-        # Parse (fork of $PROJECT)
-        fork_match = re.search(r'\s*\(fork of ([^)]+)\)\s*$', cleaned_description, re.IGNORECASE)
-        if fork_match:
-            fork_of = fork_match.group(1).strip()
-            cleaned_description = re.sub(r'\s*\(fork of [^)]+\)\s*$', '', cleaned_description, flags=re.IGNORECASE)
+        # Parse (documentation in $LANGUAGE) or (documentation in $LANG1, $LANG2)
+        doc_pattern = r'\s*\(\s*documentation\s+in\s+([^)]+)\)\s*\.?'
+        doc_match = re.search(doc_pattern, cleaned_description, re.IGNORECASE)
+        if doc_match:
+            doc_languages_str = doc_match.group(1).strip()
+            # Split by commas and 'and' to support multiple languages
+            doc_languages_raw = re.split(r'\s*,\s*|\s+and\s+', doc_languages_str, flags=re.IGNORECASE)
+            for lang in doc_languages_raw:
+                lang_clean = lang.strip()
+                if lang_clean:
+                    documentation_language.append(lang_clean)
+            # Remove the documentation annotation from description
+            cleaned_description = re.sub(doc_pattern, '', cleaned_description, flags=re.IGNORECASE)
         
-        # Parse (alternative to $PRODUCT1, $PRODUCT2)
-        alt_match = re.search(r'\s*\(alternative to ([^)]+)\)\s*$', cleaned_description, re.IGNORECASE)
+        # Parse (fork of $PROJECT) - handle both markdown links and plain text
+        # This was the worst to filter out, if anybody wants to improve this, feel free to do so. I will not touch this ever again.
+        md_fork_pattern = re.compile(r"\(\s*fork\s+of\s*\[([^\]]+)\]\(([^)]+)\)\s*\)\s*\.?", re.IGNORECASE)
+        md_match = md_fork_pattern.search(cleaned_description)
+        if md_match:
+            fork_of = md_match.group(1).strip()
+            fork_url = md_match.group(2).strip()
+            cleaned_description = md_fork_pattern.sub('', cleaned_description)
+        else:
+            plain_fork_pattern = re.compile(r"\(\s*fork\s+of\s+([^)]+?)\)\s*\.?", re.IGNORECASE)
+            plain_fork_match = plain_fork_pattern.search(cleaned_description)
+            if plain_fork_match:
+                fork_of = plain_fork_match.group(1).strip()
+                fork_url = None
+                cleaned_description = plain_fork_pattern.sub('', cleaned_description)
+        
+        # Parse (alternative to $PRODUCT1, $PRODUCT2) or (alternative to $PRODUCT1 and $PRODUCT2)
+        alt_pattern = r'\s*\(\s*alternative\s+to\s+([^)]+)\)\s*\.?'
+        alt_match = re.search(alt_pattern, cleaned_description, re.IGNORECASE)
         if alt_match:
             alternatives_str = alt_match.group(1).strip()
-            # Split by commas and clean up each alternative
-            alternative_to = [alt.strip() for alt in alternatives_str.split(',') if alt.strip()]
-            cleaned_description = re.sub(r'\s*\(alternative to [^)]+\)\s*$', '', cleaned_description, flags=re.IGNORECASE)
+            # Split by commas and 'and' to support multiple alternatives
+            alternatives_raw = re.split(r'\s*,\s*|\s+and\s+', alternatives_str, flags=re.IGNORECASE)
+            for alt in alternatives_raw:
+                alt_clean = alt.strip()
+                # Remove common suffixes and filter out empty/meaningless entries
+                alt_clean = re.sub(r'\s+(and\s+)?others?$', '', alt_clean, flags=re.IGNORECASE)
+                alt_clean = re.sub(r'\s+similar\s+services?$', '', alt_clean, flags=re.IGNORECASE)
+                if alt_clean and alt_clean.lower() not in ['others', 'similar', 'services', 'etc']:
+                    alternative_to.append(alt_clean)
+            # Remove the alternative annotation from description
+            cleaned_description = re.sub(alt_pattern, '', cleaned_description, flags=re.IGNORECASE)
         
-        # Parse (documentation in $LANGUAGE)
-        doc_match = re.search(r'\s*\(documentation in ([^)]+)\)\s*$', cleaned_description, re.IGNORECASE)
-        if doc_match:
-            documentation_language = doc_match.group(1).strip()
-            cleaned_description = re.sub(r'\s*\(documentation in [^)]+\)\s*$', '', cleaned_description, flags=re.IGNORECASE)
-        
-        # Clean up any trailing whitespace or punctuation
-        cleaned_description = cleaned_description.strip().rstrip('.')
+        # Clean up any extra whitespace and trailing periods
+        cleaned_description = re.sub(r'\s+', ' ', cleaned_description.strip())
+        cleaned_description = cleaned_description.rstrip('.')
         
         return {
             'description': cleaned_description,
             'fork_of': fork_of,
+            'fork_url': fork_url,
             'alternative_to': alternative_to,
             'documentation_language': documentation_language
         }

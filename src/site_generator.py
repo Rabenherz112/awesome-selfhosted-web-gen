@@ -309,7 +309,10 @@ class SiteGenerator:
                 'depends_3rdparty': app.depends_3rdparty,
                 'current_release': app.current_release,
                 'commit_history': app.commit_history,
-                'is_nonfree': self._is_app_nonfree(app)
+                'is_nonfree': self._is_app_nonfree(app),
+                'documentation_language': app.documentation_language,
+                'fork_of': app.fork_of,
+                'fork_url': app.fork_url
             }
             search_data.append(search_entry)
         

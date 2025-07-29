@@ -29,7 +29,7 @@ class TemplateHelpers:
         """Format star count for display."""
         if stars is None or stars == 0:
             return ""
-        
+
         if stars >= 1000:
             return f"{stars / 1000:.1f}k"
         return str(stars)

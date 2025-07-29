@@ -5,15 +5,13 @@ A Python-based static site generator that creates a beautiful, interactive websi
 ## ✨ Features
 
 - **📊 Data-Driven**: Automatically processes data from awesome-selfhosted-data repository
-- **🎨 Modern UI**: Beautiful, responsive design with dark/light themes and enhanced filters
-- **🔍 Powerful Search**: Real-time fuzzy search with mobile support and intelligent filtering
+- **🎨 Modern UI**: Responsive design with dark/light themes and enhanced filters
+- **🔍 Powerful Search**: Fuzzy search with mobile support
 - **⚡ Static & Fast**: Pre-compiled HTML for lightning-fast loading
-- **📱 Mobile-First**: Fully responsive design with mobile-optimized search and navigation
-- **🌐 SEO Optimized**: Pre-rendered content with proper meta tags and sitemaps
-- **♿ Accessible**: WCAG 2.1 AA compliant with keyboard navigation and clickable filter labels
-- **⚙️ Highly Configurable**: Extensive configuration options for UI, navigation, and content
+- **⚙️ Highly Configurable**: Configuration options for UI, navigation, and content
 - **📈 Enhanced Analytics**: Line chart commit graphs with smart data requirements
 - **🏷️ Smart Licensing**: Automatic non-free license detection using upstream data
+- **🔍 Smart Description Parsing**: Extracts relevant information from the description of the application
 
 ## 🚀 Quick Start
 
@@ -317,19 +315,23 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 
 ## 🙏 Acknowledgments
 
-- [awesome-selfhosted](https://github.com/awesome-selfhosted/awesome-selfhosted) - For the amazing curated list
-- [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the structured data and license information
-- [Tailwind CSS](https://tailwindcss.com/) - For the utility-first CSS framework
-- [Jinja2](https://jinja.palletsprojects.com/) - For the powerful templating engine
+- [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the amazing curated list
+- [Tailwind CSS](https://tailwindcss.com/) - For the CSS framework
+- [Jinja2](https://jinja.palletsprojects.com/) - For the templating engine
 
-## TOODs
+## TODOs
 
-- Check if in `data_processor.py` the `alternative_to` and `documentation_language` are correctly parsed from the description.
-  - Currently doesn't seem to work (exampel are `ACP Admin, ...)
-  - Check if `documentation_language` can be multiple languages.
-  - Add small icons simalar to `depends_3rdparty` in the browse page for documentation_language. (to warn the user that the documentation is in a different language)
 - Replace `cdn.tailwindcss.com` with local files if possible.
-- Maybe remove current tag from browse page.
+- Add some kind of fail safe to the browe page, if the user doesn't use javascript.
 - Check if I can show 250 characters of the description in the browse page.
+  - Add the ability to set this in config
+  - With setings `max_description_length` (Configure the maximal lenght before the description is cut off with `...`), `show_full_description` (Can be toggeld to show the full description) and `description_fade` (Can be toggeld to fade the description if too long instead of cutting it off)
 - Build a new Index Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page.
 - Test if no pagination works and if the performance changes.
+- Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen`
+- Add the short license information for each application in the browse page, so the user can see what license the application has
+- Stop that new links are opend in a new tab by default, make this a configuration option
+- Run `black` and `flake8` on the codebase to ensure code quality
+- Test if code still works after updating the dependencies in `requirements.txt`
+- Move Categories from the app detail page down where also Platforms are shown.
+- The Source Code Icon in the app detail page should only show a github icon, if the link is a github link. it should show a gitlab icon if the link is a gitlab link and otherwise show the git icon.
