@@ -4,24 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}</title>
-    
+
     <!-- Meta tags -->
     <meta name="description" content="{% block description %}{{ site_config.description }}{% endblock %}">
     <meta name="author" content="{{ site_config.author }}">
     <meta name="items-per-page" content="{{ items_per_page|default(24) }}">
     <meta name="enable-pagination" content="{{ generation_config.get('enable_pagination', true) }}">
-    
+    <meta name="open-external-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_external_links', false) }}">
+    <meta name="open-internal-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_internal_links', false) }}">
+
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
     <meta property="og:description" content="{% block og_description %}{{ site_config.description }}{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ site_config.url }}{% block og_url %}{% endblock %}">
-    
+
     <!-- Twitter Card tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{% block twitter_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ site_config.description }}{% endblock %}">
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>

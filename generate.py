@@ -26,8 +26,8 @@ def create_parser():
     )
     
     parser.add_argument('--config', '-c', 
-                       default='config.yaml', 
-                       help='Configuration file path (default: config.yaml)')
+                       default='config.yml', 
+                       help='Configuration file path (default: config.yml)')
     parser.add_argument('--verbose', '-v', 
                        action='store_true', 
                        help='Enable verbose output')

@@ -51,6 +51,7 @@ class SiteGenerator:
             'get_app_url': self.template_helpers.get_app_url,
             'get_language_color': self.template_helpers.get_language_color,
             'render_template_string': self.template_helpers.render_template_string,
+            'get_link_target_attrs': self.template_helpers.get_link_target_attrs,
         })
         
         # Custom filters

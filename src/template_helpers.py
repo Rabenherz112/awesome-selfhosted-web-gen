@@ -231,7 +231,36 @@ class TemplateHelpers:
             repo_url = 'https://' + repo_url
         
         return repo_url
-    
+
+    def get_link_target_attrs(self, url: str, is_internal: bool = None) -> str:
+        """Get target and rel attributes for links based on configuration."""
+        links_config = self.config.get('links', {})
+        
+        # Auto-detect if internal/external if not specified
+        if is_internal is None:
+            site_url = self.config.get('site.url', '')
+            is_site_url = site_url and url.startswith(site_url)
+            # For non-site URLs, check if it's a local path or file
+            is_local = (
+                url.startswith('/') or
+                url.startswith('./') or
+                url.startswith('../') or
+                (not url.startswith('http') and (url.endswith('.html') or url.endswith('.htm')))
+            )
+            
+            is_internal = is_site_url or is_local
+        
+        target_attrs = ''
+        
+        if is_internal:
+            if links_config.get('open_in_new_tab_for_internal_links', False):
+                target_attrs = ' target="_blank" rel="noopener"'
+        else:
+            if links_config.get('open_in_new_tab_for_external_links', False):
+                target_attrs = ' target="_blank" rel="noopener noreferrer"'
+        
+        return target_attrs
+
     def get_app_tags_html(self, app: Any, max_tags: int = 5) -> str:
         """Generate HTML for application categories (displayed as tags)."""
         if not app.categories:
@@ -252,14 +281,14 @@ class TemplateHelpers:
             )
         
         return ''.join(html_parts)
-    
+
     def get_category_badge_html(self, category: str) -> str:
         """Generate HTML for category badge."""
         if not category:
             return ""
         
         return f'<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">{category}</span>'
-    
+
     def format_app_stats(self, app: Any) -> str:
         """Format application statistics for display."""
         stats = []
@@ -275,7 +304,7 @@ class TemplateHelpers:
             stats.append(f"💻 {app.language}")
         
         return " • ".join(stats) if stats else ""
-    
+
     def is_recently_updated(self, last_updated: str, days: int = 30) -> bool:
         """Check if application was updated recently."""
         if not last_updated:

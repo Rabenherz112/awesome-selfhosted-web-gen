@@ -516,6 +516,23 @@ class BrowsePage {
     createApplicationCard(app) {
         const card = document.createElement('div');
         card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full flex flex-col';
+
+        const openExternalInNewTab = document.querySelector('meta[name="open-external-new-tab"]')?.content === 'true' || false;
+        const openInternalInNewTab = document.querySelector('meta[name="open-internal-new-tab"]')?.content === 'true' || false;
+
+        // Helper function to get target attributes
+        const getLinkAttrs = (url, isInternal = null) => {
+            if (isInternal === null) {
+                isInternal = url.startsWith('/') || url.startsWith(window.location.origin);
+            }
+
+            if (isInternal && openInternalInNewTab) {
+                return ' target="_blank" rel="noopener"';
+            } else if (!isInternal && openExternalInNewTab) {
+                return ' target="_blank" rel="noopener noreferrer"';
+            }
+            return '';
+        };
         
         const dependsIcon = app.depends_3rdparty ? `
             <div class="flex-shrink-0" title="Depends on third-party services">
@@ -584,33 +601,40 @@ class BrowsePage {
             // Check if it's a non-free license
             const isNonFree = this.isNonFreeLicense(app.license);
             if (isNonFree) {
-                licenseClass = 'inline-block text-xs px-2 py-1 ml-3 border border-orange-300 dark:border-orange-600 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 rounded';
+                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-orange-300 dark:border-orange-600 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 rounded';
             } else {
-                licenseClass = 'inline-block text-xs px-2 py-1 ml-3 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded';
+                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded';
             }
             licenseBadge = `<span class="${licenseClass}">${licenseText}</span>`;
         };
 
         // Only show buttons when they have valid URLs
         const demoLink = (app.demo_url && app.demo_url.trim()) ? `
-            <a href="${app.demo_url}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+            <a href="${app.demo_url}"${getLinkAttrs(app.demo_url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
                 Demo
             </a>
         ` : '';
 
         const sourceLink = (app.repo_url && app.repo_url.trim()) ? `
-            <a href="${app.repo_url}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
-                Source
-            </a>
+        <a href="${app.repo_url}"${getLinkAttrs(app.repo_url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+            Source
+        </a>
         ` : '';
 
         // Only show website link if it exists and is different from the source code URL
         const websiteLink = (app.url && app.url.trim() && app.url !== app.repo_url) ? `
-            <a href="${app.url}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
-                Website
-            </a>
+        <a href="${app.url}"${getLinkAttrs(app.url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+            Website
+        </a>
         ` : '';
-        
+
+        // Details link (internal)
+        const detailsLink = `
+        <a href="/apps/${app.id}.html"${getLinkAttrs(`/apps/${app.id}.html`, true)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400        dark:hover:text-primary-300 font-medium">
+            Details
+        </a>
+        `;
+
         card.innerHTML = `
             <div class="p-4 flex flex-col flex-grow">
                 <div class="flex items-start justify-between mb-3">
@@ -645,9 +669,7 @@ class BrowsePage {
                         ${websiteLink}
                         ${sourceLink}
                         ${demoLink}
-                        <a href="/apps/${app.id}.html" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
-                            Details
-                        </a>
+                        ${detailsLink}
                     </div>
                 </div>
             </div>

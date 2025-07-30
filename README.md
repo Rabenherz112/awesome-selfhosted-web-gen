@@ -329,8 +329,8 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - Build a new Index Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page.
 - Test if no pagination works and if the performance changes.
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen`
-- Stop that new links are opend in a new tab by default, make this a configuration option
 - Run `black` and `flake8` on the codebase to ensure code quality
 - Test if code still works after updating the dependencies in `requirements.txt`
 - Move Categories from the app detail page down where also Platforms are shown.
 - The Source Code Icon in the app detail page should only show a github icon, if the link is a github link. it should show a gitlab icon if the link is a gitlab link and otherwise show the git icon.
+- Add a new configuration option to the config.yml for the generation of a robots.txt file.
