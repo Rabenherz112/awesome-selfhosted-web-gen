@@ -11,7 +11,23 @@ ui:
   # Page title formatting
   title_format: "{page_title} - {site_title}"  # Format for page titles
   title_separator: " - "  # Separator between page title and site title
-  
+
+  # Limits for diffrent sections
+  limits:
+    featured_apps: 12 # Number of featured apps to show on the homepage - OLD should be removed
+    recent_apps: 8 # Number of recent apps to show on the homepage - OLD should be removed
+    category_stats: 12 # Number of categories to show on the homepage - OLD should be removed
+    related_apps: 6 # App detail page related apps
+    browse_max_tags_per_card: 2 # Browse page tags per card - To be implemented
+    browse_max_platforms_per_card: 3 # Browse page platforms per card - To be implemented
+
+  # Default text truncation lengths
+  truncation:
+    default_description_length: 150 # Default description length
+    browse_description_length: 250 # Browse page description length 
+    browse_description_full: false # Browse page show full description (overrides lenght)
+    related_apps_description_length: 100 # Related apps description length
+
   # Navigation menu items
   navigation:
     - title: "Browse"
@@ -66,13 +82,6 @@ ui:
       meta_title: "Discover Self-Hosted Applications"
       meta_description: "Find the perfect self-hosted applications for your needs"
 
-  # Description display settings for browse page
-  # TODO: To be implemented
-  description:
-    max_description_length: 250
-    show_full_description: false
-    description_fade: true
-
 # Data sources
 data:
   awesome_selfhosted_data_dir: "awesome-selfhosted-data"
@@ -100,6 +109,7 @@ generation:
 search:
   fuzzy_threshold: 0.3
   max_results: 100
+  min_query_length: 3 # Minimum number of characters to trigger a search - To be implemented
   search_fields:
     - name
     - description
@@ -117,3 +127,13 @@ performance:
   lazy_load_images: true
   generate_webp: false
   inline_critical_css: true 
+
+# Robots.txt settings
+robots:
+  generate: true
+  user_agent: "*"
+  allow:
+    - "/"
+  disallow:
+    - "/static/data/"
+  sitemap_url: "/sitemap.xml"

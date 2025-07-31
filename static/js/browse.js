@@ -53,17 +53,29 @@ class BrowsePage {
             const itemsPerPageMeta = document.querySelector('meta[name="items-per-page"]');
             if (itemsPerPageMeta) {
                 this.itemsPerPage = parseInt(itemsPerPageMeta.content) || 60;
-                console.log(`Loaded items per page from config: ${this.itemsPerPage}`);
             }
             
             // Get enable pagination setting from meta tag
             const enablePaginationMeta = document.querySelector('meta[name="enable-pagination"]');
             if (enablePaginationMeta) {
                 this.enablePagination = enablePaginationMeta.content.toLowerCase() === 'true';
-                console.log(`Pagination enabled: ${this.enablePagination}`);
+            }
+
+            // Get truncation settings
+            const browseDescLengthMeta = document.querySelector('meta[name="browse-description-length"]');
+            if (browseDescLengthMeta) {
+                this.browseDescriptionLength = parseInt(browseDescLengthMeta.content) || 80;
+            } else {
+                this.browseDescriptionLength = 80;
+            }
+            const browseDescFullMeta = document.querySelector('meta[name="browse-description-full"]');
+            if (browseDescFullMeta) {
+                this.browseDescriptionFull = browseDescFullMeta.content.toLowerCase() === 'true';
+            } else {
+                this.browseDescriptionFull = false;
             }
         } catch (error) {
-            console.log('Using default items per page: 60 and pagination enabled');
+            console.log('Using default configuration values');
         }
     }
 
@@ -658,7 +670,7 @@ class BrowsePage {
                 </div>
                 
                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 flex-grow">
-                    ${this.truncateDescription(app.description, 80)}
+                    ${this.truncateDescription(app.description)}
                 </p>
                 
                 ${categoriesHtml ? `<div class="mb-3">${categoriesHtml}</div>` : ''}
@@ -717,10 +729,21 @@ class BrowsePage {
         }
     }
 
-    truncateDescription(description, maxLength) {
+    truncateDescription(description, maxLength = null) {
         if (!description) return '';
-        if (description.length <= maxLength) return description;
-        return description.substring(0, maxLength).trim() + '...';
+        
+        if (maxLength === null) {
+            maxLength = this.browseDescriptionLength;
+        }
+        if (this.browseDescriptionFull || description.length <= maxLength) {
+            return description;
+        }
+        
+        const truncated = description.substring(0, maxLength).trim();
+        const lastSpace = truncated.lastIndexOf(' ');
+        const finalText = lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated;
+        
+        return finalText + '...';
     }
 
     updateCounts() {

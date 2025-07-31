@@ -53,21 +53,25 @@ class TemplateHelpers:
             print(f"Warning: Could not parse date '{date_str}': {e}")
             return date_str
     
-    def truncate_description(self, description: str, length: int = 150) -> str:
+    def truncate_description(self, description: str, length: int = None) -> str:
         """Truncate description to specified length."""
         if not description:
             return ""
-        
-        if len(description) <= length:
+
+        truncation_config = self.config.get('ui.truncation', {})
+        if length is None:
+            length = truncation_config.get('default_description_length', 150)
+        show_full = truncation_config.get('browse_description_full', False)
+
+        if show_full or len(description) <= length:
             return description
-        
-        # Find the last space before the limit
+
         truncated = description[:length]
         last_space = truncated.rfind(' ')
-        
+
         if last_space > 0:
             truncated = truncated[:last_space]
-        
+
         return truncated + "..."
     
     def get_app_url(self, app_id: str) -> str:
@@ -220,17 +224,6 @@ class TemplateHelpers:
         except Exception as e:
             print(f"Warning: Could not render template string '{template_str}': {e}")
             return template_str
-    
-    def format_github_url(self, repo_url: str) -> str:
-        """Format GitHub repository URL."""
-        if not repo_url or 'github.com' not in repo_url:
-            return repo_url
-        
-        # Ensure it's a proper GitHub URL
-        if not repo_url.startswith('http'):
-            repo_url = 'https://' + repo_url
-        
-        return repo_url
 
     def get_link_target_attrs(self, url: str, is_internal: bool = None) -> str:
         """Get target and rel attributes for links based on configuration."""
@@ -261,97 +254,37 @@ class TemplateHelpers:
         
         return target_attrs
 
-    def get_app_tags_html(self, app: Any, max_tags: int = 5) -> str:
-        """Generate HTML for application categories (displayed as tags)."""
-        if not app.categories:
+    def truncate_description(self, description: str, length: int = None, use_fade: bool = None, show_full: bool = None) -> str:
+        """Truncate description to specified length with configurable behavior."""
+        if not description:
             return ""
-        
-        html_parts = []
-        categories_to_show = app.categories[:max_tags]
-        
-        for category in categories_to_show:
-            html_parts.append(
-                f'<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">{category}</span>'
-            )
-        
-        if len(app.categories) > max_tags:
-            remaining = len(app.categories) - max_tags
-            html_parts.append(
-                f'<span class="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full mr-1 mb-1">+{remaining} more</span>'
-            )
-        
-        return ''.join(html_parts)
 
-    def get_category_badge_html(self, category: str) -> str:
-        """Generate HTML for category badge."""
-        if not category:
-            return ""
-        
-        return f'<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">{category}</span>'
+        # Get truncation config from UI config
+        truncation_config = self.config.get('ui.truncation', {})
 
-    def format_app_stats(self, app: Any) -> str:
-        """Format application statistics for display."""
-        stats = []
-        
-        if app.stars:
-            stars_formatted = self.format_stars(app.stars)
-            stats.append(f"⭐ {stars_formatted}")
-        
-        if app.forks:
-            stats.append(f"🍴 {app.forks}")
-        
-        if app.language:
-            stats.append(f"💻 {app.language}")
-        
-        return " • ".join(stats) if stats else ""
+        # Use provided length or fall back to config default
+        if length is None:
+            length = truncation_config.get('default_description_length', 150)
 
-    def is_recently_updated(self, last_updated: str, days: int = 30) -> bool:
-        """Check if application was updated recently."""
-        if not last_updated:
-            return False
-        
-        try:
-            dt = datetime.fromisoformat(last_updated.replace('Z', '+00:00'))
-            now = datetime.now(dt.tzinfo)
-            return (now - dt).days <= days
-        except (ValueError, AttributeError):
-            return False
-    
-    def get_demo_url_display(self, demo_url: str) -> str:
-        """Get display text for demo URL."""
-        if not demo_url:
-            return ""
-        
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(demo_url)
-            return parsed.netloc or demo_url
-        except:
-            return demo_url
-    
-    def generate_breadcrumbs(self, page_type: str, **kwargs) -> List[dict]:
-        """Generate breadcrumb navigation."""
-        breadcrumbs = [{'name': 'Home', 'url': '/'}]
-        
-        if page_type == 'browse':
-            breadcrumbs.append({'name': 'Browse', 'url': '/browse.html'})
-        
-        elif page_type == 'category':
-            category = kwargs.get('category')
-            breadcrumbs.append({'name': 'Categories', 'url': '/browse.html'})
-            if category:
-                breadcrumbs.append({
-                    'name': category['name'], 
-                    'url': '#'  # No dedicated category pages anymore
-                })
-        
-        elif page_type == 'app':
-            app = kwargs.get('app')
-            breadcrumbs.append({'name': 'Apps', 'url': '/'})
-            if app:
-                breadcrumbs.append({
-                    'name': app.name, 
-                    'url': self.get_app_url(app.id)
-                })
-        
-        return breadcrumbs 
+        # Check if full description should be shown
+        if show_full is None:
+            show_full = truncation_config.get('browse_description_full', False)
+
+        if show_full or len(description) <= length:
+            return description
+
+        # Find the last space before the limit
+        truncated = description[:length]
+        last_space = truncated.rfind(' ')
+
+        if last_space > 0:
+            truncated = truncated[:last_space]
+
+        # Check if fade effect should be used
+        if use_fade is None:
+            use_fade = truncation_config.get('browse_description_fade', True)
+
+        if use_fade:
+            return f'<span class="description-fade">{truncated}<span class="fade-ellipsis">...</span></span>'
+        else:
+            return truncated + "..."

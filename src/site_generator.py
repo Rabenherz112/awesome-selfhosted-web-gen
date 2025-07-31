@@ -69,58 +69,63 @@ class SiteGenerator:
             self.licenses_data = licenses  # Store for use in related apps algorithm
             self.template_helpers = TemplateHelpers(self.config, licenses)
             self._register_template_functions()
-        
+
         # Ensure output directories exist
         self.config.ensure_directories()
-        
+
         # Copy static assets
         self._copy_static_assets()
-        
+
         # Generate search data
         search_data = self._generate_search_data(applications)
-        
+
         # Generate pages
         self._generate_browse_as_homepage(applications, categories)  # Browse becomes homepage
         self._generate_statistics_page(applications, categories, statistics)  # New statistics page
         self._generate_app_detail_pages(applications)
         self._generate_search_data_file(search_data)
-        
+
         # Generate additional files
         self._generate_sitemap(applications, categories)
-        
+        self._generate_robots_txt()
+
         print(f"Site generation complete! Output in: {self.config.output_dir}")
     
     def _copy_static_assets(self):
         """Copy static assets to output directory."""
         if self.config.static_dir.exists():
             output_static = self.config.output_dir / 'static'
-            
+
             # Remove existing static directory
             if output_static.exists():
                 shutil.rmtree(output_static)
-            
+
             # Copy static files
             shutil.copytree(self.config.static_dir, output_static)
             print("Static assets copied")
-    
+
+    # TODO: Remove this function, if I don't re-add a proper homepage.
     def _generate_homepage(self, applications: List[Application], categories: Dict, statistics: Dict):
         """Generate the homepage."""
         template = self.jinja_env.get_template('pages/index.html')
-        
+        featured_limit = self.config.get('ui.limits.featured_apps', 12)
+        recent_limit = self.config.get('ui.limits.recent_apps', 8)  
+        category_limit = self.config.get('ui.limits.category_stats', 12)
+
         # Get featured applications (top starred)
         featured_apps = sorted(
             [app for app in applications if app.stars],
             key=lambda x: x.stars or 0,
             reverse=True
-        )[:12]
-        
+        )[:featured_limit]
+
         # Get recent updates
         recent_apps = sorted(
             [app for app in applications if app.last_updated],
             key=lambda x: x.last_updated or '',
             reverse=True
-        )[:8]
-        
+        )[:recent_limit]
+
         # Get category stats
         category_stats = [
             {
@@ -137,12 +142,12 @@ class SiteGenerator:
         content = template.render(
             featured_apps=featured_apps,
             recent_apps=recent_apps,
-            categories=category_stats[:12],
+            categories=category_stats[:category_limit],
             statistics=statistics,
             total_apps=len(applications),
             page_title="Discover Self-Hosted Applications"
         )
-        
+
         output_path = self.config.output_dir / 'index.html'
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(content)
@@ -152,10 +157,10 @@ class SiteGenerator:
     def _generate_browse_as_homepage(self, applications: List[Application], categories: Dict):
         """Generate the browse page as homepage (index.html) with client-side pagination."""
         template = self.jinja_env.get_template('pages/browse.html')
-        
+
         # Sort applications by name by default for initial display
         sorted_apps = sorted(applications, key=lambda x: x.name.lower())
-        
+
         # Generate single page with empty applications (JavaScript will populate)
         content = template.render(
             applications=[],  # Empty - JavaScript will handle all rendering
@@ -164,7 +169,7 @@ class SiteGenerator:
             items_per_page=self.config.get('generation.items_per_page', 24),
             page_title="Browse Applications"
         )
-        
+
         # Save single homepage
         output_path = self.config.output_dir / 'index.html'
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -175,38 +180,39 @@ class SiteGenerator:
     def _generate_statistics_page(self, applications: List[Application], categories: Dict, statistics: Dict):
         """Generate the statistics page."""
         template = self.jinja_env.get_template('pages/statistics.html')
-        
+
         content = template.render(
             applications=applications,
             categories=categories,
             statistics=statistics,
             page_title="Statistics"
         )
-        
+
         output_path = self.config.output_dir / 'statistics.html'
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        
+
         print("Statistics page generated")
     
     def _generate_app_detail_pages(self, applications: List[Application]):
         """Generate individual application detail pages."""
         template = self.jinja_env.get_template('pages/app_detail.html')
-        
+        related_apps_limit = self.config.get('ui.limits.related_apps', 6)
+
         # Create apps directory
         apps_dir = self.config.output_dir / 'apps'
         apps_dir.mkdir(exist_ok=True)
-        
+
         for app in applications:
             # Find related applications
             related_apps = self._find_related_apps(app, applications)
-            
+
             content = template.render(
                 app=app,
-                related_apps=related_apps[:6],  # Limit to 6 related apps
+                related_apps=related_apps[:related_apps_limit],
                 page_title=f"{app.name} - Self-Hosted Application"
             )
-            
+
             output_path = apps_dir / f"{app.id}.html"
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(content)
@@ -216,65 +222,65 @@ class SiteGenerator:
     def _find_related_apps(self, target_app: Application, all_applications: List[Application]) -> List[Application]:
         """Find applications related to the target app with improved algorithm."""
         related = []
-        
+
         for app in all_applications:
             if app.id == target_app.id:
                 continue
-            
+
             score = 0
-            
+
             # 1. Same categories = +4 points each (primary matching criteria)
             common_categories = set(app.categories or []) & set(target_app.categories or [])
             score += len(common_categories) * 4
-            
+
             # 2. Same programming language = +3 points (strong technical similarity)  
             if app.language and target_app.language and app.language.lower() == target_app.language.lower():
                 score += 3
-            
+
             # 3. Similar platform support = +2 points per common platform
             common_platforms = set(app.platforms or []) & set(target_app.platforms or [])
             score += len(common_platforms) * 2
-            
+
             # 4. Same license type (free vs non-free) = +2 points
             if app.license and target_app.license:
                 target_is_nonfree = self._is_app_nonfree(target_app)
                 app_is_nonfree = self._is_app_nonfree(app)
                 if target_is_nonfree == app_is_nonfree:
                     score += 2
-            
+
             # 5. Similar popularity tier = +1 point (apps with similar star counts)
             if app.stars and target_app.stars:
                 target_tier = self._get_popularity_tier(target_app.stars)
                 app_tier = self._get_popularity_tier(app.stars)
                 if target_tier == app_tier:
                     score += 1
-            
+
             # 6. Both have or don't have 3rd party dependencies = +1 point
             if app.depends_3rdparty == target_app.depends_3rdparty:
                 score += 1
-            
+
             if score > 0:
                 related.append((app, score))
-        
+
         # Sort by score (descending), then by stars (descending), then by name
         related.sort(key=lambda x: (-x[1], -(x[0].stars or 0), x[0].name.lower()))
-        
+
         return [app for app, score in related]
-    
+
     def _is_app_nonfree(self, app: Application) -> bool:
         """Check if an application uses non-free licenses."""
         if not app.license:
             return False
-        
+
         # Get non-free license identifiers from loaded license data
         if hasattr(self, 'licenses_data') and self.licenses_data:
             nonfree_licenses = {lic_id for lic_id, lic_info in self.licenses_data.items() 
                                if not lic_info.get('free', True)}
             return any(lic in nonfree_licenses for lic in app.license)
-        
+
         # Fallback to basic check if license data not available
         return any(lic in ['⊘ Proprietary'] for lic in app.license)
-    
+
     def _get_popularity_tier(self, stars: int) -> str:
         """Categorize applications by popularity tier based on star count."""
         if stars >= 10000:
@@ -287,11 +293,11 @@ class SiteGenerator:
             return 'moderate'  # 100-1k stars
         else:
             return 'emerging'  # <100 stars
-    
+
     def _generate_search_data(self, applications: List[Application]) -> Dict[str, Any]:
         """Generate search data for client-side search."""
         search_data = []
-        
+
         for app in applications:
             search_entry = {
                 'id': app.id,
@@ -365,3 +371,41 @@ class SiteGenerator:
             f.write(content)
         
         print("Sitemap generated") 
+
+    def _generate_robots_txt(self):
+        """Generate robots.txt file."""
+        robots_config = self.config.get('robots', {})
+
+        # Skip generation if not enabled
+        if not robots_config.get('generate', True):
+            return
+
+        # Default robots.txt content
+        content = []
+
+        # User-agent
+        user_agent = robots_config.get('user_agent', '*')
+        content.append(f"User-agent: {user_agent}")
+
+        # Allow directives
+        allow_paths = robots_config.get('allow', ['/'])
+        for path in allow_paths:
+            content.append(f"Allow: {path}")
+
+        # Disallow directives  
+        disallow_paths = robots_config.get('disallow', ['/static/data/'])
+        for path in disallow_paths:
+            content.append(f"Disallow: {path}")
+
+        # Sitemap URL
+        site_url = self.config.get('site.url', '')
+        sitemap_path = robots_config.get('sitemap_url', '/sitemap.xml')
+        if site_url:
+            content.append(f"\nSitemap: {site_url}{sitemap_path}")
+
+        # Write robots.txt
+        robots_path = self.config.output_dir / 'robots.txt'
+        with open(robots_path, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(content))
+
+        print("Robots.txt generated")

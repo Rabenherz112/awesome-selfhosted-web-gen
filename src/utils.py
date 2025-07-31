@@ -27,13 +27,11 @@ def copy_file(src: Path, dst: Path) -> None:
     ensure_directory(dst.parent)
     shutil.copy2(src, dst)
 
-
 def write_json(data: Any, file_path: Path) -> None:
     """Write data to JSON file."""
     ensure_directory(file_path.parent)
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-
 
 def read_json(file_path: Path) -> Optional[Dict[str, Any]]:
     """Read JSON file."""
@@ -46,7 +44,6 @@ def read_json(file_path: Path) -> Optional[Dict[str, Any]]:
     except (json.JSONDecodeError, IOError):
         return None
 
-
 def format_bytes(bytes_count: int) -> str:
     """Format bytes count for human-readable display."""
     for unit in ['B', 'KB', 'MB', 'GB']:
@@ -55,11 +52,9 @@ def format_bytes(bytes_count: int) -> str:
         bytes_count /= 1024.0
     return f"{bytes_count:.1f} TB"
 
-
 def get_file_size(file_path: Path) -> int:
     """Get file size in bytes."""
     return file_path.stat().st_size if file_path.exists() else 0
-
 
 def get_directory_size(directory: Path) -> int:
     """Get total size of directory in bytes."""
@@ -73,39 +68,6 @@ def get_directory_size(directory: Path) -> int:
             total_size += file_path.stat().st_size
     
     return total_size
-
-
-def validate_url(url: str) -> bool:
-    """Validate if string is a valid URL."""
-    import re
-    url_pattern = re.compile(
-        r'^https?://'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-        r'localhost|'  # localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-        r'(?::\d+)?'  # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-    return url_pattern.match(url) is not None
-
-
-def sanitize_filename(filename: str) -> str:
-    """Sanitize filename for safe file system usage."""
-    import re
-    # Remove or replace unsafe characters
-    filename = re.sub(r'[<>:"/\\|?*]', '-', filename)
-    filename = re.sub(r'[-\s]+', '-', filename)  # Multiple hyphens/spaces to single hyphen
-    return filename.strip('-')
-
-
-def get_project_root() -> Path:
-    """Get project root directory."""
-    current = Path(__file__).parent
-    while current.parent != current:
-        if (current / 'config.yaml').exists():
-            return current
-        current = current.parent
-    return Path.cwd()
-
 
 def print_build_stats(output_dir: Path) -> None:
     """Print build statistics."""
@@ -135,7 +97,6 @@ def print_build_stats(output_dir: Path) -> None:
             ext_display = ext if ext else "no extension"
             print(f"     {ext_display}: {count}")
 
-
 def timer_decorator(func):
     """Decorator to time function execution."""
     def wrapper(*args, **kwargs):
@@ -146,50 +107,3 @@ def timer_decorator(func):
         print(f"⏱️  {func.__name__} completed in {execution_time:.2f} seconds")
         return result
     return wrapper
-
-
-class ProgressBar:
-    """Simple progress bar for console output."""
-    
-    def __init__(self, total: int, description: str = "Processing"):
-        """Initialize progress bar."""
-        self.total = total
-        self.current = 0
-        self.description = description
-        self.start_time = time.time()
-    
-    def update(self, amount: int = 1, description: str = None) -> None:
-        """Update progress bar."""
-        self.current += amount
-        if description:
-            self.description = description
-        
-        self._display()
-    
-    def _display(self) -> None:
-        """Display progress bar."""
-        if self.total == 0:
-            return
-        
-        percentage = (self.current / self.total) * 100
-        bar_length = 50
-        filled_length = int(bar_length * self.current // self.total)
-        
-        bar = '█' * filled_length + '-' * (bar_length - filled_length)
-        
-        elapsed_time = time.time() - self.start_time
-        if self.current > 0:
-            eta = (elapsed_time / self.current) * (self.total - self.current)
-            eta_str = f"ETA: {eta:.1f}s"
-        else:
-            eta_str = "ETA: --"
-        
-        print(f'\r{self.description}: |{bar}| {percentage:.1f}% ({self.current}/{self.total}) {eta_str}', end='')
-        
-        if self.current >= self.total:
-            print()  # New line when complete
-    
-    def finish(self) -> None:
-        """Mark progress as complete."""
-        self.current = self.total
-        self._display() 

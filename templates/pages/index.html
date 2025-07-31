@@ -108,7 +108,7 @@
                     </div>
                     
                     <p class="text-gray-600 dark:text-gray-300 mb-4">
-                        {{ truncate_description(app.description, 120) }}
+                        {{ truncate_description(app.description, ui_config.get('truncation', {}).get('default_description_length', 150)) }}
                     </p>
                     
                     <!-- Categories -->
@@ -230,7 +230,7 @@
                 </h3>
                 
                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                    {{ truncate_description(app.description, 80) }}
+                    {{ truncate_description(app.description, ui_config.get('truncation', {}).get('browse_description_length', 80)) }}
                 </p>
                 
                 {% if app.last_updated %}

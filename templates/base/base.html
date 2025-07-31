@@ -12,6 +12,8 @@
     <meta name="enable-pagination" content="{{ generation_config.get('enable_pagination', true) }}">
     <meta name="open-external-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_external_links', false) }}">
     <meta name="open-internal-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_internal_links', false) }}">
+    <meta name="browse-description-length" content="{{ ui_config.get('truncation', {}).get('browse_description_length', 80) }}">
+    <meta name="browse-description-full" content="{{ ui_config.get('truncation', {}).get('browse_description_full', false) }}">
 
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">

@@ -15,7 +15,6 @@
             const response = await fetch('/static/data/search.json');
             if (response.ok) {
                 searchData = await response.json();
-                console.log('Search data loaded:', searchData.total, 'applications');
             }
         } catch (error) {
             console.warn('Search data not available:', error);

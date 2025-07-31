@@ -326,7 +326,7 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - Check if I can show 250 characters of the description in the browse page.
   - Add the ability to set this in config
   - With setings `max_description_length` (Configure the maximal lenght before the description is cut off with `...`), `show_full_description` (Can be toggeld to show the full description) and `description_fade` (Can be toggeld to fade the description if too long instead of cutting it off)
-- Build a new Index Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page.
+- Build a new Index / Home / Hero Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page. Maybe also add some random apps to the page, a search bar and a browse button. Maybe also display 1 or 2 random categories. (Maybe add something last 3 apps updated or so...)
 - Test if no pagination works and if the performance changes.
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen`
 - Run `black` and `flake8` on the codebase to ensure code quality
@@ -334,3 +334,4 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - Move Categories from the app detail page down where also Platforms are shown.
 - The Source Code Icon in the app detail page should only show a github icon, if the link is a github link. it should show a gitlab icon if the link is a gitlab link and otherwise show the git icon.
 - Add a new configuration option to the config.yml for the generation of a robots.txt file.
+- Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings.

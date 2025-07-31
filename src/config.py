@@ -86,10 +86,7 @@ class Config:
         dirs = [
             self.output_dir,
             self.data_cache_dir,
-            self.output_dir / 'static',
-            self.output_dir / 'css',
-            self.output_dir / 'js',
-            self.output_dir / 'images'
+            self.output_dir / 'static'
         ]
         
         for directory in dirs:
