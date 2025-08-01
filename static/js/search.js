@@ -2,12 +2,27 @@
 (function() {
     let searchData = null;
     let searchIndex = null;
+    let searchConfig = null;
     
     // Initialize search when page loads
     document.addEventListener('DOMContentLoaded', function() {
+        loadSearchConfig();
         loadSearchData();
         initializeSearchInputs();
     });
+    
+    // Load search configuration from meta tags
+    function loadSearchConfig() {
+        const minQueryLengthMeta = document.querySelector('meta[name="search-min-query-length"]');
+        const fuzzyThresholdMeta = document.querySelector('meta[name="search-fuzzy-threshold"]');
+        const maxResultsMeta = document.querySelector('meta[name="search-max-results"]');
+        
+        searchConfig = {
+            minQueryLength: minQueryLengthMeta ? parseInt(minQueryLengthMeta.content) : 3,
+            fuzzyThreshold: fuzzyThresholdMeta ? parseFloat(fuzzyThresholdMeta.content) : 0.3,
+            maxResults: maxResultsMeta ? parseInt(maxResultsMeta.content) : 8
+        };
+    }
     
     // Load search data
     async function loadSearchData() {
@@ -52,7 +67,7 @@
     function handleSearch(event, resultsId = 'search-results') {
         const query = event.target.value.trim();
         
-        if (query.length < 2) {
+        if (query.length < searchConfig.minQueryLength) {
             hideSearchResults(resultsId);
             return;
         }
@@ -81,7 +96,7 @@
                        (app.tags && app.tags.some(tag => tag.toLowerCase().includes(lowerQuery))) ||
                        (app.categories && app.categories.some(cat => cat.toLowerCase().includes(lowerQuery)));
             })
-            .slice(0, 8); // Limit to 8 results
+            .slice(0, searchConfig.maxResults); // Limit to maxResults
     }
     
     // Display search results

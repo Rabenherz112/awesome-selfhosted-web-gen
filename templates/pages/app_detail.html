@@ -43,7 +43,17 @@
                     Live Demo
                 </a>
                 {% endif %}
-                
+
+                {% if app.related_software_url %}
+                <a href="{{ app.related_software_url }}"{{ get_link_target_attrs(app.related_software_url, false) }}
+                   class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    Related Software
+                </a>
+                {% endif %}
+
                 {% if app.url and app.url != app.repo_url %}
                 <a href="{{ app.url }}"{{ get_link_target_attrs(app.url, false) }}
                    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow transition-colors">
@@ -94,7 +104,7 @@
                     <div>
                         <strong>Fork of:</strong> 
                         {% if app.fork_url %}
-                            <a href="{{ app.fork_url }}" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">{{ app.fork_of }}</a>
+                            <a href="{{ app.fork_url }}"{{ get_link_target_attrs(app.fork_url, false) }} class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">{{ app.fork_of }}</a>
                         {% else %}
                             <span class="text-gray-700 dark:text-gray-300">{{ app.fork_of }}</span>
                         {% endif %}
@@ -187,7 +197,6 @@
                 </div>
             </div>
             {% endif %}
-
 
         </div>
     </div>

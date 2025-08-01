@@ -87,11 +87,23 @@ python generate.py watch --interval 3
 python generate.py -c custom-config.yaml build
 ```
 
+### CSS Development
+
+When making changes to the website's styling (modifying `static/css/tailwind-input.css`), using new Tailwind classes, you need to rebuild the CSS file:
+
+```bash
+npm install
+npm run build-css
+```
+
+This will update the `static/css/tailwind.css` file to the latest version and include any classes needed.
+
 ## 📁 Project Structure
 
-```
-awesome-selfhosted-generator/
+```text
+awesome-selfhosted-web-gen/
 ├── src/                          # Source code
+│   ├── __init__.py              # Package initialization
 │   ├── config.py                 # Configuration management
 │   ├── data_processor.py         # Data fetching and processing
 │   ├── site_generator.py         # HTML generation engine
@@ -108,7 +120,9 @@ awesome-selfhosted-generator/
 │   └── sitemap.xml              # Sitemap template
 ├── static/                       # Static assets
 │   ├── css/
-│   │   └── custom.css           # Custom styles and enhanced filters
+│   │   ├── custom.css           # Custom styles and enhanced filters
+│   │   ├── tailwind.css         # Compiled Tailwind CSS
+│   │   └── tailwind-input.css   # Tailwind source file
 │   ├── js/
 │   │   ├── app.js               # Main application JS
 │   │   ├── app-detail.js        # Commit graph and detail page logic
@@ -116,11 +130,16 @@ awesome-selfhosted-generator/
 │   │   ├── search.js            # Search functionality with mobile support
 │   │   └── theme.js             # Theme toggle
 │   └── images/                  # Static images
+│       ├── awesome.png          # Awesome logo
+│       ├── favicon.ico          # Site favicon
+│       └── logo.svg             # Site logo
 ├── output/                       # Generated website (created after build)
 ├── data/                         # Cached data files (created after fetch)
-├── config.yaml                   # Main configuration
+├── config.yml                    # Main configuration
 ├── generate.py                   # CLI entry point
 ├── requirements.txt              # Python dependencies
+├── package.json                  # Node.js dependencies for CSS build
+├── LICENSE                       # Project license
 └── README.md                     # This file
 ```
 
@@ -136,10 +155,15 @@ The generator processes data from awesome-selfhosted-data in several stages:
 
 ### Related Applications Algorithm
 
-The system uses an intelligent scoring algorithm to suggest related applications based on:
+The system uses an automatic semantic similarity algorithm to suggest related applications. The algorithm discovers relationships by analyzing application descriptions without requiring manual keyword lists.
+
+**Scoring factors:**
+- **Semantic Similarity** (up to 25 points) - Automatic phrase matching between descriptions
 - **Common Categories** (+4 points per shared category)
-- **Platform Compatibility** (+2 points per shared platform)
+- **Alternative-to Relationships** (+6 points per shared alternative)
+- **Fork Relationships** (+8 points for forks of same project)
 - **Programming Language** (+3 points for same language)
+- **Platform Compatibility** (+2 points per shared platform)
 - **License Type** (+2 points for same license category: free/non-free)
 - **Popularity Tier** (+1 point for similar star count ranges)
 - **Dependency Status** (+1 point for matching third-party dependency requirements)
@@ -321,17 +345,8 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 
 ## TODOs
 
-- Replace `cdn.tailwindcss.com` with local files if possible.
-- Add some kind of fail safe to the browe page, if the user doesn't use javascript.
-- Check if I can show 250 characters of the description in the browse page.
-  - Add the ability to set this in config
-  - With setings `max_description_length` (Configure the maximal lenght before the description is cut off with `...`), `show_full_description` (Can be toggeld to show the full description) and `description_fade` (Can be toggeld to fade the description if too long instead of cutting it off)
 - Build a new Index / Home / Hero Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page. Maybe also add some random apps to the page, a search bar and a browse button. Maybe also display 1 or 2 random categories. (Maybe add something last 3 apps updated or so...)
 - Test if no pagination works and if the performance changes.
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen`
 - Run `black` and `flake8` on the codebase to ensure code quality
-- Test if code still works after updating the dependencies in `requirements.txt`
-- Move Categories from the app detail page down where also Platforms are shown.
-- The Source Code Icon in the app detail page should only show a github icon, if the link is a github link. it should show a gitlab icon if the link is a gitlab link and otherwise show the git icon.
-- Add a new configuration option to the config.yml for the generation of a robots.txt file.
-- Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings.
+- Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings. - Is correctly generated (so webserver or browser issue?)

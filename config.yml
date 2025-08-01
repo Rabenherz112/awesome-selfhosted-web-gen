@@ -18,14 +18,14 @@ ui:
     recent_apps: 8 # Number of recent apps to show on the homepage - OLD should be removed
     category_stats: 12 # Number of categories to show on the homepage - OLD should be removed
     related_apps: 6 # App detail page related apps
-    browse_max_tags_per_card: 2 # Browse page tags per card - To be implemented
-    browse_max_platforms_per_card: 3 # Browse page platforms per card - To be implemented
+    browse_max_tags_per_card: 2 # Browse page tags per card
+    browse_max_platforms_per_card: 3 # Browse page platforms per card
 
   # Default text truncation lengths
   truncation:
     default_description_length: 150 # Default description length
     browse_description_length: 250 # Browse page description length 
-    browse_description_full: false # Browse page show full description (overrides lenght)
+    browse_description_full: false # Browse page show full description (overrides length)
     related_apps_description_length: 100 # Related apps description length
 
   # Navigation menu items
@@ -34,7 +34,7 @@ ui:
       url: "/"
     - title: "Statistics" 
       url: "/statistics.html"
-  
+
   # Footer configuration
   footer:
     logo_text: "{{ site.title }}"
@@ -45,7 +45,7 @@ ui:
     data_source_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
     license_text: "Content under CC-BY-SA 3.0 license"
     license_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE"
-    
+
     # Footer sections
     sections:
       navigation:
@@ -55,7 +55,7 @@ ui:
             url: "/"
           - title: "Statistics"
             url: "/statistics.html"
-      
+
       resources:
         title: "Resources"
         links:
@@ -67,17 +67,17 @@ ui:
             external: true
           - title: "Sitemap"
             url: "/sitemap.xml"
-  
+
   # Page titles and descriptions
   pages:
     browse:
       title: "Browse Applications"
       description: "Discover {total_applications} self-hosted applications"
-    
+
     statistics:
       title: "Statistics"
       description: "Explore trends and insights from the self-hosted community"
-    
+
     home:
       meta_title: "Discover Self-Hosted Applications"
       meta_description: "Find the perfect self-hosted applications for your needs"
@@ -89,27 +89,27 @@ data:
   tags_dir: "tags"
   platforms_dir: "platforms"
   licenses_file: "licenses.yml"
-  
+
 # Build settings
 build:
   output_dir: "output"
   template_dir: "templates"
   static_dir: "static"
   data_cache_dir: "data"
-  
+
 # Site generation options
 generation:
   items_per_page: 60
   enable_search_index: true
   minify_html: false
   generate_sitemap: true
-  enable_pagination: true  # Set to false to disable pagination completely
-  
+  enable_pagination: true
+
 # Search settings
 search:
   fuzzy_threshold: 0.3
-  max_results: 100
-  min_query_length: 3 # Minimum number of characters to trigger a search - To be implemented
+  max_results: 8
+  min_query_length: 3
   search_fields:
     - name
     - description
@@ -117,16 +117,51 @@ search:
     - categories
   placeholder_text: "Search applications..."
 
+related_apps:
+  scoring:
+    semantic_similarity:
+      enabled: true
+      max_score: 25
+    categories:
+      enabled: true
+      points_per_match: 4
+    alternatives:
+      enabled: true
+      points_per_match: 6
+    forks:
+      enabled: true
+      same_parent_score: 8
+    language:
+      enabled: true
+      same_language_score: 3
+    platforms:
+      enabled: true
+      points_per_match: 2
+    license:
+      enabled: true
+      same_type_score: 2
+    popularity:
+      enabled: true
+      same_tier_score: 1
+    dependencies:
+      enabled: true
+      same_status_score: 1
+  tiebreakers:
+    - stars
+    - name
+  min_score: 3
+  debug: false
+
 # Links settings
 links:
   open_in_new_tab_for_internal_links: false
   open_in_new_tab_for_external_links: false
 
-# Performance settings
+# Performance settings - Not implemented
 performance:
   lazy_load_images: true
   generate_webp: false
-  inline_critical_css: true 
+  inline_critical_css: true
 
 # Robots.txt settings
 robots:

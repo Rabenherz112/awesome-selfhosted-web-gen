@@ -21,6 +21,7 @@ class Application:
     url: str
     repo_url: Optional[str] = None
     demo_url: Optional[str] = None
+    related_software_url: Optional[str] = None
     categories: List[str] = None
     license: List[str] = None
     language: Optional[str] = None
@@ -250,6 +251,7 @@ class DataProcessor:
                 url=app_data.get('website_url', ''),
                 repo_url=repo_url,
                 demo_url=app_data.get('demo_url'),
+                related_software_url=app_data.get('related_software_url'),
                 categories=app_data.get('tags', []),
                 license=licenses,
                 language=primary_language,

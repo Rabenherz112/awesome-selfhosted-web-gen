@@ -1,0 +1,25 @@
+{
+  "name": "awesome-selfhosted-web-gen",
+  "version": "1.0.0",
+  "description": "A Python-based static site generator that creates a beautiful, interactive website from the [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data/) dataset.",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "tailwindcss -i ./static/css/tailwind-input.css -o ./static/css/tailwind.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen/issues"
+  },
+  "homepage": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.11",
+    "tailwindcss": "^4.1.11"
+  }
+}

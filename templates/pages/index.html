@@ -138,12 +138,12 @@
                         
                         <div class="flex space-x-2">
                             {% if app.demo_url %}
-                            <a href="{{ app.demo_url }}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
+                            <a href="{{ app.demo_url }}"{{ get_link_target_attrs(app.demo_url, false) }} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
                                 Demo
                             </a>
                             {% endif %}
                             {% if app.repo_url %}
-                            <a href="{{ app.repo_url }}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
+                            <a href="{{ app.repo_url }}"{{ get_link_target_attrs(app.repo_url, false) }} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
                                 Source
                             </a>
                             {% endif %}

@@ -3,3 +3,5 @@ awesome-selfhosted-data
 output
 data
 __pycache__
+node_modules
+package-lock.json

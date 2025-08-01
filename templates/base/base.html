@@ -14,6 +14,12 @@
     <meta name="open-internal-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_internal_links', false) }}">
     <meta name="browse-description-length" content="{{ ui_config.get('truncation', {}).get('browse_description_length', 80) }}">
     <meta name="browse-description-full" content="{{ ui_config.get('truncation', {}).get('browse_description_full', false) }}">
+    <meta name="search-min-query-length" content="{{ search_config.get('min_query_length', 3) }}">
+    <meta name="search-fuzzy-threshold" content="{{ search_config.get('fuzzy_threshold', 0.3) }}">
+    <meta name="search-max-results" content="{{ search_config.get('max_results', 8) }}">
+    <meta name="browse-max-tags-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_tags_per_card', 2) }}">
+    <meta name="browse-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_platforms_per_card', 3) }}">
+    <meta name="lazy-load-images" content="{{ performance_config.get('lazy_load_images', true) }}">
 
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
@@ -27,6 +33,7 @@
     <meta name="twitter:description" content="{% block twitter_description %}{{ site_config.description }}{% endblock %}">
 
     <!-- Tailwind CSS -->
+    <!--
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -51,6 +58,8 @@
             }
         }
     </script>
+    -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/custom.css">
@@ -188,7 +197,7 @@
                         {% for link in section.links %}
                         <li>
                             <a href="{{ link.url }}" 
-                               {% if link.external %}target="_blank" rel="noopener"{% endif %}
+                               {{ get_link_target_attrs(link.url, not link.external) }}
                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
                                 {{ link.title }}
                             </a>
@@ -202,11 +211,11 @@
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                 <p class="text-center text-sm text-gray-500 dark:text-gray-500">
                     {{ render_template_string(ui_config.footer.copyright_text) or '&copy; 2025 ' + site_config.title + '. Data from' }} 
-                    <a href="{{ ui_config.footer.data_source_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data' }}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-500">
+                    <a href="{{ ui_config.footer.data_source_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data' }}"{{ get_link_target_attrs(ui_config.footer.data_source_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data', false) }} class="text-primary-600 hover:text-primary-500">
                         {{ ui_config.footer.data_source_text or 'awesome-selfhosted' }}
                     </a>
                     <br>
-                    <a href="{{ ui_config.footer.license_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE' }}" target="_blank" rel="noopener" class="text-primary-600 hover:text-primary-500">
+                    <a href="{{ ui_config.footer.license_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE' }}"{{ get_link_target_attrs(ui_config.footer.license_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE', false) }} class="text-primary-600 hover:text-primary-500">
                         {{ ui_config.footer.license_text or 'Content under CC-BY-SA 3.0 license' }}
                     </a>
                 </p>

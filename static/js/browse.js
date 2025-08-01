@@ -29,6 +29,12 @@ class BrowsePage {
     }
 
     async init() {
+        // Hide JavaScript required notification since JavaScript is enabled
+        const jsNotification = document.getElementById('js-required-notification');
+        if (jsNotification) {
+            jsNotification.style.display = 'none';
+        }
+        
         await this.loadSearchData();
         await this.loadLicenseData();
         await this.loadConfig();
@@ -47,33 +53,20 @@ class BrowsePage {
     }
 
     async loadConfig() {
-        // Load items per page from config
-        try {
-            // Get items per page from meta tag
-            const itemsPerPageMeta = document.querySelector('meta[name="items-per-page"]');
-            if (itemsPerPageMeta) {
-                this.itemsPerPage = parseInt(itemsPerPageMeta.content) || 60;
-            }
-            
-            // Get enable pagination setting from meta tag
-            const enablePaginationMeta = document.querySelector('meta[name="enable-pagination"]');
-            if (enablePaginationMeta) {
-                this.enablePagination = enablePaginationMeta.content.toLowerCase() === 'true';
-            }
+        // Helper function to get config value from meta tag with fallback
+        const getConfigValue = (metaName, defaultValue, parser = parseInt) => {
+            const meta = document.querySelector(`meta[name="${metaName}"]`);
+            return meta ? parser(meta.content) || defaultValue : defaultValue;
+        };
 
-            // Get truncation settings
-            const browseDescLengthMeta = document.querySelector('meta[name="browse-description-length"]');
-            if (browseDescLengthMeta) {
-                this.browseDescriptionLength = parseInt(browseDescLengthMeta.content) || 80;
-            } else {
-                this.browseDescriptionLength = 80;
-            }
-            const browseDescFullMeta = document.querySelector('meta[name="browse-description-full"]');
-            if (browseDescFullMeta) {
-                this.browseDescriptionFull = browseDescFullMeta.content.toLowerCase() === 'true';
-            } else {
-                this.browseDescriptionFull = false;
-            }
+        try {
+            // Load all configuration values using the helper function
+            this.itemsPerPage = getConfigValue('items-per-page', 60);
+            this.enablePagination = getConfigValue('enable-pagination', false, (val) => val.toLowerCase() === 'true');
+            this.browseDescriptionLength = getConfigValue('browse-description-length', 80);
+            this.browseDescriptionFull = getConfigValue('browse-description-full', false, (val) => val.toLowerCase() === 'true');
+            this.browseMaxTagsPerCard = getConfigValue('browse-max-tags-per-card', 2);
+            this.browseMaxPlatformsPerCard = getConfigValue('browse-max-platforms-per-card', 3);
         } catch (error) {
             console.log('Using default configuration values');
         }
@@ -547,7 +540,7 @@ class BrowsePage {
         };
         
         const dependsIcon = app.depends_3rdparty ? `
-            <div class="flex-shrink-0" title="Depends on third-party services">
+            <div class="flex-shrink-0" title="Depends on a proprietary service outside the user's control">
                 <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
@@ -563,7 +556,7 @@ class BrowsePage {
         ` : '';
 
         const starsIcon = app.stars ? `
-            <div class="flex items-center text-yellow-500 flex-shrink-0">
+            <div class="flex items-center text-yellow-500 flex-shrink-0" title="Repository stars">
                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
@@ -589,14 +582,15 @@ class BrowsePage {
             </div>
         ` : '';
 
-        const categoriesHtml = app.tags ? app.tags.slice(0, 2).map(category => 
+        // Tag badges (show up to configured limit)
+        const categoriesHtml = app.tags ? app.tags.slice(0, this.browseMaxTagsPerCard).map(category => 
             `<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
-        ).join('') + (app.tags.length > 2 ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.tags.length - 2}</span>` : '') : '';
+        ).join('') + (app.tags.length > this.browseMaxTagsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.tags.length - this.browseMaxTagsPerCard}</span>` : '') : '';
         
-        // Platform badges (show up to 3 platforms)
-        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, 3).map(platform => 
+        // Platform badges (show up to configured limit)
+        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.browseMaxPlatformsPerCard).map(platform => 
             `<span class="inline-block bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${platform}</span>`
-        ).join('') + (app.platforms.length > 3 ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.platforms.length - 3}</span>` : '') : '';
+        ).join('') + (app.platforms.length > this.browseMaxPlatformsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.platforms.length - this.browseMaxPlatformsPerCard}</span>` : '') : '';
 
         // License display (first license + count if multiple)
         let licenseBadge = '';

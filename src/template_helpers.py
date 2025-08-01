@@ -254,7 +254,7 @@ class TemplateHelpers:
         
         return target_attrs
 
-    def truncate_description(self, description: str, length: int = None, use_fade: bool = None, show_full: bool = None) -> str:
+    def truncate_description(self, description: str, length: int = None, show_full: bool = None) -> str:
         """Truncate description to specified length with configurable behavior."""
         if not description:
             return ""
@@ -280,11 +280,4 @@ class TemplateHelpers:
         if last_space > 0:
             truncated = truncated[:last_space]
 
-        # Check if fade effect should be used
-        if use_fade is None:
-            use_fade = truncation_config.get('browse_description_fade', True)
-
-        if use_fade:
-            return f'<span class="description-fade">{truncated}<span class="fade-ellipsis">...</span></span>'
-        else:
-            return truncated + "..."
+        return truncated + "..."
