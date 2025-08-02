@@ -14,9 +14,10 @@ ui:
 
   # Limits for diffrent sections
   limits:
-    featured_apps: 12 # Number of featured apps to show on the homepage - OLD should be removed
-    recent_apps: 8 # Number of recent apps to show on the homepage - OLD should be removed
-    category_stats: 12 # Number of categories to show on the homepage - OLD should be removed
+    homepage_popular_apps: 8 # Number of most stared apps to show on the homepage
+    homepage_recently_updated: 8 # Number of most recently updted apps to show on the homepage
+    homepage_random_picks: 6 # Number of random apps to show on the homepage
+    homepage_category_stats: 8 # Number of most popular categroies to show on the homepage
     related_apps: 6 # App detail page related apps
     browse_max_tags_per_card: 2 # Browse page tags per card
     browse_max_platforms_per_card: 3 # Browse page platforms per card
@@ -24,14 +25,72 @@ ui:
   # Default text truncation lengths
   truncation:
     default_description_length: 150 # Default description length
+    homepage_description_length: 70 # Homepage description length
     browse_description_length: 250 # Browse page description length 
     browse_description_full: false # Browse page show full description (overrides length)
     related_apps_description_length: 100 # Related apps description length
 
+  # General Hompage Settings
+  homepage:
+    debug_markdown: true
+    include_nonfree: false
+    sections:
+      - hero
+      - popular_apps
+      - recently_updated
+      - random_picks
+      - statistics
+      - popular_categories
+      - footer_markdown
+
+  footer_markdown:
+    exclude_sections:
+      - "Anti-features"
+      - "Contributing"
+      # - "External Links"
+      # - "License"
+
+  # Hero Settings
+  hero:
+    title: "Awesome Self-Hosted"
+    subtitle: "Discover amazing Self-Hosted Applications"
+    description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
+    # Badges/links to show
+    badges:
+      - name: "Awesome"
+        image: "/static/images/awesome.png"
+        url: "https://github.com/sindresorhus/awesome"
+      - name: "Dead Links Check"
+        image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-dead-links.yml/badge.svg"
+        url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
+      - name: "Unmaintained Check"
+        image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-unmaintained-projects.yml/badge.svg"
+        url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
+      - name: "Liberapay"
+        image: "https://img.shields.io/liberapay/goal/awesome-selfhosted?logo=liberapay"
+        url: "https://liberapay.com/awesome-selfhosted/"
+    # Additional links
+    links:
+      - name: "GitHub Repository"
+        url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+        description: "Markdown version (legacy)"
+      - name: "Main Website"
+        url: "https://awesome-selfhosted.net/"
+        description: "Main Frontend for this dataset"
+      - name: "Contributing Guide"
+        url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/CONTRIBUTING.md"
+        description: "How to contribute to this project"
+    # Call to action
+    cta_buttons:
+      - name: "Browse All Applications"
+        url: "/browse.html"
+        style: "primary"
+        icon: "grid"
+
   # Navigation menu items
   navigation:
     - title: "Browse"
-      url: "/"
+      url: "/browse.html"
     - title: "Statistics" 
       url: "/statistics.html"
 
@@ -40,11 +99,11 @@ ui:
     logo_text: "{{ site.title }}"
     tagline: "{{ site.description }}"
     credit_text: "Built with ❤️ for the self-hosting community"
-    copyright_text: "Copyright © 2015-2025, the {{ site.title }} community. Data from"
-    data_source_text: "awesome-selfhosted-data"
-    data_source_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
-    license_text: "Content under CC-BY-SA 3.0 license"
-    license_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE"
+    footer_text: |
+      Copyright © 2015-2025, the {{ site.title }} community. Data from 
+      <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
+      <br>
+      <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>
 
     # Footer sections
     sections:
@@ -53,6 +112,8 @@ ui:
         links:
           - title: "Home"
             url: "/"
+          - title: "Browse"
+            url: "/browse.html"
           - title: "Statistics"
             url: "/statistics.html"
 
@@ -120,7 +181,7 @@ search:
 related_apps:
   scoring:
     semantic_similarity:
-      enabled: true
+      enabled: false
       max_score: 25
     categories:
       enabled: true

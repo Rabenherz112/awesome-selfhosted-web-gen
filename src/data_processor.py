@@ -81,6 +81,9 @@ class DataProcessor:
         licenses_file = data_dir / data_config['licenses_file']
         licenses_nonfree_file = data_dir / 'licenses-nonfree.yml'
         licenses_data = self._load_licenses_data(licenses_file, licenses_nonfree_file)
+
+        # Load markdown files
+        markdown_data = self._load_markdown_files(data_dir)
         
         print(f"Loaded {len(apps_data)} applications, {len(tags_data)} tags, {len(platforms_data)} platforms, {len(licenses_data)} licenses")
         
@@ -88,7 +91,8 @@ class DataProcessor:
             'apps': apps_data,
             'categories': tags_data,
             'platforms': platforms_data,
-            'licenses': licenses_data
+            'licenses': licenses_data,
+            'markdown': markdown_data
         }
     
     def _load_software_data(self, software_dir: Path) -> List[Dict]:
@@ -385,14 +389,18 @@ class DataProcessor:
         """Create category hierarchy with application counts."""
         category_counts = {}
         
+        # Helper function to create consistent slugs
+        def slugify(text):
+            return text.lower().replace(' ', '-').replace('&', '').replace('(', '').replace(')', '').replace(',', '').replace('/', '-').replace('--',   '-').strip('-')
+        
         # Count applications per category (using tags as categories)
         for app in applications:
             for category in app.categories:
-                # Convert category name to match tag file names (lowercase, replace spaces with dashes)
-                category_key = category.lower().replace(' ', '-').replace('&', '').replace('(', '').replace(')', '').replace(',', '').replace('/', '-').replace('--', '-').strip('-')
-                category_counts[category_key] = category_counts.get(category_key, 0) + 1
-                # Also count with original name for exact matches
+                # Count by original name
                 category_counts[category] = category_counts.get(category, 0) + 1
+                # Also count by slugified version
+                category_key = slugify(category)
+                category_counts[category_key] = category_counts.get(category_key, 0) + 1
         
         # Build hierarchy using loaded tag data
         categories = {}
@@ -416,13 +424,15 @@ class DataProcessor:
             all_categories.update(app.categories)
         
         for category in all_categories:
-            category_key = category.lower().replace(' ', '-').replace('&', '').replace('(', '').replace(')', '').replace(',', '').replace('/', '-').replace('--', '-').strip('-')
+            # Create a consistent category key (same as used in URL generation)
+            category_key = slugify(category)
             if category_key not in categories:
                 categories[category_key] = {
                     'id': category_key,
                     'name': category,
                     'description': f'Applications in category {category}',
-                    'count': category_counts.get(category, 0)
+                    'count': category_counts.get(category, 0),
+                    'original_name': category  # Store original name for matching
                 }
         
         return categories
@@ -468,3 +478,35 @@ class DataProcessor:
             'apps_with_multiple_licenses': apps_with_multiple_licenses,
             'apps_with_multiple_platforms': apps_with_multiple_platforms
         } 
+
+    def _load_markdown_files(self, data_dir: Path) -> Dict[str, str]:
+        """Load markdown files (footer.md only now)."""
+        debug = self.config.get('ui.homepage.debug_markdown', False)
+        markdown_files = {}
+
+        # Only load footer now, header is configurable
+        footer_file = data_dir / 'markdown' / 'footer.md'
+
+        if debug:
+            print(f"DEBUG: Looking for footer.md at: {footer_file}")
+            print(f"DEBUG: Footer file exists: {footer_file.exists()}")
+
+        if footer_file.exists():
+            try:
+                with open(footer_file, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    markdown_files['footer'] = content
+                    if debug:
+                        print(f"DEBUG: Footer content loaded, length: {len(content)} characters")
+                        print(f"DEBUG: Footer preview: {content[:200]}...")
+            except Exception as e:
+                print(f"Error loading footer.md: {e}")
+                markdown_files['footer'] = ''
+        else:
+            print(f"Warning: footer.md not found at {footer_file}")
+            markdown_files['footer'] = ''
+
+        if debug:
+            print(f"DEBUG: Final markdown_files keys: {list(markdown_files.keys())}")
+
+        return markdown_files

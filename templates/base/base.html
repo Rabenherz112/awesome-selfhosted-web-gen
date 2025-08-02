@@ -33,32 +33,6 @@
     <meta name="twitter:description" content="{% block twitter_description %}{{ site_config.description }}{% endblock %}">
 
     <!-- Tailwind CSS -->
-    <!--
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': {
-                            50: '#eff6ff',
-                            100: '#dbeafe', 
-                            200: '#bfdbfe',
-                            300: '#93c5fd',
-                            400: '#60a5fa',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            800: '#1e40af',
-                            900: '#1e3a8a'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    -->
     <link rel="stylesheet" href="/static/css/tailwind.css">
     
     <!-- Custom CSS -->
@@ -209,16 +183,9 @@
             </div>
             
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <p class="text-center text-sm text-gray-500 dark:text-gray-500">
-                    {{ render_template_string(ui_config.footer.copyright_text) or '&copy; 2025 ' + site_config.title + '. Data from' }} 
-                    <a href="{{ ui_config.footer.data_source_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data' }}"{{ get_link_target_attrs(ui_config.footer.data_source_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data', false) }} class="text-primary-600 hover:text-primary-500">
-                        {{ ui_config.footer.data_source_text or 'awesome-selfhosted' }}
-                    </a>
-                    <br>
-                    <a href="{{ ui_config.footer.license_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE' }}"{{ get_link_target_attrs(ui_config.footer.license_url or 'https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE', false) }} class="text-primary-600 hover:text-primary-500">
-                        {{ ui_config.footer.license_text or 'Content under CC-BY-SA 3.0 license' }}
-                    </a>
-                </p>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-500">
+                    {{ render_template_string(ui_config.footer.footer_text) | safe }}
+                </div>
             </div>
         </div>
     </footer>

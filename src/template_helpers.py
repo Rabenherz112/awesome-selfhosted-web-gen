@@ -111,6 +111,20 @@ class TemplateHelpers:
             return " / ".join(formatted_licenses)
         
         return str(licenses)
+
+    def is_license_nonfree(self, license_id: str) -> bool:
+        """Check if a single license is non-free."""
+        if not license_id:
+            return False
+        
+        # Get non-free license identifiers from loaded license data
+        if hasattr(self, 'licenses_data') and self.licenses_data:
+            nonfree_licenses = {lic_id for lic_id, lic_info in self.licenses_data.items() 
+                               if not lic_info.get('free', True)}
+            return license_id in nonfree_licenses
+        
+        # Fallback to basic check if license data not available
+        return license_id in ['⊘ Proprietary']
     
     def format_platforms(self, platforms) -> str:
         """Format multiple platforms for display."""
@@ -281,3 +295,187 @@ class TemplateHelpers:
             truncated = truncated[:last_space]
 
         return truncated + "..."
+
+    def markdown_to_html(self, markdown_text: str) -> str:
+        """Convert markdown text to HTML (enhanced conversion with proper link handling)."""
+        if not markdown_text:
+            return ""
+        
+        import re
+        
+        html = markdown_text
+        
+        # Get footer configuration for section filtering
+        footer_config = self.config.get('ui.footer_markdown', {})
+        excluded_sections = footer_config.get('exclude_sections', [])
+        
+        # Remove excluded sections if configured
+        if excluded_sections:
+            for section in excluded_sections:
+                # Remove section by header (case-insensitive)
+                section_pattern = rf'^#+\s+{re.escape(section)}.*?(?=^#+|\Z)'
+                html = re.sub(section_pattern, '', html, flags=re.MULTILINE | re.DOTALL | re.IGNORECASE)
+        
+        # Remove horizontal rules (---- patterns)
+        html = re.sub(r'^-{4,}\s*$', '', html, flags=re.MULTILINE)
+        html = re.sub(r'^={4,}\s*$', '', html, flags=re.MULTILINE)
+        
+        # Remove code blocks (backticks) - handle all patterns including multi-line
+        # Remove triple backtick code blocks first (```code```)
+        html = re.sub(r'```.*?```', '', html, flags=re.DOTALL)
+        # Remove single backtick code spans (`code`) - be more thorough
+        html = re.sub(r'`[^`]*?`', '', html)
+        # Clean up any remaining standalone backticks
+        html = re.sub(r'`', '', html)
+        
+        # Convert images with links (badge pattern): [![alt](img_url)](link_url)
+        def replace_badge(match):
+            alt_text = match.group(1)
+            img_url = match.group(2)
+            link_url = match.group(3)
+            
+            # Handle relative paths for images
+            if img_url.startswith('_static/'):
+                img_url = '/static/images/' + img_url.replace('_static/', '')
+            
+            target_attrs = self.get_link_target_attrs(link_url, not link_url.startswith('http'))
+            return f'<a href="{link_url}"{target_attrs} class="inline-block mr-2 mb-2"><img src="{img_url}" alt="{alt_text}" class="inline-block h-5"></    a>'
+        
+        html = re.sub(r'\[\!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)', replace_badge, html)
+        
+        # Convert standalone images: ![alt](url)
+        def replace_image(match):
+            alt_text = match.group(1)
+            img_url = match.group(2)
+            
+            # Handle relative paths for images
+            if img_url.startswith('_static/'):
+                img_url = '/static/images/' + img_url.replace('_static/', '')
+                
+            return f'<img src="{img_url}" alt="{alt_text}" class="inline-block h-5 mr-2 mb-2">'
+        
+        html = re.sub(r'\!\[([^\]]*)\]\(([^)]+)\)', replace_image, html)
+        
+        # Convert links: [text](url) - use proper link target configuration
+        def replace_link(match):
+            text = match.group(1)
+            url = match.group(2)
+            
+            target_attrs = self.get_link_target_attrs(url, not url.startswith('http'))
+            return f'<a href="{url}"{target_attrs} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300     underline">{text}</a>'
+        
+        html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', replace_link, html)
+        
+        # Convert headers (do this after links to avoid conflicts) - CENTERED
+        html = re.sub(r'^### (.+)$', r'<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6 text-center">\1</h3>', html, flags=re.  MULTILINE)
+        html = re.sub(r'^## (.+)$', r'<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-8 text-center">\1</h2>', html, flags=re.  MULTILINE)
+        html = re.sub(r'^# (.+)$', r'<h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-6 mt-8 text-center">\1</h1>', html, flags=re.   MULTILINE)
+        
+        # Convert bold text
+        html = re.sub(r'\*\*([^*]+)\*\*', r'<strong class="font-semibold">\1</strong>', html)
+        html = re.sub(r'__([^_]+)__', r'<strong class="font-semibold">\1</strong>', html)
+        
+        # Convert italic text
+        html = re.sub(r'(?<!\*)\*([^*]+)\*(?!\*)', r'<em class="italic">\1</em>', html)
+        html = re.sub(r'(?<!_)_([^_]+)_(?!_)', r'<em class="italic">\1</em>', html)
+        
+        # Split into paragraphs and process
+        paragraphs = html.split('\n\n')
+        html_paragraphs = []
+        
+        for paragraph in paragraphs:
+            paragraph = paragraph.strip()
+            if not paragraph:
+                continue
+                
+            # Skip if it's already a header or other block element
+            if (paragraph.startswith('<h') or 
+                paragraph.startswith('<ul') or 
+                paragraph.startswith('<ol') or
+                paragraph.startswith('<div') or
+                paragraph.startswith('<blockquote')):
+                html_paragraphs.append(paragraph)
+            else:
+                # Check if this is a list (unordered or ordered)
+                lines = paragraph.split('\n')
+                
+                # Check if all non-empty lines are list items
+                is_unordered_list = all(line.strip().startswith('- ') or line.strip() == '' for line in lines if line.strip())
+                is_ordered_list = all(re.match(r'^\d+\.\s', line.strip()) or line.strip() == '' for line in lines if line.strip())
+                
+                if is_unordered_list and any(line.strip().startswith('- ') for line in lines):
+                    # Convert to unordered list
+                    list_items = []
+                    for line in lines:
+                        line = line.strip()
+                        if line.startswith('- '):
+                            item_content = line[2:].strip()
+                            list_items.append(f'<li class="text-gray-700 dark:text-gray-300 mb-2">{item_content}</li>')
+                    
+                    if list_items:
+                        html_paragraphs.append(f'<ul class="list-disc list-inside mb-4 space-y-1">\n{"".join(list_items)}\n</ul>')
+                        
+                elif is_ordered_list and any(re.match(r'^\d+\.\s', line.strip()) for line in lines):
+                    # Convert to ordered list
+                    list_items = []
+                    for line in lines:
+                        line = line.strip()
+                        if re.match(r'^\d+\.\s', line):
+                            item_content = re.sub(r'^\d+\.\s', '', line).strip()
+                            list_items.append(f'<li class="text-gray-700 dark:text-gray-300 mb-2">{item_content}</li>')
+                    
+                    if list_items:
+                        html_paragraphs.append(f'<ol class="list-decimal list-inside mb-4 space-y-1">\n{"".join(list_items)}\n</ol>')
+                else:
+                    # Handle as regular paragraph
+                    processed_lines = []
+                    
+                    for line in lines:
+                        line = line.strip()
+                        if line:
+                            processed_lines.append(line)
+                    
+                    if processed_lines:
+                        # Join lines with space and wrap in paragraph
+                        paragraph_content = ' '.join(processed_lines)
+                        html_paragraphs.append(f'<p class="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed text-center">{paragraph_content}</p>')
+        
+        # Join all paragraphs
+        html = '\n\n'.join(html_paragraphs)
+        
+        # Clean up any extra whitespace left from removed sections
+        html = re.sub(r'\n{3,}', '\n\n', html)
+        html = html.strip()
+        
+        return html
+
+    def style_description_links(self, description: str) -> str:
+        """Add proper styling to links in description text."""
+        import re
+
+        if not description:
+            return ""
+
+        # Style any <a> tags that don't already have classes
+        def style_link(match):
+            full_tag = match.group(0)
+            # If it already has a class attribute, don't modify
+            if 'class=' in full_tag:
+                return full_tag
+
+            # Extract href and content
+            href_match = re.search(r'href="([^"]*)"', full_tag)
+            content_match = re.search(r'>([^<]*)</a>', full_tag)
+
+            if href_match and content_match:
+                href = href_match.group(1)
+                content = content_match.group(1)
+
+                # Add proper target attributes using the helper
+                target_attrs = self.get_link_target_attrs(href, not href.startswith('http'))
+
+                return f'<a href="{href}"{target_attrs} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300    underline font-medium">{content}</a>'
+
+            return full_tag
+
+        return re.sub(r'<a[^>]*>.*?</a>', style_link, description)

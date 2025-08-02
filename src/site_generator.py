@@ -52,6 +52,7 @@ class SiteGenerator:
             'format_date': self.template_helpers.format_date,
             'format_license': self.template_helpers.format_license,
             'format_licenses': self.template_helpers.format_licenses,
+            'is_license_nonfree': self.template_helpers.is_license_nonfree,
             'format_platforms': self.template_helpers.format_platforms,
             'get_platforms_badges_html': self.template_helpers.get_platforms_badges_html,
             'get_tags_badges_html': self.template_helpers.get_tags_badges_html,
@@ -60,6 +61,8 @@ class SiteGenerator:
             'get_language_color': self.template_helpers.get_language_color,
             'render_template_string': self.template_helpers.render_template_string,
             'get_link_target_attrs': self.template_helpers.get_link_target_attrs,
+            'markdown_to_html': self.template_helpers.markdown_to_html,
+            'style_description_links': self.template_helpers.style_description_links,
         })
         
         # Custom filters
@@ -68,7 +71,7 @@ class SiteGenerator:
             'sort_by_stars': self.template_helpers.sort_by_stars,
         })
     
-    def generate_site(self, applications: List[Application], categories: Dict, statistics: Dict, licenses: Dict = None):
+    def generate_site(self, applications: List[Application], categories: Dict, statistics: Dict, licenses: Dict = None, markdown_data: Dict = None):
         """Generate the complete static site."""
         print("Starting site generation...")
         
@@ -94,7 +97,8 @@ class SiteGenerator:
             print("Search index disabled - skipping search data generation")
 
         # Generate pages
-        self._generate_browse_as_homepage(applications, categories)  # Browse becomes homepage
+        self._generate_homepage(applications, categories, statistics, markdown_data)
+        self._generate_browse_page(applications, categories)
         self._generate_statistics_page(applications, categories, statistics)
         self._generate_app_detail_pages(applications)
 
@@ -129,55 +133,103 @@ class SiteGenerator:
             shutil.copytree(self.config.static_dir, output_static)
             print("Static assets copied")
 
-    # TODO: Remove this function, if I don't re-add a proper homepage.
-    def _generate_homepage(self, applications: List[Application], categories: Dict, statistics: Dict):
+    def _generate_homepage(self, applications: List[Application], categories: Dict, statistics: Dict, markdown_data: Dict = None):
         """Generate the homepage."""
         template = self.jinja_env.get_template('pages/index.html')
-        featured_limit = self.config.get('ui.limits.featured_apps', 12)
-        recent_limit = self.config.get('ui.limits.recent_apps', 8)  
-        category_limit = self.config.get('ui.limits.category_stats', 12)
 
-        # Get featured applications (top starred)
-        featured_apps = sorted(
-            [app for app in applications if app.stars],
+        homepage_config = self.config.get('ui.homepage', {})
+        limits = self.config.get('ui.limits', {})
+        include_nonfree = homepage_config.get('include_nonfree', True)
+
+        # Filter applications based on include_nonfree setting
+        if include_nonfree:
+            filtered_apps = applications
+        else:
+            filtered_apps = [app for app in applications if not self._is_app_nonfree(app)]
+
+        # Get popular applications (top starred)
+        popular_apps = sorted(
+            [app for app in filtered_apps if app.stars],
             key=lambda x: x.stars or 0,
             reverse=True
-        )[:featured_limit]
+        )[:limits.get('homepage_popular_apps', 12)]
 
         # Get recent updates
         recent_apps = sorted(
-            [app for app in applications if app.last_updated],
+            [app for app in filtered_apps if app.last_updated],
             key=lambda x: x.last_updated or '',
             reverse=True
-        )[:recent_limit]
+        )[:limits.get('homepage_recently_updated', 8)]
 
-        # Get category stats
-        category_stats = [
-            {
-                'id': cat_id,
-                'name': cat_info['name'],
-                'count': cat_info['count'],
-                'url': self.template_helpers.get_category_url(cat_id)
-            }
-            for cat_id, cat_info in categories.items()
-            if cat_info['count'] > 0
-        ]
+        # Get random picks (high quality apps with good ratings)
+        import random
+        quality_apps = [app for app in filtered_apps if app.stars and app.stars >= 100]
+        random.shuffle(quality_apps)
+        random_picks = quality_apps[:limits.get('homepage_random_picks', 6)]
+
+        # Get top categories by app count
+        category_stats = []
+        for cat_id, cat_info in categories.items():
+            if cat_info['count'] > 0:
+                # Create slugified version of the category name for consistent URLs
+                category_name = cat_info['name']
+                category_slug = category_name.lower().replace(' ', '-').replace('&', '').replace('(', '').replace(')', '').replace(',', '').replace('/',    '-').replace('--', '-').strip('-')
+
+                category_stats.append({
+                    'id': cat_id,
+                    'name': category_name, 
+                    'count': cat_info['count'],
+                    'url': f"/browse.html?category={category_slug}"
+                })
+
         category_stats.sort(key=lambda x: x['count'], reverse=True)
-        
+
         content = template.render(
-            featured_apps=featured_apps,
+            popular_apps=popular_apps,
             recent_apps=recent_apps,
-            categories=category_stats[:category_limit],
+            random_picks=random_picks,
+            categories=category_stats[:limits.get('homepage_popular_categories', 8)],
             statistics=statistics,
-            total_apps=len(applications),
-            page_title="Discover Self-Hosted Applications"
+            total_applications=len(applications),
+            markdown_data=markdown_data or {},
+            homepage_config=homepage_config,
+            page_title=None  # Use site title for homepage
         )
+
+        # Minify HTML if enabled
+        content = self._minify_html_if_enabled(content)
 
         output_path = self.config.output_dir / 'index.html'
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        
+
         print("Homepage generated")
+
+    def _generate_browse_page(self, applications: List[Application], categories: Dict):
+        """Generate the browse page at /browse.html with client-side pagination."""
+        template = self.jinja_env.get_template('pages/browse.html')
+
+        # Sort applications by name by default for initial display
+        sorted_apps = sorted(applications, key=lambda x: x.name.lower())
+
+        # Generate single page with empty applications (JavaScript will populate)
+        content = template.render(
+            applications=[],  # Empty - JavaScript will handle all rendering
+            categories=categories,
+            total_applications=len(applications),
+            items_per_page=self.config.get('generation.items_per_page', 24),
+            page_title="Browse Applications"
+        )
+
+        # Minify HTML if enabled
+        content = self._minify_html_if_enabled(content)
+
+        # Save browse page
+        output_path = self.config.output_dir / 'browse.html'
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        print(f"Browse page generated (client-side rendering for {len(applications)} apps)")
     
     def _generate_browse_as_homepage(self, applications: List[Application], categories: Dict):
         """Generate the browse page as homepage (index.html) with client-side pagination."""

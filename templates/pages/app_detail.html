@@ -54,7 +54,7 @@
                 </a>
                 {% endif %}
 
-                {% if app.url and app.url != app.repo_url %}
+                {% if app.url and app.url != app.repo_url and app.url != app.demo_url %}
                 <a href="{{ app.url }}"{{ get_link_target_attrs(app.url, false) }}
                    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,10 +92,22 @@
         {% endif %}
 
         <!-- Special Annotations -->
-        {% if app.fork_of or app.alternative_to or app.documentation_language %}
+        {% if app.fork_of or app.alternative_to or app.documentation_language or app.depends_3rdparty %}
         <div class="mb-6">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Additional Information</h3>
             <div class="space-y-2">
+                {% if app.depends_3rdparty %}
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <svg class="w-4 h-4 mr-2 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <strong>Third-party dependency:</strong> 
+                        <span class="text-gray-700 dark:text-gray-300">This application depends on a proprietary service outside the user's control</span>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if app.fork_of %}
                 <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <svg class="w-4 h-4 mr-2 text-blue-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
@@ -166,7 +178,22 @@
                     License{% if app.license is iterable and app.license is not string and app.license|length > 1 %}s{% endif %}
                 </h4>
                 <div class="text-gray-700 dark:text-gray-300">
-                    {{ format_licenses(app.license) }}
+                    {% if app.license is iterable and app.license is not string %}
+                        {% for license in app.license %}
+                            {% if is_license_nonfree(license) %}
+                                <span class="text-orange-700 dark:text-orange-300">{{ format_license(license) }}</span>
+                            {% else %}
+                                {{ format_license(license) }}
+                            {% endif %}
+                            {%- if not loop.last %} / {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {% if is_license_nonfree(app.license) %}
+                            <span class="text-orange-700 dark:text-orange-300">{{ format_license(app.license) }}</span>
+                        {% else %}
+                            {{ format_license(app.license) }}
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
             {% endif %}

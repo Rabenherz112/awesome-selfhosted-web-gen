@@ -22,7 +22,7 @@ class BrowsePage {
         
         // Pagination settings
         this.currentPage = 1;
-        this.itemsPerPage = 24;
+        this.itemsPerPage = 60;
         this.totalPages = 1;
         this.enablePagination = true;
         this.init();
@@ -41,6 +41,7 @@ class BrowsePage {
         this.extractPlatforms();
         this.extractLicenses();
         this.extractCategories();
+        this.parseUrlParameters();
         this.setupEventListeners();
         this.setupPlatformFilters();
         this.setupLicenseFilters();
@@ -80,6 +81,34 @@ class BrowsePage {
             this.filteredApplications = [...this.applications];
         } catch (error) {
             console.error('Failed to load search data:', error);
+        }
+    }
+
+    parseUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+        
+        if (categoryParam) {
+            // Create a helper to convert category names to URL-friendly slugs
+            const slugify = (text) => {
+                return text.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[^a-z0-9-]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            };
+            
+            // Find matching category by comparing slugified versions and direct matches
+            let matchingCategory = Array.from(this.categories).find(cat => {
+                const slugifiedCat = slugify(cat);
+                return slugifiedCat === categoryParam.toLowerCase() || 
+                       cat.toLowerCase() === categoryParam.toLowerCase();
+            });
+            
+            if (matchingCategory) {
+                this.selectedCategories.add(matchingCategory);
+                console.log(`Category filter applied: "${matchingCategory}"`);
+            }
         }
     }
 
@@ -305,6 +334,10 @@ class BrowsePage {
             `;
 
             const checkbox = filterDiv.querySelector('input');
+            // Check if this category was selected from URL parameters
+            if (this.selectedCategories.has(category)) {
+                checkbox.checked = true;
+            }
             checkbox.addEventListener('change', (e) => {
                 if (e.target.checked) {
                     this.selectedCategories.add(category);
@@ -628,7 +661,7 @@ class BrowsePage {
         ` : '';
 
         // Only show website link if it exists and is different from the source code URL
-        const websiteLink = (app.url && app.url.trim() && app.url !== app.repo_url) ? `
+        const websiteLink = (app.url && app.url.trim() && app.url !== app.repo_url && app.url !== app.demo_url) ? `
         <a href="${app.url}"${getLinkAttrs(app.url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
             Website
         </a>
@@ -667,7 +700,7 @@ class BrowsePage {
                     ${this.truncateDescription(app.description)}
                 </p>
                 
-                ${categoriesHtml ? `<div class="mb-3">${categoriesHtml}</div>` : ''}
+                ${categoriesHtml ? `<div class="mb-1">${categoriesHtml}</div>` : ''}
                 ${platformsHtml ? `<div class="mb-3">${platformsHtml}</div>` : ''}
                 
                 <div class="flex items-end justify-between text-xs mt-auto pt-2">

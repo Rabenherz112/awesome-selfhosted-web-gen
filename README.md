@@ -170,82 +170,8 @@ The system uses an automatic semantic similarity algorithm to suggest related ap
 
 ## ⚙️ Configuration
 
-Edit `config.yaml` to extensively customize your website:
-
-```yaml
-site:
-  title: "Awesome Self-Hosted"
-  description: "Discover amazing self-hosted applications"
-  url: "https://your-domain.com"
-  author: "Your Name"
-
-# Generation settings
-generation:
-  items_per_page: 60
-  enable_search_index: true
-  minify_html: false
-
-# Search configuration
-search:
-  fuzzy_threshold: 0.3
-  max_results: 100
-  placeholder_text: "Search applications..."
-
-# Extensive UI configuration
-ui:
-  # Page title formatting
-  title_format: "{page_title} - {site_title}"
-  title_separator: " - "
-  
-  # Navigation menu items
-  navigation:
-    - title: "Browse"
-      url: "/"
-    - title: "Statistics"
-      url: "/statistics.html"
-  
-  # Footer configuration
-  footer:
-    logo_text: "{{ site.title }}"
-    tagline: "{{ site.description }}"
-    credit_text: "Built with ❤️ for the self-hosting community"
-    copyright_text: "Copyright © 2015-2025, the {{ site.title }} community. Data from"
-    data_source_text: "awesome-selfhosted-data"
-    data_source_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
-    license_text: "Content under CC-BY-SA 3.0 license"
-    license_url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE"
-    
-    # Footer sections with links
-    sections:
-      navigation:
-        title: "Navigation"
-        links:
-          - title: "Home"
-            url: "/"
-          - title: "Statistics"
-            url: "/statistics.html"
-      resources:
-        title: "Resources"
-        links:
-          - title: "GitHub"
-            url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
-            external: true
-          - title: "Data Source"
-            url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
-            external: true
-  
-  # Page-specific configuration
-  pages:
-    browse:
-      title: "Browse Applications"
-      description: "Discover {total_applications} self-hosted applications"
-    statistics:
-      title: "Statistics"
-      description: "Explore trends and insights from the self-hosted community"
-    home:
-      meta_title: "Discover Self-Hosted Applications"
-      meta_description: "Find the perfect self-hosted applications for your needs"
-```
+The `config.yml` file is used to configure the generator, and has the ability to re-brand the website and many more options.
+To see all options possible and default values, see [config.yml](/config.yml).
 
 ### Templates
 
@@ -346,7 +272,21 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 ## TODOs
 
 - Build a new Index / Home / Hero Page, which uses the awesome-selfhosted-data/markdown/header.md file as first section, and under there add the explanation of the icons and the awesome-selfhosted-data/markdown/footer.md file as last section. before addig the same call to action button as in the statistics page. Maybe also add some random apps to the page, a search bar and a browse button. Maybe also display 1 or 2 random categories. (Maybe add something last 3 apps updated or so...)
-- Test if no pagination works and if the performance changes.
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen`
 - Run `black` and `flake8` on the codebase to ensure code quality
-- Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings. - Is correctly generated (so webserver or browser issue?)
+- Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings. - Is correctly generated (so webserver or browser issue?) - Maybe we define `_self` when we want to open in the same tab.
+- Check if we still have somewhere the deprecated tags instead of categories (and remove them)
+- Check for unused code and variables
+- Long App Names can break the buttons both in desktop and mobile view
+  - https://fs.ravshort.com/4wB7c.png
+  - https://fs.ravshort.com/j0n1R.png
+- Add config ability to add a referer details to all outgoing links
+- Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space?
+- Theme switching doesn't work anymore..
+- Use in the browse page the same style for plattforms we do on the index page.
+- Bug in Browse Page and app details when clicking on browse you land back on the index page.
+- Bug in Index where parts of the footer are rendered, but not supposed to be.
+- Test HTML minification
+- Simplify Code where possible
+- Simplify the config.yml file
+- Simplify the markdown_to_html function in template_helpers.py py only adding support for the markdown features we need.
