@@ -305,7 +305,7 @@ def cmd_info(config):
     print(f"\n📊 Data Configuration:")
     print(f"   Awesome data directory: {data_config.get('awesome_selfhosted_data_dir', 'awesome-selfhosted-data')}")
     print(f"   Software directory: {data_config.get('software_dir', 'software')}")
-    print(f"   Tags directory: {data_config.get('tags_dir', 'tags')}")
+    print(f"   Categories directory: {data_config.get('categories_dir', 'tags')}")
     print(f"   Platforms directory: {data_config.get('platforms_dir', 'platforms')}")
     print(f"   Licenses file: {data_config.get('licenses_file', 'licenses.yml')}")
     
@@ -377,11 +377,11 @@ def cmd_info(config):
         
         # Check for key directories
         software_dir = data_dir / data_config.get('software_dir', 'software')
-        tags_dir = data_dir / data_config.get('tags_dir', 'tags')
+        categories_dir = data_dir / data_config.get('categories_dir', 'tags')
         platforms_dir = data_dir / data_config.get('platforms_dir', 'platforms')
         
         print(f"   Software files: {len(list(software_dir.glob('*.yml'))) if software_dir.exists() else 0}")
-        print(f"   Tags files: {len(list(tags_dir.glob('*.yml'))) if tags_dir.exists() else 0}")
+        print(f"   Category files: {len(list(categories_dir.glob('*.yml'))) if categories_dir.exists() else 0}")
         print(f"   Platforms files: {len(list(platforms_dir.glob('*.yml'))) if platforms_dir.exists() else 0}")
     else:
         print(f"\n📚 Data Source:")

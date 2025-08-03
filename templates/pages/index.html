@@ -8,7 +8,7 @@
 
   {% if section == 'hero' %}
     <!-- Configurable Hero Section -->
-    {% set hero_config = ui_config.get('hero', {}) %}
+    {% set hero_config = hero_config %}
     <div class="bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-800 dark:to-gray-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div class="text-center">
@@ -30,7 +30,7 @@
                 {% if hero_config.get('badges') %}
                 <div class="flex flex-wrap justify-center items-center gap-2 mb-8">
                     {% for badge in hero_config.badges %}
-                    <a href="{{ badge.url }}"{{ get_link_target_attrs(badge.url, false) }} class="hover:scale-105 transition-transform mx-1">
+                    <a href="{{ badge.url }}"{{ get_link_target_attrs(badge.url, false) | safe }} class="hover:scale-105 transition-transform mx-1">
                         <img src="{{ badge.image }}" alt="{{ badge.name }}" class="h-5">
                     </a>
                     {% endfor %}
@@ -42,7 +42,7 @@
                     {% for button in hero_config.get('cta_buttons', [
                         {'name': 'Browse All Applications', 'url': '/browse.html', 'style': 'primary', 'icon': 'grid'}
                     ]) %}
-                    <a href="{{ button.url }}"{{ get_link_target_attrs(button.url, true) }} class="inline-flex items-center px-8 py-3 {% if button.style == 'primary' %}bg-primary-600 hover:bg-primary-700 text-white{% else %}bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 border border-primary-600 dark:border-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700{% endif %} font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                    <a href="{{ button.url }}"{{ get_link_target_attrs(button.url, true) | safe }} class="inline-flex items-center px-8 py-3 {% if button.style == 'primary' %}bg-primary-600 hover:bg-primary-700 text-white{% else %}bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 border border-primary-600 dark:border-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700{% endif %} font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                         {% if button.icon == 'grid' %}
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="-5 -2 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d='M9 14v-2.298l.856-.597a5 5 0 1 0-5.712 0l.856.597V14h1V6a1 1 0 1 1 2 0v8h1zm0 2H5v2h4v-2zM0 7a7 7 0 1 1 11 5.745V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5.255A6.992 6.992 0 0 1 0 7z'/>
@@ -62,7 +62,7 @@
                 <div class="flex flex-wrap justify-center gap-6 text-sm">
                     {% for link in hero_config.links %}
                     <div class="text-center">
-                        <a href="{{ link.url }}"{{ get_link_target_attrs(link.url, false) }} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+                        <a href="{{ link.url }}"{{ get_link_target_attrs(link.url, false) | safe }} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
                             {{ link.name }}
                         </a>
                         {% if link.description %}
@@ -110,7 +110,7 @@
                         </div>
                         
                         <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm flex-grow">
-                            {{ truncate_description(app.description, 120) }}
+                            {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 70)) }}
                         </p>
                         
                         <!-- Categories - pushed to bottom -->
@@ -132,10 +132,10 @@
                             
                             <!-- Footer -->
                             <div class="flex items-center justify-between text-xs">
-                                {% if app.language %}
+                                {% if app.platforms %}
                                 <div class="flex items-center text-gray-500 dark:text-gray-400">
-                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: {{ get_language_color(app.language) }};"></div>
-                                    {{ app.language }}
+                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: {{ get_platform_color(app.platforms[0]) }};"></div>
+                                    {{ app.platforms[0] }}
                                 </div>
                                 {% endif %}
                                 
@@ -157,7 +157,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    🆕 Recently Updated
+                    Recently Updated
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-300">
                     Applications with recent development activity
@@ -174,7 +174,7 @@
                     </h3>
                     
                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow">
-                        {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 80)) }}
+                        {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 70)) }}
                     </p>
                     
                     {% if app.last_updated %}
@@ -194,7 +194,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    🎲 Hidden Gems
+                    Hidden Gems
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-300">
                     Quality applications you might have missed
@@ -221,7 +221,7 @@
                     </div>
                     
                     <p class="text-gray-600 dark:text-gray-300 mb-4 text-sm flex-grow">
-                        {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 100)) }}
+                        {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 70)) }}
                     </p>
                     
                     <a href="{{ get_app_url(app.id) }}" class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium text-sm mt-auto self-start">
@@ -239,7 +239,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    📊 Detailed Statistics
+                    Detailed Statistics
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-300">
                     Deep dive into the awesome-selfhosted ecosystem
@@ -266,10 +266,10 @@
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-6 text-center shadow-md">
                     <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                        {{ statistics.top_languages|length }}
+                        {{ statistics.total_platforms or 0 }}
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Programming Languages
+                        Platforms & Technologies
                     </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-6 text-center shadow-md">
@@ -283,7 +283,7 @@
             </div>
             
             <div class="text-center">
-                <a href="/statistics.html"{{ get_link_target_attrs('/statistics.html', true) }} class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                <a href="/statistics.html"{{ get_link_target_attrs('/statistics.html', true) | safe }} class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     View Full Statistics Dashboard
                     <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -299,7 +299,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    📂 Popular Categories
+                    Popular Categories
                 </h2>
                 <p class="text-lg text-gray-600 dark:text-gray-300">
                     Explore applications by category
@@ -308,7 +308,7 @@
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for category in categories %}
-                <a href="{{ category.url }}"{{ get_link_target_attrs(category.url, true) }} class="group bg-gray-50 dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600">
+                <a href="{{ category.url }}"{{ get_link_target_attrs(category.url, true) | safe }} class="group bg-gray-50 dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600">
                     <div class="text-2xl font-bold text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
                         {{ category.count }}
                     </div>
@@ -320,7 +320,7 @@
             </div>
             
             <div class="text-center mt-12">
-                <a href="/browse.html"{{ get_link_target_attrs('/browse.html', true) }} class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                <a href="/browse.html"{{ get_link_target_attrs('/browse.html', true) | safe }} class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     Browse All Categories
                     <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -340,7 +340,7 @@
             
             <!-- Call to Action -->
             <div class="text-center mt-12">
-                <a href="/browse.html"{{ get_link_target_attrs('/browse.html', true) }} class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                <a href="/browse.html"{{ get_link_target_attrs('/browse.html', true) | safe }} class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     Start Exploring Applications
                     <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>

@@ -10,14 +10,14 @@
     <meta name="author" content="{{ site_config.author }}">
     <meta name="items-per-page" content="{{ items_per_page|default(24) }}">
     <meta name="enable-pagination" content="{{ generation_config.get('enable_pagination', true) }}">
-    <meta name="open-external-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_external_links', false) }}">
-    <meta name="open-internal-new-tab" content="{{ ui_config.get('links', {}).get('open_in_new_tab_for_internal_links', false) }}">
+    <meta name="open-external-new-tab" content="{{ links_config.get('open_in_new_tab_for_external_links', false) }}">
+    <meta name="open-internal-new-tab" content="{{ links_config.get('open_in_new_tab_for_internal_links', false) }}">
     <meta name="browse-description-length" content="{{ ui_config.get('truncation', {}).get('browse_description_length', 80) }}">
     <meta name="browse-description-full" content="{{ ui_config.get('truncation', {}).get('browse_description_full', false) }}">
     <meta name="search-min-query-length" content="{{ search_config.get('min_query_length', 3) }}">
     <meta name="search-fuzzy-threshold" content="{{ search_config.get('fuzzy_threshold', 0.3) }}">
     <meta name="search-max-results" content="{{ search_config.get('max_results', 8) }}">
-    <meta name="browse-max-tags-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_tags_per_card', 2) }}">
+    <meta name="browse-max-categories-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_categories_per_card', 2) }}">
     <meta name="browse-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_platforms_per_card', 3) }}">
     <meta name="lazy-load-images" content="{{ performance_config.get('lazy_load_images', true) }}">
 
@@ -67,7 +67,7 @@
                     
                     <!-- Main Navigation -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
-                        {% for nav_item in ui_config.navigation %}
+                        {% for nav_item in navigation_config %}
                         <a href="{{ nav_item.url }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
                             {{ nav_item.title }}
                         </a>
@@ -82,7 +82,7 @@
                         <div class="relative">
                             <input type="text" 
                                    id="search-input" 
-                                   placeholder="{{ ui_config.get('search', {}).get('placeholder_text', 'Search applications...') }}" 
+                                   placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" 
                                    class="w-64 px-4 py-2 pl-10 pr-4 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
                             <div class="absolute left-3 top-2.5">
                                 <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +129,7 @@
                 <div class="px-3 py-2 relative">
                     <input type="text" 
                            id="mobile-search-input" 
-                           placeholder="{{ ui_config.get('search', {}).get('placeholder_text', 'Search applications...') }}" 
+                           placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" 
                            class="w-full px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
                     <!-- Mobile Search Results Dropdown -->
                     <div id="mobile-search-results" class="absolute mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden z-50 max-h-64 overflow-y-auto">
@@ -152,17 +152,17 @@
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-2 mb-4">
                         <img src="/static/images/logo.svg" alt="Logo" class="h-8 w-8">
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ render_template_string(ui_config.footer.logo_text) or site_config.title }}</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ render_template_string(footer_config.logo_text) or site_config.title }}</span>
                     </div>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
-                        {{ render_template_string(ui_config.footer.tagline) or site_config.description }}
+                        {{ render_template_string(footer_config.tagline) or site_config.description }}
                     </p>
                     <p class="text-sm text-gray-500 dark:text-gray-500">
-                        {{ render_template_string(ui_config.footer.credit_text) or 'Built with ❤️ for the self-hosting community' }}
+                        {{ render_template_string(footer_config.credit_text) or 'Built with ❤️ for the self-hosting community' }}
                     </p>
                 </div>
                 
-                {% for section_id, section in ui_config.footer.sections.items() %}
+                {% for section_id, section in footer_config.sections.items() %}
                 <div>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
                         {{ section.title }}
@@ -171,7 +171,7 @@
                         {% for link in section.links %}
                         <li>
                             <a href="{{ link.url }}" 
-                               {{ get_link_target_attrs(link.url, not link.external) }}
+                               {{ get_link_target_attrs(link.url, not link.external) | safe }}
                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
                                 {{ link.title }}
                             </a>
@@ -184,7 +184,7 @@
             
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                 <div class="text-center text-sm text-gray-500 dark:text-gray-500">
-                    {{ render_template_string(ui_config.footer.footer_text) | safe }}
+                    {{ render_template_string(footer_config.footer_text) | safe }}
                 </div>
             </div>
         </div>

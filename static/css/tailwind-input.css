@@ -13,3 +13,6 @@
     --color-primary-800: #1e40af;
     --color-primary-900: #1e3a8a;
 }
+
+/* Override dark variant to use .dark class instead of prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));

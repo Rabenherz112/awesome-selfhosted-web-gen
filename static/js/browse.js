@@ -66,7 +66,7 @@ class BrowsePage {
             this.enablePagination = getConfigValue('enable-pagination', false, (val) => val.toLowerCase() === 'true');
             this.browseDescriptionLength = getConfigValue('browse-description-length', 80);
             this.browseDescriptionFull = getConfigValue('browse-description-full', false, (val) => val.toLowerCase() === 'true');
-            this.browseMaxTagsPerCard = getConfigValue('browse-max-tags-per-card', 2);
+            this.browseMaxCategoriesPerCard = getConfigValue('browse-max-categories-per-card', 2);
             this.browseMaxPlatformsPerCard = getConfigValue('browse-max-platforms-per-card', 3);
         } catch (error) {
             console.log('Using default configuration values');
@@ -615,15 +615,19 @@ class BrowsePage {
             </div>
         ` : '';
 
-        // Tag badges (show up to configured limit)
-        const categoriesHtml = app.tags ? app.tags.slice(0, this.browseMaxTagsPerCard).map(category => 
+        // Category badges (show up to configured limit)
+        const categoriesHtml = app.categories ? app.categories.slice(0, this.browseMaxCategoriesPerCard).map(category => 
             `<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
-        ).join('') + (app.tags.length > this.browseMaxTagsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.tags.length - this.browseMaxTagsPerCard}</span>` : '') : '';
+        ).join('') + (app.categories.length > this.browseMaxCategoriesPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.categories.length - this.browseMaxCategoriesPerCard}</span>` : '') : '';
         
         // Platform badges (show up to configured limit)
-        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.browseMaxPlatformsPerCard).map(platform => 
-            `<span class="inline-block bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${platform}</span>`
-        ).join('') + (app.platforms.length > this.browseMaxPlatformsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.platforms.length - this.browseMaxPlatformsPerCard}</span>` : '') : '';
+        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.browseMaxPlatformsPerCard).map(platform => {
+            const color = this.getPlatformColor(platform);
+            return `<span class="inline-flex items-center text-gray-500 dark:text-gray-400 text-xs mr-2 mb-1">
+                <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></div>
+                ${platform}
+            </span>`;
+        }).join('') + (app.platforms.length > this.browseMaxPlatformsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded mr-1 mb-1">+${app.platforms.length - this.browseMaxPlatformsPerCard}</span>` : '') : '';
 
         // License display (first license + count if multiple)
         let licenseBadge = '';
@@ -701,9 +705,9 @@ class BrowsePage {
                 </p>
                 
                 ${categoriesHtml ? `<div class="mb-1">${categoriesHtml}</div>` : ''}
-                ${platformsHtml ? `<div class="mb-3">${platformsHtml}</div>` : ''}
+                ${platformsHtml ? `<div class="mb-2">${platformsHtml}</div>` : ''}
                 
-                <div class="flex items-end justify-between text-xs mt-auto pt-2">
+                <div class="flex items-end justify-between text-xs mt-auto pt-1">
                     <div class="flex flex-wrap gap-2">
                         ${websiteLink}
                         ${sourceLink}
@@ -715,6 +719,41 @@ class BrowsePage {
         `;
         
         return card;
+    }
+
+    getPlatformColor(platform) {
+        // Common platform colors (GitHub-style)
+        // Change this in template_helpers.py as well
+        const colors = {
+            'python': '#3572A5',
+            'javascript': '#f1e05a',
+            'typescript': '#2b7489',
+            'java': '#b07219',
+            'go': '#00ADD8',
+            'rust': '#dea584',
+            'php': '#4F5D95',
+            'c': '#555555',
+            'c++': '#f34b7d',
+            'c#': '#239120',
+            'ruby': '#701516',
+            'shell': '#89e051',
+            'docker': '#384d54',
+            'html': '#e34c26',
+            'css': '#563d7c',
+            'vue': '#4FC08D',
+            'react': '#61DAFB',
+            'nodejs': '#43853d',
+            'dart': '#00B4AB',
+            'kotlin': '#F18E33',
+            'swift': '#FA7343',
+            'scala': '#c22d40'
+        };
+        
+        if (!platform) {
+            return '#6b7280'; // gray-500
+        }
+        
+        return colors[platform.toLowerCase()] || '#6b7280';
     }
 
     formatStars(stars) {

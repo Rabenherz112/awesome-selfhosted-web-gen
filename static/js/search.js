@@ -93,8 +93,7 @@
             .filter(app => {
                 return app.name.toLowerCase().includes(lowerQuery) ||
                        app.description.toLowerCase().includes(lowerQuery) ||
-                       (app.tags && app.tags.some(tag => tag.toLowerCase().includes(lowerQuery))) ||
-                       (app.categories && app.categories.some(cat => cat.toLowerCase().includes(lowerQuery)));
+                       (app.categories && app.categories.some(category => category.toLowerCase().includes(lowerQuery)))
             })
             .slice(0, searchConfig.maxResults); // Limit to maxResults
     }

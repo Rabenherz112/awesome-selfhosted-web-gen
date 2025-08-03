@@ -1,38 +1,68 @@
 # Awesome Self-Hosted Website Generator Configuration
 
+# =============================================================================
+# SITE METADATA
+# =============================================================================
 site:
   title: "Awesome Selfhosted"
   description: "Discover and explore self-hosted applications"
   url: "https://awesome-selfhosted.net"
   author: "Awesome Self-Hosted Community"
-  
-# UI Configuration
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+data:
+  awesome_selfhosted_data_dir: "awesome-selfhosted-data"
+  software_dir: "software"
+  categories_dir: "tags"
+  platforms_dir: "platforms"
+  licenses_file: "licenses.yml"
+
+# =============================================================================
+# BUILD SETTINGS
+# =============================================================================
+build:
+  output_dir: "output"
+  template_dir: "templates"
+  static_dir: "static"
+  data_cache_dir: "data"
+
+generation:
+  items_per_page: 60
+  enable_search_index: true
+  minify_html: false
+  generate_sitemap: true
+  enable_pagination: true
+
+# =============================================================================
+# UI CONFIGURATION
+# =============================================================================
 ui:
   # Page title formatting
-  title_format: "{page_title} - {site_title}"  # Format for page titles
-  title_separator: " - "  # Separator between page title and site title
+  title_format: "{page_title} - {site_title}"
+  title_separator: " - "
 
-  # Limits for diffrent sections
+  # Content limits for different sections
   limits:
-    homepage_popular_apps: 8 # Number of most stared apps to show on the homepage
-    homepage_recently_updated: 8 # Number of most recently updted apps to show on the homepage
-    homepage_random_picks: 6 # Number of random apps to show on the homepage
-    homepage_category_stats: 8 # Number of most popular categroies to show on the homepage
-    related_apps: 6 # App detail page related apps
-    browse_max_tags_per_card: 2 # Browse page tags per card
-    browse_max_platforms_per_card: 3 # Browse page platforms per card
+    homepage_popular_apps: 8
+    homepage_recently_updated: 8
+    homepage_random_picks: 6
+    homepage_category_stats: 8
+    related_apps: 6
+    browse_max_categories_per_card: 2
+    browse_max_platforms_per_card: 3
 
-  # Default text truncation lengths
+  # Text truncation settings
   truncation:
-    default_description_length: 150 # Default description length
-    homepage_description_length: 70 # Homepage description length
-    browse_description_length: 250 # Browse page description length 
-    browse_description_full: false # Browse page show full description (overrides length)
-    related_apps_description_length: 100 # Related apps description length
+    default_description_length: 150
+    homepage_description_length: 70
+    browse_description_length: 250
+    browse_description_full: false
+    related_apps_description_length: 100
 
-  # General Hompage Settings
+  # Homepage configuration
   homepage:
-    debug_markdown: true
     include_nonfree: false
     sections:
       - hero
@@ -43,6 +73,7 @@ ui:
       - popular_categories
       - footer_markdown
 
+  # Footer markdown exclusions
   footer_markdown:
     exclude_sections:
       - "Anti-features"
@@ -50,123 +81,110 @@ ui:
       # - "External Links"
       # - "License"
 
-  # Hero Settings
-  hero:
-    title: "Awesome Self-Hosted"
-    subtitle: "Discover amazing Self-Hosted Applications"
-    description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
-    # Badges/links to show
-    badges:
-      - name: "Awesome"
-        image: "/static/images/awesome.png"
-        url: "https://github.com/sindresorhus/awesome"
-      - name: "Dead Links Check"
-        image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-dead-links.yml/badge.svg"
-        url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
-      - name: "Unmaintained Check"
-        image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-unmaintained-projects.yml/badge.svg"
-        url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
-      - name: "Liberapay"
-        image: "https://img.shields.io/liberapay/goal/awesome-selfhosted?logo=liberapay"
-        url: "https://liberapay.com/awesome-selfhosted/"
-    # Additional links
-    links:
-      - name: "GitHub Repository"
-        url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
-        description: "Markdown version (legacy)"
-      - name: "Main Website"
-        url: "https://awesome-selfhosted.net/"
-        description: "Main Frontend for this dataset"
-      - name: "Contributing Guide"
-        url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/CONTRIBUTING.md"
-        description: "How to contribute to this project"
-    # Call to action
-    cta_buttons:
-      - name: "Browse All Applications"
-        url: "/browse.html"
-        style: "primary"
-        icon: "grid"
-
-  # Navigation menu items
-  navigation:
-    - title: "Browse"
+# =============================================================================
+# HERO SECTION
+# =============================================================================
+hero:
+  title: "Awesome Self-Hosted"
+  subtitle: "Discover amazing Self-Hosted Applications"
+  description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
+  
+  # Badges to display
+  badges:
+    - name: "Awesome"
+      image: "/static/images/awesome.png"
+      url: "https://github.com/sindresorhus/awesome"
+    - name: "Dead Links Check"
+      image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-dead-links.yml/badge.svg"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
+    - name: "Unmaintained Check"
+      image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-unmaintained-projects.yml/badge.svg"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
+    - name: "Liberapay"
+      image: "https://img.shields.io/liberapay/goal/awesome-selfhosted?logo=liberapay"
+      url: "https://liberapay.com/awesome-selfhosted/"
+  
+  # Additional links
+  links:
+    - name: "GitHub Repository"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+      description: "Markdown version (legacy)"
+    - name: "Main Website"
+      url: "https://awesome-selfhosted.net/"
+      description: "Main Frontend for this dataset"
+    - name: "Contributing Guide"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/CONTRIBUTING.md"
+      description: "How to contribute to this project"
+  
+  # Call to action buttons
+  cta_buttons:
+    - name: "Browse All Applications"
       url: "/browse.html"
-    - title: "Statistics" 
-      url: "/statistics.html"
+      style: "primary"
+      icon: "grid"
 
-  # Footer configuration
-  footer:
-    logo_text: "{{ site.title }}"
-    tagline: "{{ site.description }}"
-    credit_text: "Built with ❤️ for the self-hosting community"
-    footer_text: |
-      Copyright © 2015-2025, the {{ site.title }} community. Data from 
-      <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
-      <br>
-      <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>
+# =============================================================================
+# NAVIGATION & FOOTER
+# =============================================================================
+navigation:
+  - title: "Browse"
+    url: "/browse.html"
+  - title: "Statistics" 
+    url: "/statistics.html"
 
-    # Footer sections
-    sections:
-      navigation:
-        title: "Navigation"
-        links:
-          - title: "Home"
-            url: "/"
-          - title: "Browse"
-            url: "/browse.html"
-          - title: "Statistics"
-            url: "/statistics.html"
+footer:
+  logo_text: "{{ site.title }}"
+  tagline: "{{ site.description }}"
+  credit_text: "Built with ❤️ for the self-hosting community"
+  footer_text: |
+    Copyright © 2015-2025, the {{ site.title }} community. Data from 
+    <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
+    <br>
+    <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>
 
-      resources:
-        title: "Resources"
-        links:
-          - title: "GitHub"
-            url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
-            external: true
-          - title: "Data Source"
-            url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
-            external: true
-          - title: "Sitemap"
-            url: "/sitemap.xml"
+  # Footer sections
+  sections:
+    navigation:
+      title: "Navigation"
+      links:
+        - title: "Home"
+          url: "/"
+        - title: "Browse"
+          url: "/browse.html"
+        - title: "Statistics"
+          url: "/statistics.html"
 
-  # Page titles and descriptions
-  pages:
-    browse:
-      title: "Browse Applications"
-      description: "Discover {total_applications} self-hosted applications"
+    resources:
+      title: "Resources"
+      links:
+        - title: "GitHub"
+          url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+          external: true
+        - title: "Data Source"
+          url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
+          external: true
+        - title: "Sitemap"
+          url: "/sitemap.xml"
 
-    statistics:
-      title: "Statistics"
-      description: "Explore trends and insights from the self-hosted community"
+# =============================================================================
+# PAGE METADATA
+# =============================================================================
+pages:
+  browse:
+    title: "Browse Applications"
+    description: "Discover {total_applications} self-hosted applications"
 
-    home:
-      meta_title: "Discover Self-Hosted Applications"
-      meta_description: "Find the perfect self-hosted applications for your needs"
+  statistics:
+    title: "Statistics"
+    description: "Explore trends and insights from the self-hosted community"
 
-# Data sources
-data:
-  awesome_selfhosted_data_dir: "awesome-selfhosted-data"
-  software_dir: "software"
-  tags_dir: "tags"
-  platforms_dir: "platforms"
-  licenses_file: "licenses.yml"
+  home:
+    meta_title: "Discover Self-Hosted Applications"
+    meta_description: "Find the perfect self-hosted applications for your needs"
 
-# Build settings
-build:
-  output_dir: "output"
-  template_dir: "templates"
-  static_dir: "static"
-  data_cache_dir: "data"
-
-# Site generation options
-generation:
-  items_per_page: 60
-  enable_search_index: true
-  minify_html: false
-  generate_sitemap: true
-  enable_pagination: true
-
-# Search settings
+# =============================================================================
+# SEARCH CONFIGURATION
+# =============================================================================
 search:
   fuzzy_threshold: 0.3
   max_results: 8
@@ -174,14 +192,16 @@ search:
   search_fields:
     - name
     - description
-    - tags
     - categories
   placeholder_text: "Search applications..."
 
+# =============================================================================
+# RELATED APPS ALGORITHM
+# =============================================================================
 related_apps:
   scoring:
     semantic_similarity:
-      enabled: false
+      enabled: true
       max_score: 25
     categories:
       enabled: true
@@ -192,9 +212,6 @@ related_apps:
     forks:
       enabled: true
       same_parent_score: 8
-    language:
-      enabled: true
-      same_language_score: 3
     platforms:
       enabled: true
       points_per_match: 2
@@ -213,18 +230,24 @@ related_apps:
   min_score: 3
   debug: false
 
-# Links settings
+# =============================================================================
+# LINK BEHAVIOR
+# =============================================================================
 links:
   open_in_new_tab_for_internal_links: false
   open_in_new_tab_for_external_links: false
 
-# Performance settings - Not implemented
+# =============================================================================
+# PERFORMANCE OPTIMIZATIONS - Not implemented
+# =============================================================================
 performance:
   lazy_load_images: true
   generate_webp: false
   inline_critical_css: true
 
-# Robots.txt settings
+# =============================================================================
+# SEO & ROBOTS
+# =============================================================================
 robots:
   generate: true
   user_agent: "*"

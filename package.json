@@ -11,8 +11,8 @@
     "url": "git+https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Rabenherz112",
+  "license": "AGPL-3.0",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen/issues"
