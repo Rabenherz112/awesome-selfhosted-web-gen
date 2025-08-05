@@ -201,17 +201,7 @@ class SiteGenerator:
             if cat_info["count"] > 0:
                 # Create slugified version of the category name for consistent URLs
                 category_name = cat_info["name"]
-                category_slug = (
-                    category_name.lower()
-                    .replace(" ", "-")
-                    .replace("&", "")
-                    .replace("(", "")
-                    .replace(")", "")
-                    .replace(",", "")
-                    .replace("/", "-")
-                    .replace("--", "-")
-                    .strip("-")
-                )
+                category_slug = self.template_helpers.slugify(category_name)
 
                 category_stats.append(
                     {

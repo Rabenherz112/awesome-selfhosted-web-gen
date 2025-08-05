@@ -700,7 +700,7 @@ class BrowsePage {
                     </div>
                 </div>
                 
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2 flex-grow">
+                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow">
                     ${this.truncateDescription(app.description)}
                 </p>
                 

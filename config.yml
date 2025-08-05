@@ -18,6 +18,7 @@ data:
   categories_dir: "tags"
   platforms_dir: "platforms"
   licenses_file: "licenses.yml"
+  licenses_nonfree_file: "licenses-nonfree.yml"
 
 # =============================================================================
 # BUILD SETTINGS
@@ -57,7 +58,7 @@ ui:
   truncation:
     default_description_length: 150
     homepage_description_length: 70
-    browse_description_length: 250
+    browse_description_length: 90
     browse_description_full: false
     related_apps_description_length: 100
 
