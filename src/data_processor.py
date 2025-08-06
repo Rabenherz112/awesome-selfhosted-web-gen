@@ -77,7 +77,7 @@ class DataProcessor:
 
         # Load licenses data (both free and non-free)
         licenses_file = data_dir / data_config["licenses_file"]
-        licenses_nonfree_file = data_dir / "licenses-nonfree.yml"
+        licenses_nonfree_file = data_dir / data_config["licenses_nonfree_file"]
         licenses_data = self._load_licenses_data(licenses_file, licenses_nonfree_file)
 
         # Load markdown files
