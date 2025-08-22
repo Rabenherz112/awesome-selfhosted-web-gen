@@ -45,7 +45,17 @@ jobs:
 
       - name: Generate website
         run: |
-          python generate.py -c config-pr-preview.yml build
+          # Create a temporary config file with dynamic base_path
+          cp config-pr-preview.yml config-pr-preview-temp.yml
+          
+          # Update base_path to include repository name and PR number
+          sed -i 's|base_path: ""|base_path: "/awesome-selfhosted-web-gen/pr-${{ github.event.number }}"|g' config-pr-preview-temp.yml
+          
+          # Generate website with the modified config
+          python generate.py -c config-pr-preview-temp.yml build
+          
+          # Clean up temporary config file
+          rm config-pr-preview-temp.yml
 
       - name: Deploy to GitHub Pages branch
         run: |
