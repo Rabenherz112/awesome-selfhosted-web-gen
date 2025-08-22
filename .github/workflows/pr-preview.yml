@@ -148,28 +148,26 @@ jobs:
                                   const prA = parseInt(a.match(/pr-(\d+)/)[1]);
                                   const prB = parseInt(b.match(/pr-(\d+)/)[1]);
                                   return prB - prA; // Newest first
-                              });
-
+                              })
                           const previewList = document.getElementById('previewList');
                           if (prDirs.length === 0) {
                               previewList.innerHTML = '<li>No PR previews available</li>';
                           } else {
                               previewList.innerHTML = prDirs.map(dir => {
                                   const prNumber = dir.match(/pr-(\d+)/)[1];
-                                  return \`<li class="preview-item">
-                                      <a href="\${dir}">PR #\${prNumber} Preview</a>
+                                  return `<li class="preview-item">
+                                      <a href="${dir}">PR #${prNumber} Preview</a>
                                       <span class="badge">Active</span>
                                       <div class="pr-meta">
-                                          Preview for Pull Request #\${prNumber}
+                                          Preview for Pull Request #${prNumber}
                                       </div>
-                                  </li>\`;
+                                  </li>`;
                               }).join('');
                           }
                       } catch (error) {
                           document.getElementById('previewList').innerHTML = '<li>Error loading preview list</li>';
                       }
                   }
-
                   loadPreviews();
               </script>
           </body>
