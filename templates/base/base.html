@@ -77,7 +77,8 @@
             </p>
             {% if banner_config.get('button') %}
             {% set button = banner_config.get('button', {}) %}
-            <a href="{{ button.get('url', '#') }}"{{ get_link_target_attrs(button.get('url', '#'), not button.get('external', false)) | safe }} 
+            {% set button_url = button.get('url', '#') %}
+            <a href="{{ button_url }}"{{ get_link_target_attrs(button_url, not button.get('external', false)) | safe }} 
                class="flex-none rounded-full bg-white/10 px-3.5 py-1 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50">
                 {{ button.get('text', 'Learn More') }} <span aria-hidden="true">&rarr;</span>
             </a>
