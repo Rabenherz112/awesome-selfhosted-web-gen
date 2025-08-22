@@ -5,10 +5,10 @@
 # SITE METADATA
 # =============================================================================
 site:
-  title: "Awesome Selfhosted - PR Preview"
-  description: "Discover and explore self-hosted applications - PR Preview"
-  url: "https://awesome-selfhosted.net"
-  author: "Awesome Self-Hosted Community"
+  title: "Awesome Selfhosted"
+  description: "Discover and explore self-hosted applications"
+  url: "https://rabenherz112.github.io"
+  author: "Awesome Selfhosted Community"
   base_path: "" # Required for PR preview deployments to subdirectories
 
 # =============================================================================
@@ -93,10 +93,10 @@ ui:
 # HERO SECTION
 # =============================================================================
 hero:
-  title: "Awesome Self-Hosted - PR Preview"
-  subtitle: "Preview Build for Testing"
-  description: 'This is a preview build of the Awesome Self-Hosted website generator for testing pull request changes.'
-  
+  title: "Awesome Selfhosted"
+  subtitle: "Discover amazing Selfhosted Applications"
+  description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
+
   # Badges to display
   badges:
     - name: "Awesome"
@@ -180,15 +180,15 @@ footer:
 pages:
   browse:
     title: "Browse Applications"
-    description: "Discover {total_applications} self-hosted applications"
+    description: "Discover {total_applications} selfhosted applications"
 
   statistics:
     title: "Statistics"
-    description: "Explore trends and insights from the self-hosted community"
+    description: "Explore trends and insights from the selfhosted community"
 
   home:
-    meta_title: "Discover Self-Hosted Applications"
-    meta_description: "Find the perfect self-hosted applications for your needs"
+    meta_title: "Discover Selfhosted Applications"
+    meta_description: "Find the perfect selfhosted applications for your needs"
 
 # =============================================================================
 # SEARCH CONFIGURATION
