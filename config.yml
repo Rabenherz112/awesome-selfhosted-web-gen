@@ -5,9 +5,9 @@
 # =============================================================================
 site:
   title: "Awesome Selfhosted"
-  description: "Discover and explore self-hosted applications"
+  description: "Discover and explore selfhosted applications"
   url: "https://awesome-selfhosted.net"
-  author: "Awesome Self-Hosted Community"
+  author: "Awesome Selfhosted Community"
   base_path: "" # Leave empty for root, or set to "/awesome-selfhosted" for subdirectory
 
 # =============================================================================
@@ -98,8 +98,8 @@ ui:
 # HERO SECTION
 # =============================================================================
 hero:
-  title: "Awesome Self-Hosted"
-  subtitle: "Discover amazing Self-Hosted Applications"
+  title: "Awesome Selfhosted"
+  subtitle: "Discover amazing selfhosted Applications"
   description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
   
   # Badges to display
@@ -185,15 +185,15 @@ footer:
 pages:
   browse:
     title: "Browse Applications"
-    description: "Discover {total_applications} self-hosted applications"
+    description: "Discover {total_applications} selfhosted applications"
 
   statistics:
     title: "Statistics"
-    description: "Explore trends and insights from the self-hosted community"
+    description: "Explore trends and insights from the selfhosted community"
 
   home:
-    meta_title: "Discover Self-Hosted Applications"
-    meta_description: "Find the perfect self-hosted applications for your needs"
+    meta_title: "Discover Selfhosted Applications"
+    meta_description: "Find the perfect selfhosted applications for your needs"
 
 # =============================================================================
 # SEARCH CONFIGURATION

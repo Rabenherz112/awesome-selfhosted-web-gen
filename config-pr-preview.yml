@@ -5,10 +5,10 @@
 # SITE METADATA
 # =============================================================================
 site:
-  title: "Awesome Selfhosted - PR Preview"
-  description: "Discover and explore self-hosted applications - PR Preview"
-  url: "https://awesome-selfhosted.net"
-  author: "Awesome Self-Hosted Community"
+  title: "Awesome Selfhosted"
+  description: "Discover and explore selfhosted applications"
+  url: "https://rabenherz112.github.io"
+  author: "Awesome Selfhosted Community"
   base_path: "" # Required for PR preview deployments to subdirectories
 
 # =============================================================================
@@ -46,23 +46,12 @@ ui:
   title_format: "{page_title} - {site_title}"
   title_separator: " - "
 
-  # Content limits for different sections
-  limits:
-    homepage_popular_apps: 8
-    homepage_recently_updated: 8
-    app_detail_related_apps: 6
-    category_top_apps: 12
-
   # Banner configuration
   banner:
-    enabled: false
-    dismissible: true
-    style: "info"  # info, warning, success, announcement
-    text: "**PR Preview** This is a preview build for testing purposes" # Markdown bold (**text**) is supported
-    button:
-      text: "Main Site"
-      url: "https://awesome-selfhosted.net" 
-      external: true
+    enabled: true
+    dismissible: false
+    style: "warning"  # info, warning, success, announcement
+    text: "**PR Preview** This is a preview build for testing purposes"
 
   # Content limits for different sections
   limits:
@@ -104,15 +93,24 @@ ui:
 # HERO SECTION
 # =============================================================================
 hero:
-  title: "Awesome Self-Hosted - PR Preview"
-  subtitle: "Preview Build for Testing"
-  description: 'This is a preview build of the Awesome Self-Hosted website generator for testing pull request changes.'
-  
+  title: "Awesome Selfhosted"
+  subtitle: "Discover amazing selfhosted Applications"
+  description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
+
   # Badges to display
   badges:
     - name: "Awesome"
       image: "/static/images/awesome.png"
       url: "https://github.com/sindresorhus/awesome"
+    - name: "Dead Links Check"
+      image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-dead-links.yml/badge.svg"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
+    - name: "Unmaintained Check"
+      image: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/actions/workflows/check-unmaintained-projects.yml/badge.svg"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/issues/1"
+    - name: "Liberapay"
+      image: "https://img.shields.io/liberapay/goal/awesome-selfhosted?logo=liberapay"
+      url: "https://liberapay.com/awesome-selfhosted/"
   
   # Additional links
   links:
@@ -122,6 +120,9 @@ hero:
     - name: "Main Website"
       url: "https://awesome-selfhosted.net/"
       description: "Main Frontend for this dataset"
+    - name: "Contributing Guide"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/CONTRIBUTING.md"
+      description: "How to contribute to this project"
   
   # Call to action buttons
   cta_buttons:
@@ -179,15 +180,15 @@ footer:
 pages:
   browse:
     title: "Browse Applications"
-    description: "Discover {total_applications} self-hosted applications"
+    description: "Discover {total_applications} selfhosted applications"
 
   statistics:
     title: "Statistics"
-    description: "Explore trends and insights from the self-hosted community"
+    description: "Explore trends and insights from the selfhosted community"
 
   home:
-    meta_title: "Discover Self-Hosted Applications"
-    meta_description: "Find the perfect self-hosted applications for your needs"
+    meta_title: "Discover Selfhosted Applications"
+    meta_description: "Find the perfect selfhosted applications for your needs"
 
 # =============================================================================
 # SEARCH CONFIGURATION
