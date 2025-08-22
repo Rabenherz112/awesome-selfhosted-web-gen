@@ -99,7 +99,7 @@ ui:
 # =============================================================================
 hero:
   title: "Awesome Selfhosted"
-  subtitle: "Discover amazing Selfhosted Applications"
+  subtitle: "Discover amazing selfhosted Applications"
   description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
   
   # Badges to display
