@@ -50,7 +50,7 @@ ui:
   banner:
     enabled: true
     dismissible: false
-    style: "info"  # info, warning, success, announcement
+    style: "warning"  # info, warning, success, announcement
     text: "**PR Preview** This is a preview build for testing purposes"
 
   # Content limits for different sections
