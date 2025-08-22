@@ -1,0 +1,265 @@
+# Fast configuration for PR previews - based on config.yml but optimized for speed
+# Semantic similarity is disabled to speed up the build process
+
+# =============================================================================
+# SITE METADATA
+# =============================================================================
+site:
+  title: "Awesome Selfhosted - PR Preview"
+  description: "Discover and explore self-hosted applications - PR Preview"
+  url: "https://awesome-selfhosted.net"
+  author: "Awesome Self-Hosted Community"
+  base_path: "" # Required for PR preview deployments to subdirectories
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+data:
+  awesome_selfhosted_data_dir: "awesome-selfhosted-data"
+  software_dir: "software"
+  categories_dir: "tags"
+  platforms_dir: "platforms"
+  licenses_file: "licenses.yml"
+  licenses_nonfree_file: "licenses-nonfree.yml"
+
+# =============================================================================
+# BUILD SETTINGS
+# =============================================================================
+build:
+  output_dir: "output"
+  template_dir: "templates"
+  static_dir: "static"
+  data_cache_dir: "data"
+
+generation:
+  items_per_page: 60
+  enable_search_index: true
+  minify_html: false
+  generate_sitemap: true
+  enable_pagination: true
+
+# =============================================================================
+# UI CONFIGURATION
+# =============================================================================
+ui:
+  # Page title formatting
+  title_format: "{page_title} - {site_title}"
+  title_separator: " - "
+
+  # Content limits for different sections
+  limits:
+    homepage_popular_apps: 8
+    homepage_recently_updated: 8
+    app_detail_related_apps: 6
+    category_top_apps: 12
+
+  # Banner configuration
+  banner:
+    enabled: false
+    dismissible: true
+    style: "info"  # info, warning, success, announcement
+    text: "**PR Preview** This is a preview build for testing purposes" # Markdown bold (**text**) is supported
+    button:
+      text: "Main Site"
+      url: "https://awesome-selfhosted.net" 
+      external: true
+
+  # Content limits for different sections
+  limits:
+    homepage_popular_apps: 8
+    homepage_recently_updated: 8
+    homepage_random_picks: 6
+    homepage_category_stats: 8
+    related_apps: 6
+    browse_max_categories_per_card: 2
+    browse_max_platforms_per_card: 3
+
+  # Text truncation settings
+  truncation:
+    default_description_length: 150
+    homepage_description_length: 70
+    browse_description_length: 90
+    browse_description_full: false
+    related_apps_description_length: 100
+
+  # Homepage configuration
+  homepage:
+    include_nonfree: false
+    sections:
+      - hero
+      - popular_apps
+      - recently_updated
+      - random_picks
+      - statistics
+      - popular_categories
+      - footer_markdown
+
+  # Footer markdown exclusions
+  footer_markdown:
+    exclude_sections:
+      - "Anti-features"
+      - "Contributing"
+
+# =============================================================================
+# HERO SECTION
+# =============================================================================
+hero:
+  title: "Awesome Self-Hosted - PR Preview"
+  subtitle: "Preview Build for Testing"
+  description: 'This is a preview build of the Awesome Self-Hosted website generator for testing pull request changes.'
+  
+  # Badges to display
+  badges:
+    - name: "Awesome"
+      image: "/static/images/awesome.png"
+      url: "https://github.com/sindresorhus/awesome"
+  
+  # Additional links
+  links:
+    - name: "GitHub Repository"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+      description: "Markdown version (legacy)"
+    - name: "Main Website"
+      url: "https://awesome-selfhosted.net/"
+      description: "Main Frontend for this dataset"
+  
+  # Call to action buttons
+  cta_buttons:
+    - name: "Browse All Applications"
+      url: "/browse.html"
+      style: "primary"
+      icon: "grid"
+
+# =============================================================================
+# NAVIGATION & FOOTER
+# =============================================================================
+navigation:
+  - title: "Browse"
+    url: "/browse.html"
+  - title: "Statistics" 
+    url: "/statistics.html"
+
+footer:
+  logo_text: "{{ site.title }}"
+  tagline: "{{ site.description }}"
+  credit_text: "Built with ❤️ for the self-hosting community"
+  footer_text: |
+    Copyright © 2015-2025, the {{ site.title }} community. Data from 
+    <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
+    <br>
+    <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>
+
+  # Footer sections
+  sections:
+    navigation:
+      title: "Navigation"
+      links:
+        - title: "Home"
+          url: "/"
+        - title: "Browse"
+          url: "/browse.html"
+        - title: "Statistics"
+          url: "/statistics.html"
+
+    resources:
+      title: "Resources"
+      links:
+        - title: "GitHub"
+          url: "https://github.com/awesome-selfhosted/awesome-selfhosted"
+          external: true
+        - title: "Data Source"
+          url: "https://github.com/awesome-selfhosted/awesome-selfhosted-data"
+          external: true
+        - title: "Sitemap"
+          url: "/sitemap.xml"
+
+# =============================================================================
+# PAGE METADATA
+# =============================================================================
+pages:
+  browse:
+    title: "Browse Applications"
+    description: "Discover {total_applications} self-hosted applications"
+
+  statistics:
+    title: "Statistics"
+    description: "Explore trends and insights from the self-hosted community"
+
+  home:
+    meta_title: "Discover Self-Hosted Applications"
+    meta_description: "Find the perfect self-hosted applications for your needs"
+
+# =============================================================================
+# SEARCH CONFIGURATION
+# =============================================================================
+search:
+  fuzzy_threshold: 0.3
+  max_results: 8
+  min_query_length: 3
+  search_fields:
+    - name
+    - description
+    - categories
+  placeholder_text: "Search applications..."
+
+# =============================================================================
+# RELATED APPS ALGORITHM - OPTIMIZED FOR SPEED
+# =============================================================================
+related_apps:
+  scoring:
+    semantic_similarity:
+      enabled: false  # Disabled for faster PR builds
+      max_score: 25
+    categories:
+      enabled: true
+      points_per_match: 4
+    alternatives:
+      enabled: true
+      points_per_match: 6
+    forks:
+      enabled: true
+      same_parent_score: 8
+    platforms:
+      enabled: true
+      points_per_match: 2
+    license:
+      enabled: true
+      same_type_score: 2
+    popularity:
+      enabled: true
+      same_tier_score: 1
+    dependencies:
+      enabled: true
+      same_status_score: 1
+  tiebreakers:
+    - stars
+    - name
+  min_score: 3
+  debug: false
+
+# =============================================================================
+# LINK BEHAVIOR
+# =============================================================================
+links:
+  open_in_new_tab_for_internal_links: false
+  open_in_new_tab_for_external_links: false
+
+# =============================================================================
+# PERFORMANCE OPTIMIZATIONS - Not implemented
+# =============================================================================
+performance:
+  lazy_load_images: true
+  generate_webp: false
+  inline_critical_css: true
+
+# =============================================================================
+# SEO & ROBOTS
+# =============================================================================
+robots:
+  generate: true
+  user_agent: "*"
+  allow:
+    - "/"
+  disallow:
+    - "/static/data/"
+  sitemap_url: "/sitemap.xml"
