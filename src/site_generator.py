@@ -73,6 +73,9 @@ class SiteGenerator:
                 "markdown_to_html": self.template_helpers.markdown_to_html,
                 "style_description_links": self.template_helpers.style_description_links,
                 "process_banner_text": self.template_helpers.process_banner_text,
+                "base_path": self.config.get("site.base_path", "").rstrip("/"),
+                "url_for": self.template_helpers.url_for,
+                "asset_url": self.template_helpers.asset_url,
             }
         )
 
@@ -915,20 +918,21 @@ class SiteGenerator:
     def _generate_sitemap(self, applications: List[Application]):
         """Generate XML sitemap."""
         template = self.jinja_env.get_template("sitemap.xml")
+        base_path = self.config.get('site.base_path', '').rstrip('/')
 
         urls = [
-            {"loc": "/", "priority": "1.0"},  # Homepage
-            {"loc": "/browse.html", "priority": "1.0"},  # Browse page
-            {"loc": "/statistics.html", "priority": "1.0"},  # Statistics page
+            {"loc": base_path + "/", "priority": "1.0"},  # Homepage
+            {"loc": base_path + "/browse.html", "priority": "1.0"},  # Browse page
+            {"loc": base_path + "/statistics.html", "priority": "1.0"},  # Statistics page
         ]
 
         # Add application pages
         for app in applications:
-            urls.append({"loc": f"/apps/{app.id}.html", "priority": "0.7"})
+            urls.append({"loc": base_path + f"/apps/{app.id}.html", "priority": "0.7"})
 
         content = template.render(
             urls=urls,
-            site_url=self.config.get("site.url", "https://awesome-selfhosted.net"),
+            site_url=self.config.get("site.url", "https://awesome-selfhosted.net") + base_path,
         )
 
         output_path = self.config.output_dir / "sitemap.xml"
@@ -940,6 +944,7 @@ class SiteGenerator:
     def _generate_robots_txt(self):
         """Generate robots.txt file."""
         robots_config = self.config.get("robots", {})
+        base_path = self.config.get('site.base_path', '').rstrip('/')
 
         # Skip generation if not enabled
         if not robots_config.get("generate", True):
@@ -966,7 +971,7 @@ class SiteGenerator:
         site_url = self.config.get("site.url", "")
         sitemap_path = robots_config.get("sitemap_url", "/sitemap.xml")
         if site_url:
-            content.append(f"\nSitemap: {site_url}{sitemap_path}")
+            content.append(f"\nSitemap: {site_url}{base_path}{sitemap_path}")
 
         # Write robots.txt
         robots_path = self.config.output_dir / "robots.txt"

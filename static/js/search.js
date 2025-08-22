@@ -23,11 +23,12 @@
             maxResults: maxResultsMeta ? parseInt(maxResultsMeta.content) : 8
         };
     }
+    const basePath = document.querySelector('meta[name="base-path"]')?.content || '';
     
     // Load search data
     async function loadSearchData() {
         try {
-            const response = await fetch('/static/data/search.json');
+            const response = await fetch(basePath + '/static/data/search.json');
             if (response.ok) {
                 searchData = await response.json();
             }
@@ -110,7 +111,7 @@
         
         const html = results.map(app => `
             <div class="search-result-item">
-                <a href="/apps/${app.id}.html" class="block">
+                <a href="${basePath}/apps/${app.id}.html" class="block">
                     <div class="font-medium text-gray-900 dark:text-white">${highlightMatch(app.name, query)}</div>
                     <div class="text-sm text-gray-600 dark:text-gray-300 truncate">${highlightMatch(app.description.substring(0, 100), query)}...</div>
                     ${app.stars ? `<div class="text-xs text-yellow-600 mt-1">⭐ ${app.stars}</div>` : ''}
@@ -168,7 +169,7 @@
             if (event.key === 'Enter') {
                 const query = event.target.value.trim();
                 if (query) {
-                    window.location.href = `/browse.html?search=${encodeURIComponent(query)}`;
+                    window.location.href = `${basePath}/browse.html?search=${encodeURIComponent(query)}`;
                 }
             }
         });

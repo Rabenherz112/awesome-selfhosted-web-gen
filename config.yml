@@ -8,6 +8,7 @@ site:
   description: "Discover and explore self-hosted applications"
   url: "https://awesome-selfhosted.net"
   author: "Awesome Self-Hosted Community"
+  base_path: "" # Leave empty for root, or set to "/awesome-selfhosted" for subdirectory
 
 # =============================================================================
 # DATA SOURCES
