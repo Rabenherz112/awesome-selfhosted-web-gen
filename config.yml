@@ -52,7 +52,7 @@ ui:
     text: "**New Release!** Check out our latest features and improvements" # Markdown bold (**text**) is supported
     button:
       text: "Release Notes"
-      url: "https://github.com/awesome-selfhosted/awesome-selfhosted/releases"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted/releases" # this can also be "/browse.html" if external is set to false
       external: true
 
   # Content limits for different sections
