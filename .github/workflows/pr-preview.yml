@@ -75,6 +75,50 @@ jobs:
           mkdir -p pr-${{ github.event.number }}
           cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/
 
+          # Update or create active PRs JSON file
+          cat > active-prs.json << 'EOF'
+          []
+          EOF
+          
+          # Read existing active PRs if file exists
+          if [ -f active-prs.json ]; then
+            EXISTING_PRS=$(cat active-prs.json)
+          else
+            EXISTING_PRS="[]"
+          fi
+          
+          # Add current PR to the list (using Python for JSON manipulation)
+          python3 << 'PYTHON_SCRIPT'
+          import json
+          import sys
+          import os
+          
+          pr_number = ${{ github.event.number }}
+          
+          # Read existing PRs
+          try:
+              with open('active-prs.json', 'r') as f:
+                  active_prs = json.load(f)
+          except:
+              active_prs = []
+          
+          # Remove any existing entry for this PR and add the new one
+          active_prs = [pr for pr in active_prs if pr['number'] != pr_number]
+          active_prs.append({
+              'number': pr_number,
+              'title': 'PR #' + str(pr_number),
+              'url': 'pr-' + str(pr_number) + '/',
+              'updated': '$(date -Iseconds)'
+          })
+          
+          # Sort by PR number (newest first)
+          active_prs.sort(key=lambda x: x['number'], reverse=True)
+          
+          # Write back to file
+          with open('active-prs.json', 'w') as f:
+              json.dump(active_prs, f, indent=2)
+          PYTHON_SCRIPT
+
           # Create/update index page with list of PR previews
           cat > index.html << 'EOF'
           <!DOCTYPE html>
@@ -136,36 +180,29 @@ jobs:
               <script>
                   async function loadPreviews() {
                       try {
-                          const response = await fetch('.');
-                          const html = await response.text();
-                          const parser = new DOMParser();
-                          const doc = parser.parseFromString(html, 'text/html');
-                          const links = Array.from(doc.querySelectorAll('a'));
-                          const prDirs = links
-                              .map(link => link.getAttribute('href'))
-                              .filter(href => href && href.match(/^pr-\d+\/$/))
-                              .sort((a, b) => {
-                                  const prA = parseInt(a.match(/pr-(\d+)/)[1]);
-                                  const prB = parseInt(b.match(/pr-(\d+)/)[1]);
-                                  return prB - prA; // Newest first
-                              })
+                          const response = await fetch('./active-prs.json');
+                          if (!response.ok) {
+                              throw new Error('Failed to load active PRs');
+                          }
+                          const activePrs = await response.json();
                           const previewList = document.getElementById('previewList');
-                          if (prDirs.length === 0) {
+                          
+                          if (activePrs.length === 0) {
                               previewList.innerHTML = '<li>No PR previews available</li>';
                           } else {
-                              previewList.innerHTML = prDirs.map(dir => {
-                                  const prNumber = dir.match(/pr-(\d+)/)[1];
+                              previewList.innerHTML = activePrs.map(pr => {
                                   return `<li class="preview-item">
-                                      <a href="${dir}">PR #${prNumber} Preview</a>
+                                      <a href="${pr.url}">PR #${pr.number} Preview</a>
                                       <span class="badge">Active</span>
                                       <div class="pr-meta">
-                                          Preview for Pull Request #${prNumber}
+                                          Preview for Pull Request #${pr.number}
                                       </div>
                                   </li>`;
                               }).join('');
                           }
                       } catch (error) {
-                          document.getElementById('previewList').innerHTML = '<li>Error loading preview list</li>';
+                          console.error('Error loading previews:', error);
+                          document.getElementById('previewList').innerHTML = '<li>Error loading preview list. No active PRs found.</li>';
                       }
                   }
                   loadPreviews();
@@ -175,7 +212,7 @@ jobs:
           EOF
 
           # Add only the necessary files and commit
-          git add pr-${{ github.event.number }}/ index.html
+          git add pr-${{ github.event.number }}/ index.html active-prs.json
           # Add README.md if it exists
           [ -f README.md ] && git add README.md
           if git diff --staged --quiet; then
@@ -264,7 +301,31 @@ jobs:
             # Remove PR directory if it exists
             if [ -d "pr-${{ github.event.number }}" ]; then
               rm -rf pr-${{ github.event.number }}
-              git add pr-${{ github.event.number }}
+              
+              # Update active PRs JSON file to remove this PR
+              if [ -f active-prs.json ]; then
+                python3 << 'PYTHON_SCRIPT'
+          import json
+          
+          pr_number = ${{ github.event.number }}
+          
+          # Read existing PRs
+          try:
+              with open('active-prs.json', 'r') as f:
+                  active_prs = json.load(f)
+          except:
+              active_prs = []
+          
+          # Remove this PR from the list
+          active_prs = [pr for pr in active_prs if pr['number'] != pr_number]
+          
+          # Write back to file
+          with open('active-prs.json', 'w') as f:
+              json.dump(active_prs, f, indent=2)
+          PYTHON_SCRIPT
+              fi
+              
+              git add pr-${{ github.event.number }} active-prs.json
               if git diff --staged --quiet; then
                 echo "No changes to commit"
               else
