@@ -20,6 +20,7 @@
     <meta name="browse-max-categories-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_categories_per_card', 2) }}">
     <meta name="browse-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_platforms_per_card', 3) }}">
     <meta name="lazy-load-images" content="{{ performance_config.get('lazy_load_images', true) }}">
+    <meta name="base-path" content="{{ base_path }}">
 
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
@@ -32,14 +33,10 @@
     <meta name="twitter:title" content="{% block twitter_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}{{ site_config.description }}{% endblock %}">
 
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/custom.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <!-- Assets -->
+    <link rel="stylesheet" href="{{ asset_url('static/css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ asset_url('static/css/custom.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset_url('static/images/favicon.ico') }}">
     
     <!-- Theme handling inline to prevent flash -->
     <script>
@@ -78,7 +75,7 @@
             {% if banner_config.get('button') %}
             {% set button = banner_config.get('button', {}) %}
             {% set button_url = button.get('url', '#') %}
-            <a href="{{ button_url }}"{{ get_link_target_attrs(button_url, not button.get('external', false)) | safe }} 
+            <a href="{{ url_for(button_url) }}"{{ get_link_target_attrs(url_for(button_url), not button.get('external', false)) | safe }} 
                class="flex-none rounded-full bg-white/10 px-3.5 py-1 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50">
                 {{ button.get('text', 'Learn More') }} <span aria-hidden="true">&rarr;</span>
             </a>
@@ -104,15 +101,15 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
-                    <a href="/" class="flex items-center space-x-3">
-                        <img src="/static/images/logo.svg" alt="Awesome Self-Hosted" class="h-10 w-10">
+                    <a href="{{ url_for('/') }}" class="flex items-center space-x-3">
+                        <img src="{{ asset_url('static/images/logo.svg') }}" alt="Awesome Self-Hosted" class="h-10 w-10">
                         <span class="text-xl font-bold text-gray-900 dark:text-white">{{ site_config.title }}</span>
                     </a>
                     
                     <!-- Main Navigation -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
                         {% for nav_item in navigation_config %}
-                        <a href="{{ nav_item.url }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
+                        <a href="{{ url_for(nav_item.url) }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
                             {{ nav_item.title }}
                         </a>
                         {% endfor %}
@@ -163,10 +160,10 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="md:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                <a href="/browse.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                <a href="{{ url_for('/browse.html') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
                     Browse
                 </a>
-                <a href="/statistics.html" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                <a href="{{ url_for('/statistics.html') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
                     Statistics
                 </a>
                 <!-- Mobile Search -->
@@ -195,7 +192,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-2 mb-4">
-                        <img src="/static/images/logo.svg" alt="Logo" class="h-8 w-8">
+                        <img src="{{ asset_url('static/images/logo.svg') }}" alt="Logo" class="h-8 w-8">
                         <span class="text-xl font-bold text-gray-900 dark:text-white">{{ render_template_string(footer_config.logo_text) or site_config.title }}</span>
                     </div>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">
@@ -214,8 +211,8 @@
                     <ul class="space-y-2">
                         {% for link in section.links %}
                         <li>
-                            <a href="{{ link.url }}" 
-                               {{ get_link_target_attrs(link.url, not link.external) | safe }}
+                            <a href="{{ url_for(link.url) }}" 
+                               {{ get_link_target_attrs(url_for(link.url), not link.external) | safe }}
                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
                                 {{ link.title }}
                             </a>
@@ -235,9 +232,9 @@
     </footer>
     
     <!-- JavaScript -->
-    <script src="/static/js/theme.js"></script>
-    <script src="/static/js/search.js"></script>
-    <script src="/static/js/app.js"></script>
+    <script src="{{ asset_url('static/js/theme.js') }}"></script>
+    <script src="{{ asset_url('static/js/search.js') }}"></script>
+    <script src="{{ asset_url('static/js/app.js') }}"></script>
     
     {% block extra_js %}{% endblock %}
 </body>

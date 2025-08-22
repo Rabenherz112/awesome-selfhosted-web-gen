@@ -495,3 +495,36 @@ class TemplateHelpers:
         processed = re.sub(r'\*\*(.*?)\*\*', r'<strong class="font-semibold">\1</strong>', text)
 
         return processed
+
+    def get_base_path(self) -> str:
+        """Get the base path for the site."""
+        return self.config.get('site.base_path', '').rstrip('/')
+
+    def url_for(self, path: str) -> str:
+        """Generate a URL with the base path prepended."""
+        base_path = self.get_base_path()
+
+        # Handle absolute URLs (external links)
+        if path.startswith('http://') or path.startswith('https://'):
+            return path
+
+        # Ensure path starts with /
+        if not path.startswith('/'):
+            path = '/' + path
+
+        # Prepend base path
+        return base_path + path
+
+    def asset_url(self, path: str) -> str:
+        """Generate an asset URL with the base path prepended."""
+        # Remove leading slash if present for consistency
+        if path.startswith('/'):
+            path = path[1:]
+
+        base_path = self.get_base_path()
+        return f"{base_path}/{path}"
+
+    def get_app_url(self, app_id: str) -> str:
+        """Get URL for application detail page."""
+        # Don't use url_for here as it will be called from templates
+        return f"/apps/{app_id}.html"

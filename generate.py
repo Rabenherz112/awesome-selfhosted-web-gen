@@ -155,6 +155,12 @@ def cmd_build(config, fetch_first=False, verbose=False):
         
         # Generate the site
         generator = SiteGenerator(config)
+        base_path = config.get('site.base_path', '').rstrip('/')
+        if base_path:
+            print(f"📁 Base path configured: {base_path}")
+            print(f"   Website will be deployed at: {config.get('site.url', '')}{base_path}")
+        else:
+            print("📁 Building for root deployment (/)")
         
         print("Generating site...")
         generator.generate_site(applications, categories, statistics, data.get('licenses', {}), markdown_data)
@@ -274,7 +280,8 @@ def cmd_info(config):
     print(f"   Description: {site_config.get('description', 'N/A')}")
     print(f"   URL: {site_config.get('url', 'N/A')}")
     print(f"   Author: {site_config.get('author', 'N/A')}")
-    
+    print(f"   Base path: {site_config.get('base_path', 'N/A')}")
+
     # Build Configuration
     build_config = config.get_build_config()
     print(f"\n🏗️  Build Configuration:")
