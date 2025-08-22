@@ -5,6 +5,7 @@
         initializeMobileMenu();
         initializeScrollToTop();
         initializeExternalLinks();
+        initializeBanner();
     });
     
     // Mobile menu functionality
@@ -157,6 +158,66 @@
             this.style.transform = 'translateY(0)';
         });
     });
-    
-    console.log('✅ Awesome Self-Hosted website initialized');
+
+    // Banner functionality
+    function initializeBanner() {
+        const banner = document.getElementById('site-banner');
+        const dismissButton = document.getElementById('dismiss-banner');
+        
+        if (!banner) return;
+        
+        try {
+            // Create a hash of the banner content to detect changes
+            const bannerText = banner.querySelector('p')?.textContent?.trim() || '';
+            const bannerButton = banner.querySelector('a')?.textContent?.trim() || '';
+            const bannerContent = bannerText + bannerButton;
+            
+            // Simple hash function that's more reliable than btoa
+            let bannerHash = 0;
+            for (let i = 0; i < bannerContent.length; i++) {
+                const char = bannerContent.charCodeAt(i);
+                bannerHash = ((bannerHash << 5) - bannerHash) + char;
+                bannerHash = bannerHash & bannerHash; // Convert to 32-bit integer
+            }
+            bannerHash = Math.abs(bannerHash).toString(16);
+            
+            // Check if this specific banner was previously dismissed
+            const dismissedBanners = JSON.parse(localStorage.getItem('dismissed-banners') || '[]');
+            if (dismissedBanners.includes(bannerHash)) {
+                banner.style.display = 'none';
+                return;
+            }
+            
+            // Handle dismiss button
+            if (dismissButton) {
+                dismissButton.addEventListener('click', function() {
+                    banner.style.display = 'none';
+                    
+                    try {
+                        // Add this banner's hash to the dismissed list
+                        const currentDismissed = JSON.parse(localStorage.getItem('dismissed-banners') || '[]');
+                        if (!currentDismissed.includes(bannerHash)) {
+                            currentDismissed.push(bannerHash);
+                            // Keep only the last 3 dismissed banners to avoid localStorage bloat
+                            const recentDismissed = currentDismissed.slice(-3);
+                            localStorage.setItem('dismissed-banners', JSON.stringify(recentDismissed));
+                        }
+                    } catch (e) {
+                        console.log('Could not save banner dismiss state:', e);
+                    }
+                });
+            }
+        } catch (error) {
+            console.log('Banner initialization error:', error);
+            
+            // Fallback: simple dismiss without content tracking
+            if (dismissButton) {
+                dismissButton.addEventListener('click', function() {
+                    banner.style.display = 'none';
+                });
+            }
+        }
+    }
+
+    console.log('✅ ASWG initialized');
 })(); 

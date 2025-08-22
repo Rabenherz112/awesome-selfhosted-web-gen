@@ -72,6 +72,7 @@ class SiteGenerator:
                 "get_link_target_attrs": self.template_helpers.get_link_target_attrs,
                 "markdown_to_html": self.template_helpers.markdown_to_html,
                 "style_description_links": self.template_helpers.style_description_links,
+                "process_banner_text": self.template_helpers.process_banner_text,
             }
         )
 

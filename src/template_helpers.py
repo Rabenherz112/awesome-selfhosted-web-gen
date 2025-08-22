@@ -482,3 +482,16 @@ class TemplateHelpers:
             return full_tag
 
         return re.sub(r"<a[^>]*>.*?</a>", style_link, description)
+
+    def process_banner_text(self, text: str) -> str:
+        """Process banner text to handle markdown-style bold formatting."""
+        import re
+
+        if not text:
+            return ""
+
+        # Replace **text** with <strong>text</strong>
+        # This regex captures non-greedy content between ** pairs
+        processed = re.sub(r'\*\*(.*?)\*\*', r'<strong class="font-semibold">\1</strong>', text)
+
+        return processed
