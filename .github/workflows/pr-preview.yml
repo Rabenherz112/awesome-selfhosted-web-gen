@@ -43,10 +43,6 @@ jobs:
         run: |
           npm install
 
-      - name: Build CSS
-        run: |
-          npm run build-css
-
       - name: Generate website
         run: |
           python generate.py -c config-pr-preview.yml build
