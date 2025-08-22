@@ -31,7 +31,7 @@
                 <div class="flex flex-wrap justify-center items-center gap-2 mb-8">
                     {% for badge in hero_config.badges %}
                     <a href="{{ badge.url }}"{{ get_link_target_attrs(badge.url, false) | safe }} class="hover:scale-105 transition-transform mx-1">
-                        <img src="{{ badge.image }}" alt="{{ badge.name }}" class="h-5">
+                        <img src="{{ url_for(badge.image) }}" alt="{{ badge.name }}" class="h-5">
                     </a>
                     {% endfor %}
                 </div>
