@@ -8,6 +8,7 @@ site:
   description: "Discover and explore self-hosted applications"
   url: "https://awesome-selfhosted.net"
   author: "Awesome Self-Hosted Community"
+  base_path: "" # Leave empty for root, or set to "/awesome-selfhosted" for subdirectory
 
 # =============================================================================
 # DATA SOURCES
@@ -43,6 +44,17 @@ ui:
   # Page title formatting
   title_format: "{page_title} - {site_title}"
   title_separator: " - "
+
+  # Banner configuration
+  banner:
+    enabled: false
+    dismissible: true
+    style: "info"  # info, warning, success, announcement
+    text: "**New Release!** Check out our latest features and improvements" # Markdown bold (**text**) is supported
+    button:
+      text: "Release Notes"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted/releases" # this can also be "/browse.html" if external is set to false
+      external: true
 
   # Content limits for different sections
   limits:

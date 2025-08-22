@@ -360,6 +360,49 @@ input:checked + .toggle-slider:before {
     color: #93c5fd;
 }
 
+/* Banner animations and styling */
+.banner-container,
+#site-banner {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Banner responsive adjustments */
+@media (max-width: 640px) {
+    #site-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    #site-banner .flex-1 {
+        flex: none;
+        width: 100%;
+    }
+    
+    #site-banner .flex-wrap {
+        justify-content: center;
+    }
+}
+
+/* Ensure banner decorative elements don't interfere on mobile */
+@media (max-width: 768px) {
+    #site-banner [aria-hidden="true"] {
+        display: none;
+    }
+}
+
 /* Mobile responsive improvements */
 @media (max-width: 640px) {
     .container {

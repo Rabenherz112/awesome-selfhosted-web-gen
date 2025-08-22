@@ -12,6 +12,7 @@ class BrowsePage {
         this.nonFreeLicenses = new Set();
         this.showNonFreeOnly = false;
         this.currentSort = 'name';
+        this.basePath = document.querySelector('meta[name="base-path"]')?.content || '';
         
         // Sort direction tracking
         this.sortDirections = {
@@ -76,7 +77,7 @@ class BrowsePage {
 
     async loadSearchData() {
         try {
-            const response = await fetch('/static/data/search.json');
+            const response = await fetch(this.basePath + '/static/data/search.json');
             const data = await response.json();
             this.applications = data.apps || [];
             this.filteredApplications = [...this.applications];
@@ -199,7 +200,7 @@ class BrowsePage {
     async loadLicenseData() {
         // Load non-free license identifiers from search data
         try {
-            const response = await fetch('/static/data/search.json');
+            const response = await fetch(this.basePath + '/static/data/search.json');
             const data = await response.json();
             
             if (data.nonfree_licenses && Array.isArray(data.nonfree_licenses)) {
@@ -757,7 +758,7 @@ class BrowsePage {
 
         // Details link (internal)
         const detailsLink = `
-        <a href="/apps/${app.id}.html"${getLinkAttrs(`/apps/${app.id}.html`, true)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400        dark:hover:text-primary-300 font-medium">
+        <a href="${this.basePath}/apps/${app.id}.html"${getLinkAttrs(`${this.basePath}/apps/${app.id}.html`, true)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400        dark:hover:text-primary-300 font-medium">
             Details
         </a>
         `;
@@ -768,7 +769,7 @@ class BrowsePage {
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                                <a href="/apps/${app.id}.html" class="hover:text-primary-600 dark:hover:text-primary-400">
+                                <a href="${this.basePath}/apps/${app.id}.html" class="hover:text-primary-600 dark:hover:text-primary-400">
                                     ${app.name}
                                 </a>
                             </h3>
