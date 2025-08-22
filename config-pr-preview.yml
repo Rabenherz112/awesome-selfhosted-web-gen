@@ -48,8 +48,8 @@ ui:
 
   # Banner configuration
   banner:
-    enabled: false
-    dismissible: true
+    enabled: true
+    dismissible: false
     style: "info"  # info, warning, success, announcement
     text: "**PR Preview** This is a preview build for testing purposes"
 
