@@ -2,6 +2,13 @@
 
 This repository includes an automated PR preview system that helps validate changes before they are merged.
 
+## Setup Requirements
+
+To enable this system, repository administrators need to:
+
+1. **Enable GitHub Pages**: Go to Settings > Pages and set source to "Deploy from a branch" and select "gh-pages"
+2. **Configure Workflow Permissions**: Go to Settings > Actions > General > Workflow permissions and enable "Read and write permissions"
+
 ## How it works
 
 When you create or update a pull request:

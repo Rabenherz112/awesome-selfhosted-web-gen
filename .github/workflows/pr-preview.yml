@@ -14,52 +14,52 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      
+
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
+
       - name: Clone awesome-selfhosted-data
         run: |
           git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
-          
+
       - name: Install Python dependencies
         run: |
           pip install -r requirements.txt
-          
+
       - name: Install Node.js dependencies
         run: |
           npm install
-          
+
       - name: Build CSS
         run: |
           npm run build-css
-          
+
       - name: Generate website
         run: |
           python generate.py -c config-pr-preview.yml build
-          
+
       - name: Deploy to GitHub Pages branch
         run: |
           # Configure git
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
+
           # Store current working directory
           WORK_DIR=$(pwd)
-          
+
           # Check if gh-pages branch exists remotely
           if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
             # Branch exists, fetch and checkout
@@ -74,11 +74,11 @@ jobs:
             git commit -m "Initialize gh-pages branch for PR previews"
             git push origin gh-pages
           fi
-          
+
           # Create PR directory and copy files
           mkdir -p pr-${{ github.event.number }}
           cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/
-          
+
           # Create/update index page with list of PR previews
           cat > index.html << 'EOF'
           <!DOCTYPE html>
@@ -88,33 +88,33 @@ jobs:
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>PR Previews - Awesome Self-Hosted Web Generator</title>
               <style>
-                  body { 
-                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-                      margin: 40px; 
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      margin: 40px;
                       background: #f7fafc;
                   }
                   .container { max-width: 800px; margin: 0 auto; }
                   .header { text-align: center; margin-bottom: 40px; }
                   .preview-list { list-style: none; padding: 0; }
-                  .preview-item { 
-                      margin: 10px 0; 
-                      padding: 20px; 
+                  .preview-item {
+                      margin: 10px 0;
+                      padding: 20px;
                       background: white;
-                      border: 1px solid #e2e8f0; 
-                      border-radius: 8px; 
+                      border: 1px solid #e2e8f0;
+                      border-radius: 8px;
                       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                   }
-                  .preview-item a { 
-                      text-decoration: none; 
-                      color: #3182ce; 
-                      font-weight: 500; 
+                  .preview-item a {
+                      text-decoration: none;
+                      color: #3182ce;
+                      font-weight: 500;
                       font-size: 1.1em;
                   }
                   .preview-item a:hover { text-decoration: underline; }
-                  .pr-meta { 
-                      font-size: 0.9em; 
-                      color: #718096; 
-                      margin-top: 5px; 
+                  .pr-meta {
+                      font-size: 0.9em;
+                      color: #718096;
+                      margin-top: 5px;
                   }
                   .badge {
                       display: inline-block;
@@ -153,7 +153,7 @@ jobs:
                                   const prB = parseInt(b.match(/pr-(\d+)/)[1]);
                                   return prB - prA; // Newest first
                               });
-                          
+
                           const previewList = document.getElementById('previewList');
                           if (prDirs.length === 0) {
                               previewList.innerHTML = '<li>No PR previews available</li>';
@@ -173,13 +173,13 @@ jobs:
                           document.getElementById('previewList').innerHTML = '<li>Error loading preview list</li>';
                       }
                   }
-                  
+
                   loadPreviews();
               </script>
           </body>
           </html>
           EOF
-          
+
           # Add and commit
           git add .
           if git diff --staged --quiet; then
@@ -188,7 +188,7 @@ jobs:
               git commit -m "Deploy PR #${{ github.event.number }} preview"
               git push origin gh-pages
           fi
-        
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
@@ -196,35 +196,35 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const repoUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}`;
             const previewUrl = `${repoUrl}/pr-${prNumber}/`;
-            
+
             // Check if we already have a preview comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
-            
-            const botComment = comments.data.find(comment => 
-              comment.user.type === 'Bot' && 
+
+            const botComment = comments.data.find(comment =>
+              comment.user.type === 'Bot' &&
               comment.body.includes('🔍 PR Preview')
             );
-            
+
             const commentBody = `## 🔍 PR Preview
-            
+
             Your changes have been deployed! You can preview them here:
-            
+
             **📱 Preview URL:** ${previewUrl}
-            
+
             This preview was generated from commit \`${context.payload.pull_request.head.sha.substring(0, 7)}\` and will be updated when you push new changes.
-            
+
             ### ✅ Build Status
             - Generator executed successfully
             - Website built without errors
             - Static files deployed to GitHub Pages
-            
+
             ---
             *This comment will be automatically updated when you push new commits.*`;
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -247,24 +247,24 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: Remove PR preview directory
         run: |
           # Configure git
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
+
           # Check if gh-pages branch exists and checkout
           if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
             git fetch origin gh-pages:gh-pages
             git checkout gh-pages
-            
+
             # Remove PR directory if it exists
             if [ -d "pr-${{ github.event.number }}" ]; then
               rm -rf pr-${{ github.event.number }}
@@ -281,35 +281,35 @@ jobs:
           else
             echo "gh-pages branch does not exist"
           fi
-          
+
       - name: Comment on closed PR
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
-            
+
             // Find and update the preview comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
-            
-            const botComment = comments.data.find(comment => 
-              comment.user.type === 'Bot' && 
+
+            const botComment = comments.data.find(comment =>
+              comment.user.type === 'Bot' &&
               comment.body.includes('🔍 PR Preview')
             );
-            
+
             if (botComment) {
               const commentBody = `## 🔍 PR Preview *(Closed)*
-              
+
               This PR has been ${context.payload.pull_request.merged ? 'merged' : 'closed'}.
-              
+
               The preview deployment has been removed to save space.
-              
+
               ---
               *Preview was available at: \`pr-${prNumber}/\`*`;
-              
+
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,

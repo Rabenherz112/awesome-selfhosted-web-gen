@@ -254,6 +254,17 @@ jobs:
         # Deploy the output/ directory to your hosting service
 ```
 
+### PR Preview System
+
+This repository includes an automated PR preview system that generates preview websites for pull requests:
+
+- **Automatic builds** for each PR using the latest awesome-selfhosted-data
+- **Preview deployments** to GitHub Pages at unique URLs
+- **Bot comments** with preview links in PRs
+- **Automatic cleanup** when PRs are closed
+
+See [PR_PREVIEW.md](PR_PREVIEW.md) for setup instructions and details.
+
 ## 📄 License
 
 This project is licensed under the AGPL-3.0 License - see the LICENSE file for details.
