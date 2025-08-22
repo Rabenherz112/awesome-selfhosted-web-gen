@@ -46,6 +46,7 @@ class BrowsePage {
         this.setupPlatformFilters();
         this.setupLicenseFilters();
         this.setupCategoryFilters();
+        this.setupFilterSearch();
         if (this.enablePagination) {
             this.setupPaginationEventListeners();
         }
@@ -110,6 +111,89 @@ class BrowsePage {
                 console.log(`Category filter applied: "${matchingCategory}"`);
             }
         }
+    }
+
+    setupFilterSearch() {
+        // Handle search toggle buttons
+        document.querySelectorAll('.filter-search-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.getAttribute('data-target');
+                const searchContainer = document.getElementById(targetId);
+                const searchInput = searchContainer.querySelector('input');
+                
+                if (searchContainer.classList.contains('hidden')) {
+                    searchContainer.classList.remove('hidden');
+                    searchInput.focus();
+                } else {
+                    searchContainer.classList.add('hidden');
+                    searchInput.value = '';
+                    // Clear any search filtering
+                    this.clearFilterSearch(targetId);
+                }
+            });
+        });
+    
+        // Handle search input
+        const searchInputs = ['categorySearch', 'platformSearch', 'licenseSearch'];
+        searchInputs.forEach(searchId => {
+            const searchContainer = document.getElementById(searchId);
+            if (searchContainer) {
+                const searchInput = searchContainer.querySelector('input');
+                searchInput.addEventListener('input', (e) => {
+                    this.filterCheckboxes(searchId, e.target.value);
+                });
+            }
+        });
+    }
+    
+    filterCheckboxes(searchId, query) {
+        const filterType = searchId.replace('Search', '');
+        const filtersContainer = document.getElementById(filterType + 'Filters');
+        
+        if (!filtersContainer) return;
+        
+        const labels = filtersContainer.querySelectorAll('.filter-label');
+        const lowerQuery = query.toLowerCase();
+        
+        labels.forEach(label => {
+            // Get the main text content excluding the count span
+            const textSpan = label.querySelector('span.flex-1');
+            if (textSpan) {
+                // Get only the text nodes, excluding the count span
+                const clonedSpan = textSpan.cloneNode(true);
+                const countSpan = clonedSpan.querySelector('.text-xs.opacity-70');
+                if (countSpan) {
+                    countSpan.remove();
+                }
+                const text = clonedSpan.textContent.trim().toLowerCase();
+                
+                if (text.includes(lowerQuery)) {
+                    label.style.display = '';
+                } else {
+                    label.style.display = 'none';
+                }
+            } else {
+                // Fallback to search full text if structure is different (i.e I ever update the HTML structure and forget to update this)
+                const text = label.textContent.toLowerCase();
+                if (text.includes(lowerQuery)) {
+                    label.style.display = '';
+                } else {
+                    label.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    clearFilterSearch(searchId) {
+        const filterType = searchId.replace('Search', '');
+        const filtersContainer = document.getElementById(filterType + 'Filters');
+        
+        if (!filtersContainer) return;
+        
+        const labels = filtersContainer.querySelectorAll('.filter-label');
+        labels.forEach(label => {
+            label.style.display = '';
+        });
     }
 
     async loadLicenseData() {
