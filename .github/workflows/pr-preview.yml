@@ -176,8 +176,10 @@ jobs:
           </html>
           EOF
 
-          # Add and commit
-          git add .
+          # Add only the necessary files and commit
+          git add pr-${{ github.event.number }}/ index.html
+          # Add README.md if it exists
+          [ -f README.md ] && git add README.md
           if git diff --staged --quiet; then
               echo "No changes to commit"
           else
@@ -264,7 +266,7 @@ jobs:
             # Remove PR directory if it exists
             if [ -d "pr-${{ github.event.number }}" ]; then
               rm -rf pr-${{ github.event.number }}
-              git add .
+              git add pr-${{ github.event.number }}
               if git diff --staged --quiet; then
                 echo "No changes to commit"
               else
