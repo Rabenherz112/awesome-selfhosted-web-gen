@@ -1,4 +1,4 @@
-# Awesome Self-Hosted Website Generator
+# Awesome Selfhosted Website Generator (ASWG)
 
 A Python-based static site generator that creates a beautiful, interactive website from the [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data/) dataset.
 
