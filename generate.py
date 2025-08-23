@@ -152,6 +152,10 @@ def cmd_build(config, fetch_first=False, verbose=False):
         markdown_data = data.get('markdown', {})
         
         print(f"📚 Loaded {len(applications)} applications from cache")
+
+        if config.get('alternatives.enabled', False):
+            alternatives_count = sum(1 for app in applications if app.alternative_to)
+            print(f"🔄 Alternatives page enabled - {alternatives_count} apps have alternative_to data")
         
         # Generate the site
         generator = SiteGenerator(config)

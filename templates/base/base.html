@@ -108,7 +108,7 @@
                     
                     <!-- Main Navigation -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
-                        {% for nav_item in navigation_config %}
+                        {% for nav_item in filter_navigation(navigation_config) %}
                         <a href="{{ url_for(nav_item.url) }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
                             {{ nav_item.title }}
                         </a>
@@ -160,12 +160,11 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="md:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                <a href="{{ url_for('/browse.html') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                    Browse
+                {% for nav_item in filter_navigation(navigation_config) %}
+                <a href="{{ url_for(nav_item.url) }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                    {{ nav_item.title }}
                 </a>
-                <a href="{{ url_for('/statistics.html') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                    Statistics
-                </a>
+                {% endfor %}
                 <!-- Mobile Search -->
                 <div class="px-3 py-2 relative">
                     <input type="text" 
