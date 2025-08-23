@@ -13,6 +13,10 @@
 <priority>1.0</priority>        <changefreq>weekly</changefreq>
     </url>
     <url>
+        <loc>https://rabenherz112.github.io/awesome-selfhosted-web-gen/pr-6/awesome-selfhosted-web-gen/pr-6/alternatives.html</loc>
+<priority>0.9</priority>        <changefreq>weekly</changefreq>
+    </url>
+    <url>
         <loc>https://rabenherz112.github.io/awesome-selfhosted-web-gen/pr-6/awesome-selfhosted-web-gen/pr-6/apps/otobo.html</loc>
 <priority>0.7</priority>        <changefreq>weekly</changefreq>
     </url>
