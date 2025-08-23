@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Previews - Awesome Self-Hosted Web Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 40px;
+            background: #f7fafc;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .preview-list { list-style: none; padding: 0; }
+        .preview-item {
+            margin: 10px 0;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .preview-item a {
+            text-decoration: none;
+            color: #3182ce;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        .preview-item a:hover { text-decoration: underline; }
+        .pr-meta {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #edf2f7;
+            color: #4a5568;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 PR Previews</h1>
+            <p>Available preview deployments for pull requests</p>
+        </div>
+        <ul class="preview-list" id="previewList">
+            <li>Loading...</li>
+        </ul>
+    </div>
+    <script>
+        async function loadPreviews() {
+            try {
+                const response = await fetch('./active-prs.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load active PRs');
+                }
+                const activePrs = await response.json();
+                const previewList = document.getElementById('previewList');
+                
+                if (activePrs.length === 0) {
+                    previewList.innerHTML = '<li>No PR previews available</li>';
+                } else {
+                    previewList.innerHTML = activePrs.map(pr => {
+                        return `<li class="preview-item">
+                            <a href="${pr.url}">PR #${pr.number} Preview</a>
+                            <span class="badge">Active</span>
+                            <div class="pr-meta">
+                                Preview for Pull Request #${pr.number}
+                            </div>
+                        </li>`;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading previews:', error);
+                document.getElementById('previewList').innerHTML = '<li>Error loading preview list. No active PRs found.</li>';
+            }
+        }
+        loadPreviews();
+    </script>
+</body>
+</html>
