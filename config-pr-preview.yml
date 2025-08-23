@@ -137,6 +137,8 @@ hero:
 navigation:
   - title: "Browse"
     url: "/browse.html"
+  - title: "Alternatives"
+    url: "/alternatives.html"
   - title: "Statistics" 
     url: "/statistics.html"
 
@@ -159,6 +161,9 @@ footer:
           url: "/"
         - title: "Browse"
           url: "/browse.html"
+        - title: "Alternatives"
+          url: "/alternatives.html"
+          enabled: "{{ alternatives.enabled }}"
         - title: "Statistics"
           url: "/statistics.html"
 
@@ -189,6 +194,14 @@ pages:
   home:
     meta_title: "Discover Selfhosted Applications"
     meta_description: "Find the perfect selfhosted applications for your needs"
+
+# =============================================================================
+# ALTERNATIVES PAGE CONFIGURATION
+# =============================================================================
+alternatives:
+  enabled: true  # Set to false to disable the alternatives page
+  min_alternatives: 2  # Minimum number of alternatives required to show a software
+  show_statistics: true  # Show statistics section on the page
 
 # =============================================================================
 # SEARCH CONFIGURATION

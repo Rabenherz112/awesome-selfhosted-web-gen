@@ -206,7 +206,7 @@ pages:
 # ALTERNATIVES PAGE CONFIGURATION
 # =============================================================================
 alternatives:
-  enabled: true  # Set to false to disable the alternatives page
+  enabled: false  # Set to false to disable the alternatives page
   min_alternatives: 2  # Minimum number of alternatives required to show a software
   show_statistics: true  # Show statistics section on the page
 
@@ -229,7 +229,7 @@ search:
 related_apps:
   scoring:
     semantic_similarity:
-      enabled: false
+      enabled: true
       max_score: 25
     categories:
       enabled: true
