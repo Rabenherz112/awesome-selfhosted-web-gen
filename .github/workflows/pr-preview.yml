@@ -188,35 +188,67 @@ jobs:
               git push origin gh-pages 2>&1 | tee -a build.log
           fi
 
-      # Comment on success
-      - name: Comment on PR (success)
+      # Marker that only appears on successful deploys
+      - name: Mark success
         if: ${{ success() }}
+        run: echo "ok" > .build_succeeded
+
+      # Unified comment: update/create a single "🔍 PR Preview" comment on success or failure
+      - name: Comment on PR (update or create, success or failure)
+        if: ${{ always() }}
         uses: actions/github-script@v7
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const repoUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}`;
-            const previewUrl = `${repoUrl}/pr-${prNumber}/`;
+            const fs = require('fs');
 
-            const comments = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const headShaShort = context.payload.pull_request.head.sha.substring(0, 7);
+
+            // Success marker written only when deploy succeeded
+            let isSuccess = false;
+            try { isSuccess = fs.existsSync('.build_succeeded'); } catch (e) {}
+
+            // Load existing "🔍 PR Preview" comment if present
+            const { data: comments } = await github.rest.issues.listComments({
+              owner, repo, issue_number: prNumber,
             });
 
-            const botComment = comments.data.find(c =>
-              c.user.type === 'Bot' && c.body.includes('🔍 PR Preview')
-            );
+            const PREVIEW_ANCHOR = '## 🔍 PR Preview';
+            let existing = comments.find(c => c.user.type === 'Bot' && c.body.includes(PREVIEW_ANCHOR));
 
-            const body = `## 🔍 PR Preview
+            // Reuse existing Preview URL if present (so failures keep the same link)
+            let existingPreviewUrl = undefined;
+            if (existing) {
+              const m = existing.body.match(/\*\*📱 Preview URL:\*\*\s*(\S+)/);
+              if (m) existingPreviewUrl = m[1];
+            }
 
-            Your changes have been deployed! You can preview them here:
+            // Compute preview URL for success case
+            const computedPreviewUrl = `https://${owner}.github.io/${repo}/pr-${prNumber}/`;
+            const effectivePreviewUrl = isSuccess ? (existingPreviewUrl ?? computedPreviewUrl) : existingPreviewUrl;
 
-            **📱 Preview URL:** ${previewUrl}
+            // Read build log (if exists) and truncate for safety
+            let logText = '';
+            try { logText = fs.readFileSync('build.log', 'utf8'); } catch (e) {}
+            const MAX = 60000;
+            if (logText.length > MAX) {
+              logText = '... (truncated) ...\\n' + logText.slice(-MAX);
+            }
+            const shownChars = Math.min(logText.length, MAX);
 
-            Preview from commit \`${context.payload.pull_request.head.sha.substring(0, 7)}\`.
-            *The website may take a few minutes to go live after this comment* 
+            // Common header
+            let body = `## 🔍 PR Preview
 
+            ${effectivePreviewUrl ? `**📱 Preview URL:** ${effectivePreviewUrl}\n` : ''}
+
+            This preview was generated from commit \`${headShaShort}\` and will be updated when you push new changes.
+            `;
+
+            // Build Status section (icon toggles)
+            if (isSuccess) {
+              body += `
             ### ✅ Build Status
             - Generator executed successfully
             - Website built without errors
@@ -224,51 +256,33 @@ jobs:
 
             ---
             *This comment will be automatically updated when you push new commits.*`;
-
-            if (botComment) {
-              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: botComment.id, body });
             } else {
-              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber, body });
-            }
-
-      # Comment on failure (no deploy/push happens)
-      - name: Comment on PR (failure with build log)
-        if: ${{ failure() }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const prNumber = context.payload.pull_request.number;
-
-            let log = 'Build log not found.';
-            try { log = fs.readFileSync('build.log', 'utf8'); } catch (e) {}
-
-            // Truncate to fit GitHub comment limits
-            const MAX = 60000;
-            if (log.length > MAX) {
-              log = '... (truncated) ...\n' + log.slice(-MAX);
-            }
-
-            const body = `## ❌ Build failed
-
-            The preview was **not deployed** because the build failed.
+              body += `
+            ### ❌ Build Status
+            - Build failed — preview not deployed
 
             <details>
-            <summary>Build log (last ${Math.min(log.length, MAX)} characters)</summary>
+            <summary>Build log (last ${shownChars} characters)</summary>
 
             \`\`\`
-            ${log}
+            ${logText || 'No build log available.'}
             \`\`\`
             </details>
 
-            _Commit: \`${context.payload.pull_request.head.sha.substring(0,7)}\`_`;
+            ---
+            *This comment will be automatically updated when you push new commits.*`;
+            }
 
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body
-            })
+            // Update or create the single comment
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNumber, body
+              });
+            }
 
   cleanup-preview:
     if: github.event.action == 'closed'
