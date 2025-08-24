@@ -1,8 +1,5 @@
 {% extends "base/base.html" %}
 
-{% block title %}{% if ui_config.get('title_format') %}{{ ui_config.title_format.replace('{page_title}', 'Alternative Software').replace('{site_title}', site_config.title) }}{% else %}Alternative Software - {{ site_config.title }}{% endif %}{% endblock %}
-{% block description %}Find self-hosted alternatives to popular software. Discover {{ total_software }} different software with {{ total_alternatives }} alternatives.{% endblock %}
-
 {% block content %}
 <!-- JavaScript Required Notification -->
 <div id="js-required-notification" class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mb-6">
@@ -29,10 +26,10 @@
     <!-- Page Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            🔄 Alternative Software
+            Alternative Software
         </h1>
         <p class="text-lg text-gray-600 dark:text-gray-300">
-            Find self-hosted alternatives to popular software - {{ total_software }} software with {{ total_alternatives }} alternatives
+            Find selfhosted alternatives to popular software - {{ total_software }} software with {{ total_alternatives }} alternatives
         </p>
     </div>
 
@@ -81,31 +78,31 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
         <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
             <!-- Search -->
-            <div class="flex-1">
+            <div class="w-full md:flex-1">
                 <div class="relative">
                     <input type="text" 
                            id="alternatives-search" 
                            placeholder="Search for software (e.g., Discord, Slack, Google Drive)..." 
-                           class="w-full px-4 py-2 pl-10 pr-4 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
-                    <div class="absolute left-3 top-2.5">
-                        <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           class="w-full px-4 py-3 pl-12 pr-4 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600     rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
+                    <div class="absolute left-4 top-3.5">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Sort Options -->
-            <div class="flex space-x-2">
+            <div class="flex space-x-2 flex-shrink-0">
                 <button id="sortAlphabetical" class="sort-button active">
-                    A-Z
+                    Name
                 </button>
                 <button id="sortMostAlternatives" class="sort-button">
-                    Most Alternatives
+                    Alternatives
                 </button>
             </div>
         </div>
-        
+
         <!-- Results Count -->
         <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
             Showing <span id="visibleCount">{{ total_software }}</span> of <span id="totalCount">{{ total_software }}</span> software
@@ -123,9 +120,7 @@
     <!-- No Results Message -->
     <div id="noResultsMessage" class="hidden text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div class="text-gray-500 dark:text-gray-400">
-            <svg class="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m-7 4h8a2 2 0 002-2V6a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
+            <div class="text-6xl mb-4">🔍</div>
             <p class="text-lg font-medium mb-2">No alternatives found</p>
             <p class="text-sm">Try adjusting your search terms or browse all alternatives above.</p>
         </div>
@@ -148,41 +143,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Help Section -->
-    <div class="mt-12 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-6 rounded-r-lg">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-lg font-medium text-blue-900 dark:text-blue-200 mb-2">
-                    How it works
-                </h3>
-                <p class="text-blue-800 dark:text-blue-300 text-sm mb-2">
-                    This page shows self-hosted alternatives to popular proprietary software. The data is curated by the awesome-selfhosted community.
-                </p>
-                <ul class="text-blue-700 dark:text-blue-300 text-sm space-y-1">
-                    <li>• Search for specific software to find alternatives</li>
-                    <li>• Click on any alternative to view detailed information</li>
-                    <li>• Only software with {{ config.min_alternatives or 2 }}+ alternatives are shown</li>
-                    <li>• Pagination shows {{ generation_config.get('items_per_page', 60) }} items per page</li>
-                </ul>
-            </div>
-        </div>
-    </div>
 </div>
 
-<!-- Hidden data for JavaScript -->
-<script>
-    window.alternativesData = {{ alternatives | tojson }};
-    window.alternativesConfig = {
-        itemsPerPage: {{ generation_config.get('items_per_page', 60) }},
-        minAlternatives: {{ config.min_alternatives or 2 }}
-    };
-</script>
 {% endblock %}
 
 {% block extra_js %}
