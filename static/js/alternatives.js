@@ -16,10 +16,10 @@ class AlternativesPage {
         this.currentSort = 'name';
         
         // Configuration settings
-        this.browseDescriptionLength = 80;
-        this.browseDescriptionFull = false;
-        this.browseMaxCategoriesPerCard = 2;
-        this.browseMaxPlatformsPerCard = 3;
+        this.alternativesDescriptionLength = 80;
+        this.alternativesDescriptionFull = false;
+        this.alternativesMaxCategoriesPerCard = 2;
+        this.alternativesMaxPlatformsPerCard = 3;
         this.alternativesShowMoreThreshold = 3;
         
         // Non-free licenses tracking
@@ -52,10 +52,10 @@ class AlternativesPage {
 
         try {
             // Load all configuration values using the helper function
-            this.browseDescriptionLength = getConfigValue('browse-description-length', 80);
-            this.browseDescriptionFull = getConfigValue('browse-description-full', false, (val) => val.toLowerCase() === 'true');
-            this.browseMaxCategoriesPerCard = getConfigValue('browse-max-categories-per-card', 2);
-            this.browseMaxPlatformsPerCard = getConfigValue('browse-max-platforms-per-card', 3);
+            this.alternativesDescriptionLength = getConfigValue('alternatives-description-length', 80);
+            this.alternativesDescriptionFull = getConfigValue('alternatives-description-full', false, (val) => val.toLowerCase() === 'true');
+            this.alternativesMaxCategoriesPerCard = getConfigValue('alternatives-max-categories-per-card', 2);
+            this.alternativesMaxPlatformsPerCard = getConfigValue('alternatives-max-platforms-per-card', 3);
             this.alternativesShowMoreThreshold = getConfigValue('alternatives-show-more-threshold', 3);
         } catch (error) {
             console.log('Using default configuration values');
@@ -447,7 +447,7 @@ class AlternativesPage {
         
         const subtitle = document.createElement('p');
         subtitle.className = 'text-gray-600 dark:text-gray-300';
-        subtitle.textContent = `${alternatives.length} selfhosted alternative${alternatives.length !== 1 ? 's' : ''}`;
+        subtitle.textContent = `${alternatives.length} alternative${alternatives.length !== 1 ? 's' : ''}`;
         
         headerDiv.appendChild(title);
         headerDiv.appendChild(subtitle);
@@ -563,18 +563,18 @@ class AlternativesPage {
         ` : '';
 
         // Category badges (show up to configured limit)
-        const categoriesHtml = app.categories ? app.categories.slice(0, this.browseMaxCategoriesPerCard).map(category => 
+        const categoriesHtml = app.categories ? app.categories.slice(0, this.alternativesMaxCategoriesPerCard).map(category => 
             `<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
-        ).join('') + (app.categories.length > this.browseMaxCategoriesPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.categories.length - this.browseMaxCategoriesPerCard}</span>` : '') : '';
+        ).join('') + (app.categories.length > this.alternativesMaxCategoriesPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.categories.length - this.alternativesMaxCategoriesPerCard}</span>` : '') : '';
         
         // Platform badges (show up to configured limit)
-        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.browseMaxPlatformsPerCard).map(platform => {
+        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.alternativesMaxPlatformsPerCard).map(platform => {
             const color = this.getPlatformColor(platform);
             return `<span class="inline-flex items-center text-gray-500 dark:text-gray-400 text-xs mr-2 mb-1">
                 <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></div>
                 ${platform}
             </span>`;
-        }).join('') + (app.platforms.length > this.browseMaxPlatformsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded mr-1 mb-1">+${app.platforms.length - this.browseMaxPlatformsPerCard}</span>` : '') : '';
+        }).join('') + (app.platforms.length > this.alternativesMaxPlatformsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded mr-1 mb-1">+${app.platforms.length - this.alternativesMaxPlatformsPerCard}</span>` : '') : '';
 
         // License display (first license + count if multiple)
         let licenseBadge = '';
@@ -732,9 +732,9 @@ class AlternativesPage {
         if (!description) return '';
         
         if (maxLength === null) {
-            maxLength = this.browseDescriptionLength;
+            maxLength = this.alternativesDescriptionLength;
         }
-        if (this.browseDescriptionFull || description.length <= maxLength) {
+        if (this.alternativesDescriptionFull || description.length <= maxLength) {
             return description;
         }
         

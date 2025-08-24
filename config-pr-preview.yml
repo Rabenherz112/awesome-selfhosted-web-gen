@@ -62,6 +62,8 @@ ui:
     related_apps: 6
     browse_max_categories_per_card: 2
     browse_max_platforms_per_card: 3
+    alternatives_max_categories_per_card: 2
+    alternatives_max_platforms_per_card: 3
 
   # Text truncation settings
   truncation:
@@ -69,6 +71,8 @@ ui:
     homepage_description_length: 70
     browse_description_length: 90
     browse_description_full: false
+    alternatives_description_length: 90
+    alternatives_description_full: false
     related_apps_description_length: 100
 
   # Homepage configuration
@@ -139,6 +143,7 @@ navigation:
     url: "/browse.html"
   - title: "Alternatives"
     url: "/alternatives.html"
+    enabled: "{{ alternatives.enabled }}"  # Conditional navigation
   - title: "Statistics" 
     url: "/statistics.html"
 

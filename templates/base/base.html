@@ -23,6 +23,10 @@
     <meta name="base-path" content="{{ base_path }}">
     {% if alternatives_config %}
     <meta name="alternatives-show-more-threshold" content="{{ alternatives_config.get('show_more_threshold', 3) }}">
+    <meta name="alternatives-description-length" content="{{ ui_config.get('truncation', {}).get('alternatives_description_length', 90) }}">
+    <meta name="alternatives-description-full" content="{{ ui_config.get('truncation', {}).get('alternatives_description_full', false) }}">
+    <meta name="alternatives-max-categories-per-card" content="{{ ui_config.get('limits', {}).get('alternatives_max_categories_per_card', 2) }}">
+    <meta name="alternatives-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('alternatives_max_platforms_per_card', 3) }}">
     <meta name="total-all-applications" content="{{ total_all_applications }}">
     {% endif %}
 
