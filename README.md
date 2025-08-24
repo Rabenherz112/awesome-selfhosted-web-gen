@@ -25,7 +25,7 @@ A Python-based static site generator that creates a beautiful, interactive websi
 
 1. **Clone the repository:**
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git
 cd awesome-selfhosted-generator
 ```
 
