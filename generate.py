@@ -140,7 +140,7 @@ def cmd_build(config, fetch_first=False, verbose=False):
             cmd_fetch(config, verbose)
         
         # Load the data
-        import json
+        #import json - Itentionally breaking
         with open(cache_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
