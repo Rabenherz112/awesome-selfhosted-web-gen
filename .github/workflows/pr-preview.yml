@@ -26,42 +26,44 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      - name: Initialize build log
+        run: |
+          echo "Build log for PR #${{ github.event.number }} — $(date -Iseconds)" > build.log
 
       - name: Clone awesome-selfhosted-data
+        shell: bash
         run: |
-          git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
+          set -o pipefail
+          git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git 2>&1 | tee -a build.log
 
       - name: Install Python dependencies
+        shell: bash
         run: |
-          pip install -r requirements.txt
-
-      - name: Install Node.js dependencies
-        run: |
-          npm install
+          set -o pipefail
+          pip install -r requirements.txt 2>&1 | tee -a build.log
 
       - name: Generate website
+        shell: bash
         run: |
+          set -o pipefail
           # Create a temporary config file with dynamic base_path
-          cp config-pr-preview.yml config-pr-preview-temp.yml
-          
+          cp config-pr-preview.yml config-pr-preview-temp.yml 2>&1 | tee -a build.log
           # Update base_path to include repository name and PR number
-          sed -i 's|base_path: ""|base_path: "/awesome-selfhosted-web-gen/pr-${{ github.event.number }}"|g' config-pr-preview-temp.yml
-          
+          sed -i 's|base_path: ""|base_path: "/awesome-selfhosted-web-gen/pr-${{ github.event.number }}"|g' config-pr-preview-temp.yml 2>&1 | tee -a build.log
           # Generate website with the modified config
-          python generate.py -c config-pr-preview-temp.yml build
-          
+          python generate.py -c config-pr-preview-temp.yml build 2>&1 | tee -a build.log
           # Clean up temporary config file
-          rm config-pr-preview-temp.yml
+          rm -f config-pr-preview-temp.yml 2>&1 | tee -a build.log
 
+      # Deploy only if everything above succeeded
       - name: Deploy to GitHub Pages branch
+        if: ${{ success() }}
+        shell: bash
         run: |
+          set -o pipefail
           # Configure git
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git config --global user.name 'github-actions[bot]' 2>&1 | tee -a build.log
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com' 2>&1 | tee -a build.log
 
           # Store current working directory
           WORK_DIR=$(pwd)
@@ -69,67 +71,56 @@ jobs:
           # Check if gh-pages branch exists remotely
           if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
             # Branch exists, fetch and checkout
-            git fetch origin gh-pages:gh-pages
-            git checkout gh-pages
+            git fetch origin gh-pages:gh-pages 2>&1 | tee -a build.log
+            git checkout gh-pages 2>&1 | tee -a build.log
           else
             # Branch doesn't exist, create orphan branch
-            git checkout --orphan gh-pages
-            git rm -rf .
+            git checkout --orphan gh-pages 2>&1 | tee -a build.log
+            git rm -rf . 2>&1 | tee -a build.log
             echo "# PR Previews" > README.md
-            git add README.md
-            git commit -m "Initialize gh-pages branch for PR previews"
-            git push origin gh-pages
+            git add README.md 2>&1 | tee -a build.log
+            git commit -m "Initialize gh-pages branch for PR previews" 2>&1 | tee -a build.log
+            git push origin gh-pages 2>&1 | tee -a build.log
           fi
 
           # Create PR directory and copy files
-          mkdir -p pr-${{ github.event.number }}
-          cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/
+          mkdir -p pr-${{ github.event.number }} 2>&1 | tee -a build.log
+          cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/ 2>&1 | tee -a build.log
 
           # Update or create active PRs JSON file
           cat > active-prs.json << 'EOF'
           []
           EOF
-          
-          # Read existing active PRs if file exists
-          if [ -f active-prs.json ]; then
-            EXISTING_PRS=$(cat active-prs.json)
-          else
-            EXISTING_PRS="[]"
-          fi
-          
-          # Add current PR to the list (using Python for JSON manipulation)
+
+          # Add/refresh this PR entry
           python3 << 'PYTHON_SCRIPT'
-          import json
-          import sys
-          import os
-          
-          pr_number = ${{ github.event.number }}
-          
-          # Read existing PRs
+          import json, os
+          pr_number = int(os.environ.get('PR_NUMBER', '0'))
           try:
               with open('active-prs.json', 'r') as f:
                   active_prs = json.load(f)
-          except:
+          except Exception:
               active_prs = []
-          
-          # Remove any existing entry for this PR and add the new one
-          active_prs = [pr for pr in active_prs if pr['number'] != pr_number]
+          active_prs = [pr for pr in active_prs if pr.get('number') != pr_number]
           active_prs.append({
               'number': pr_number,
-              'title': 'PR #' + str(pr_number),
-              'url': 'pr-' + str(pr_number) + '/',
-              'updated': '$(date -Iseconds)'
+              'title': f'PR #{pr_number}',
+              'url': f'pr-{pr_number}/',
+              'updated': os.popen('date -Iseconds').read().strip()
           })
-          
-          # Sort by PR number (newest first)
           active_prs.sort(key=lambda x: x['number'], reverse=True)
-          
-          # Write back to file
           with open('active-prs.json', 'w') as f:
               json.dump(active_prs, f, indent=2)
           PYTHON_SCRIPT
+        env:
+          PR_NUMBER: ${{ github.event.number }}
 
-          # Create/update index page with list of PR previews
+      - name: Commit & push preview
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -o pipefail
+          # Write/refresh index.html
           cat > index.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
@@ -138,43 +129,15 @@ jobs:
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>PR Previews - Awesome Self-Hosted Web Generator</title>
               <style>
-                  body {
-                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                      margin: 40px;
-                      background: #f7fafc;
-                  }
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 40px; background: #f7fafc; }
                   .container { max-width: 800px; margin: 0 auto; }
                   .header { text-align: center; margin-bottom: 40px; }
                   .preview-list { list-style: none; padding: 0; }
-                  .preview-item {
-                      margin: 10px 0;
-                      padding: 20px;
-                      background: white;
-                      border: 1px solid #e2e8f0;
-                      border-radius: 8px;
-                      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                  }
-                  .preview-item a {
-                      text-decoration: none;
-                      color: #3182ce;
-                      font-weight: 500;
-                      font-size: 1.1em;
-                  }
+                  .preview-item { margin: 10px 0; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                  .preview-item a { text-decoration: none; color: #3182ce; font-weight: 500; font-size: 1.1em; }
                   .preview-item a:hover { text-decoration: underline; }
-                  .pr-meta {
-                      font-size: 0.9em;
-                      color: #718096;
-                      margin-top: 5px;
-                  }
-                  .badge {
-                      display: inline-block;
-                      padding: 2px 8px;
-                      background: #edf2f7;
-                      color: #4a5568;
-                      border-radius: 4px;
-                      font-size: 0.8em;
-                      margin-left: 8px;
-                  }
+                  .pr-meta { font-size: 0.9em; color: #718096; margin-top: 5px; }
+                  .badge { display: inline-block; padding: 2px 8px; background: #edf2f7; color: #4a5568; border-radius: 4px; font-size: 0.8em; margin-left: 8px; }
               </style>
           </head>
           <body>
@@ -191,12 +154,9 @@ jobs:
                   async function loadPreviews() {
                       try {
                           const response = await fetch('./active-prs.json');
-                          if (!response.ok) {
-                              throw new Error('Failed to load active PRs');
-                          }
+                          if (!response.ok) throw new Error('Failed to load active PRs');
                           const activePrs = await response.json();
                           const previewList = document.getElementById('previewList');
-                          
                           if (activePrs.length === 0) {
                               previewList.innerHTML = '<li>No PR previews available</li>';
                           } else {
@@ -204,9 +164,7 @@ jobs:
                                   return `<li class="preview-item">
                                       <a href="${pr.url}">PR #${pr.number} Preview</a>
                                       <span class="badge">Active</span>
-                                      <div class="pr-meta">
-                                          Preview for Pull Request #${pr.number}
-                                      </div>
+                                      <div class="pr-meta">Preview for Pull Request #${pr.number}</div>
                                   </li>`;
                               }).join('');
                           }
@@ -221,18 +179,18 @@ jobs:
           </html>
           EOF
 
-          # Add only the necessary files and commit
-          git add pr-${{ github.event.number }}/ index.html active-prs.json
-          # Add README.md if it exists
-          [ -f README.md ] && git add README.md
+          git add pr-${{ github.event.number }}/ index.html active-prs.json 2>&1 | tee -a build.log
+          [ -f README.md ] && git add README.md 2>&1 | tee -a build.log
           if git diff --staged --quiet; then
-              echo "No changes to commit"
+              echo "No changes to commit" | tee -a build.log
           else
-              git commit -m "Deploy PR #${{ github.event.number }} preview"
-              git push origin gh-pages
+              git commit -m "Deploy PR #${{ github.event.number }} preview" 2>&1 | tee -a build.log
+              git push origin gh-pages 2>&1 | tee -a build.log
           fi
 
-      - name: Comment on PR
+      # Comment on success
+      - name: Comment on PR (success)
+        if: ${{ success() }}
         uses: actions/github-script@v7
         with:
           script: |
@@ -240,25 +198,24 @@ jobs:
             const repoUrl = `https://${context.repo.owner}.github.io/${context.repo.repo}`;
             const previewUrl = `${repoUrl}/pr-${prNumber}/`;
 
-            // Check if we already have a preview comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
 
-            const botComment = comments.data.find(comment =>
-              comment.user.type === 'Bot' &&
-              comment.body.includes('🔍 PR Preview')
+            const botComment = comments.data.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🔍 PR Preview')
             );
 
-            const commentBody = `## 🔍 PR Preview
+            const body = `## 🔍 PR Preview
 
             Your changes have been deployed! You can preview them here:
 
             **📱 Preview URL:** ${previewUrl}
 
-            This preview was generated from commit \`${context.payload.pull_request.head.sha.substring(0, 7)}\` and will be updated when you push new changes.
+            Preview from commit \`${context.payload.pull_request.head.sha.substring(0, 7)}\`.
+            *The website may take a few minutes to go live after this comment* 
 
             ### ✅ Build Status
             - Generator executed successfully
@@ -269,20 +226,49 @@ jobs:
             *This comment will be automatically updated when you push new commits.*`;
 
             if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: commentBody
-              });
+              await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: botComment.id, body });
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body: commentBody
-              });
+              await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber, body });
             }
+
+      # Comment on failure (no deploy/push happens)
+      - name: Comment on PR (failure with build log)
+        if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const prNumber = context.payload.pull_request.number;
+
+            let log = 'Build log not found.';
+            try { log = fs.readFileSync('build.log', 'utf8'); } catch (e) {}
+
+            // Truncate to fit GitHub comment limits
+            const MAX = 60000;
+            if (log.length > MAX) {
+              log = '... (truncated) ...\n' + log.slice(-MAX);
+            }
+
+            const body = `## ❌ Build failed
+
+            The preview was **not deployed** because the build failed.
+
+            <details>
+            <summary>Build log (last ${Math.min(log.length, MAX)} characters)</summary>
+
+            \`\`\`
+            ${log}
+            \`\`\`
+            </details>
+
+            _Commit: \`${context.payload.pull_request.head.sha.substring(0,7)}\`_`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body
+            })
 
   cleanup-preview:
     if: github.event.action == 'closed'
@@ -316,20 +302,13 @@ jobs:
               if [ -f active-prs.json ]; then
                 python3 << 'PYTHON_SCRIPT'
           import json
-          
           pr_number = ${{ github.event.number }}
-          
-          # Read existing PRs
           try:
               with open('active-prs.json', 'r') as f:
                   active_prs = json.load(f)
-          except:
+          except Exception:
               active_prs = []
-          
-          # Remove this PR from the list
-          active_prs = [pr for pr in active_prs if pr['number'] != pr_number]
-          
-          # Write back to file
+          active_prs = [pr for pr in active_prs if pr.get('number') != pr_number]
           with open('active-prs.json', 'w') as f:
               json.dump(active_prs, f, indent=2)
           PYTHON_SCRIPT
@@ -355,20 +334,18 @@ jobs:
           script: |
             const prNumber = context.payload.pull_request.number;
 
-            // Find and update the preview comment
             const comments = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
             });
 
-            const botComment = comments.data.find(comment =>
-              comment.user.type === 'Bot' &&
-              comment.body.includes('🔍 PR Preview')
+            const botComment = comments.data.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🔍 PR Preview')
             );
 
             if (botComment) {
-              const commentBody = `## 🔍 PR Preview *(Closed)*
+              const body = `## 🔍 PR Preview *(Closed)*
 
               This PR has been ${context.payload.pull_request.merged ? 'merged' : 'closed'}.
 
@@ -381,6 +358,6 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: commentBody
+                body
               });
             }
