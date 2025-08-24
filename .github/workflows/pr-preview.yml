@@ -34,13 +34,13 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git 2>&1 | tee -a build.log
+          git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
 
       - name: Install Python dependencies
         shell: bash
         run: |
           set -o pipefail
-          pip install -r requirements.txt 2>&1 | tee -a build.log
+          pip install -r requirements.txt
 
       - name: Generate website
         shell: bash
@@ -62,8 +62,8 @@ jobs:
         run: |
           set -o pipefail
           # Configure git
-          git config --global user.name 'github-actions[bot]' 2>&1 | tee -a build.log
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com' 2>&1 | tee -a build.log
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
           # Store current working directory
           WORK_DIR=$(pwd)
@@ -71,21 +71,21 @@ jobs:
           # Check if gh-pages branch exists remotely
           if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
             # Branch exists, fetch and checkout
-            git fetch origin gh-pages:gh-pages 2>&1 | tee -a build.log
-            git checkout gh-pages 2>&1 | tee -a build.log
+            git fetch origin gh-pages:gh-pages 
+            git checkout gh-pages 
           else
             # Branch doesn't exist, create orphan branch
-            git checkout --orphan gh-pages 2>&1 | tee -a build.log
-            git rm -rf . 2>&1 | tee -a build.log
+            git checkout --orphan gh-pages 
+            git rm -rf . 
             echo "# PR Previews" > README.md
-            git add README.md 2>&1 | tee -a build.log
-            git commit -m "Initialize gh-pages branch for PR previews" 2>&1 | tee -a build.log
-            git push origin gh-pages 2>&1 | tee -a build.log
+            git add README.md 
+            git commit -m "Initialize gh-pages branch for PR previews" 
+            git push origin gh-pages 
           fi
 
           # Create PR directory and copy files
-          mkdir -p pr-${{ github.event.number }} 2>&1 | tee -a build.log
-          cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/ 2>&1 | tee -a build.log
+          mkdir -p pr-${{ github.event.number }} 
+          cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/ 
 
           # Update or create active PRs JSON file
           cat > active-prs.json << 'EOF'
@@ -179,13 +179,13 @@ jobs:
           </html>
           EOF
 
-          git add pr-${{ github.event.number }}/ index.html active-prs.json 2>&1 | tee -a build.log
-          [ -f README.md ] && git add README.md 2>&1 | tee -a build.log
+          git add pr-${{ github.event.number }}/ index.html active-prs.json 
+          [ -f README.md ] && git add README.md 
           if git diff --staged --quiet; then
               echo "No changes to commit" | tee -a build.log
           else
-              git commit -m "Deploy PR #${{ github.event.number }} preview" 2>&1 | tee -a build.log
-              git push origin gh-pages 2>&1 | tee -a build.log
+              git commit -m "Deploy PR #${{ github.event.number }} preview" 
+              git push origin gh-pages 
           fi
 
       # Marker that only appears on successful deploys
