@@ -277,6 +277,21 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - [Tailwind CSS](https://tailwindcss.com/) - For the CSS framework
 - [Jinja2](https://jinja.palletsprojects.com/) - For the templating engine
 
+## 📜 Disclaimer
+
+This project was created with the assistance of Large Language Models (LLMs).
+Some portions of the code, documentation, and/or design may have been generated or refined using AI-based tools.
+
+For transparency, the following models/tools were used during development:
+
+- [OpenAI GPT-5](https://openai.com/index/introducing-gpt-5/) (for code suggestions, and documentation drafting)
+- [OpenAI GPT-4o](https://openai.com/index/introducing-gpt-4o/) (for code suggestions, and documentation drafting)
+- [Claude 4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1) (for code suggestions, and some design suggestions)
+- [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (for code suggestions)
+- [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (for code suggestions)
+
+While AI was used as a development aid, all outputs have been reviewed and, where necessary, modified by a human contributor.
+
 ## TODOs
 
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen` - How to do this? - Paused for now

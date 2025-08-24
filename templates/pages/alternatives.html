@@ -22,124 +22,176 @@
     </div>
 </div>
 
-<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Alternative Software
         </h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300">
+        <p class="text-xl text-gray-600 dark:text-gray-300">
             Find selfhosted alternatives to popular software - {{ total_software }} software with {{ total_alternatives }} alternatives
         </p>
     </div>
 
-    {% if config.show_statistics %}
+    {% if alternatives_config.show_statistics %}
     <!-- Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                {{ total_software }}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div id="statisticsSection" class="contents">
+            <!-- Total Software -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Software with Alternatives</dt>
+                            <dd class="text-3xl font-bold text-gray-900 dark:text-white" id="totalSoftwareCount">{{ total_software }}</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-                Software with Alternatives
+            
+            <!-- Total Alternatives -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Alternative Apps</dt>
+                            <dd class="text-3xl font-bold text-gray-900 dark:text-white" id="totalAlternativesCount">{{ total_alternatives }}</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-            <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-                {{ total_alternatives }}
+            
+            <!-- Average Alternatives -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Avg. Alternatives per Software</dt>
+                            <dd class="text-3xl font-bold text-gray-900 dark:text-white" id="averageAlternativesCount">{{ "%.1f"|format(total_alternatives / total_software if total_software > 0 else 0) }}</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-                Total Alternatives
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                {{ alternatives_statistics.most_alternatives }}
-            </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-                Most Alternatives
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-            <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                {{ alternatives_statistics.avg_alternatives_per_software }}
-            </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">
-                Avg per Software
+            
+            <!-- Software Coverage Percentage -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-md flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Apps alternative set</dt>
+                            <dd class="text-3xl font-bold text-gray-900 dark:text-white" id="coveragePercentage">{{ "%.1f"|format((total_software / total_all_applications * 100) if total_all_applications > 0 else 0) }}%</dd>
+                        </dl>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     {% endif %}
 
-    <!-- Filter and Search -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-        <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <!-- Search -->
-            <div class="w-full md:flex-1">
-                <div class="relative">
+    <!-- Search and Filter Section -->
+    <div class="max-w-4xl mx-auto mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <!-- Search Bar -->
+            <div class="mb-6">
+                <div class="relative max-w-2xl mx-auto">
                     <input type="text" 
                            id="alternatives-search" 
                            placeholder="Search for software (e.g., Discord, Slack, Google Drive)..." 
-                           class="w-full px-4 py-3 pl-12 pr-4 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600     rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
-                    <div class="absolute left-4 top-3.5">
+                           class="w-full px-4 py-3 pl-12 text-base bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
+                    <!-- Search Suggestions Dropdown -->
+                    <div id="searchSuggestions" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+                        <!-- Suggestions will be populated by JavaScript -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Sort Options -->
-            <div class="flex space-x-2 flex-shrink-0">
-                <button id="sortAlphabetical" class="sort-button active">
-                    Name
-                </button>
-                <button id="sortMostAlternatives" class="sort-button">
-                    Alternatives
-                </button>
+            <!-- Sort Options and Results Count -->
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Showing <span id="visibleCount">{{ total_software }}</span> of <span id="totalCount">{{ total_software }}</span> software
+                </div>
+                <div class="flex space-x-2 flex-shrink-0">
+                    <button id="sortAlphabetical" class="sort-button active">
+                        Name
+                    </button>
+                    <button id="sortMostAlternatives" class="sort-button">
+                        Alternatives
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <!-- Results Count -->
-        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
-            Showing <span id="visibleCount">{{ total_software }}</span> of <span id="totalCount">{{ total_software }}</span> software
         </div>
     </div>
 
     <!-- Alternatives Grid -->
-    <div id="alternativesGrid" class="space-y-6">
-        <!-- Alternatives will be populated by JavaScript -->
-        <div id="loadingMessage" class="text-center py-12">
-            <div class="text-gray-500 dark:text-gray-400">Loading alternatives...</div>
+    <div class="max-w-7xl mx-auto">
+        <div id="alternativesGrid">
+            <!-- Alternatives will be populated by JavaScript -->
+            <div id="loadingMessage" class="text-center py-12">
+                <div class="text-gray-500 dark:text-gray-400">Loading alternatives...</div>
+            </div>
         </div>
     </div>
 
     <!-- No Results Message -->
-    <div id="noResultsMessage" class="hidden text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <div class="text-gray-500 dark:text-gray-400">
-            <div class="text-6xl mb-4">🔍</div>
-            <p class="text-lg font-medium mb-2">No alternatives found</p>
-            <p class="text-sm">Try adjusting your search terms or browse all alternatives above.</p>
+    <div class="max-w-7xl mx-auto">
+        <div id="noResultsMessage" class="hidden text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <div class="text-gray-500 dark:text-gray-400">
+                <div class="text-6xl mb-4">🔍</div>
+                <p class="text-lg font-medium mb-2">No alternatives found</p>
+                <p class="text-sm">Try adjusting your search terms or browse all alternatives above.</p>
+            </div>
         </div>
     </div>
 
     <!-- Pagination -->
-    <div id="paginationContainer" class="hidden mt-8">
-        <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-                Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
-            </div>
-            
-            <div class="flex space-x-2">
-                <button id="prevPage" class="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    Previous
-                </button>
-                <button id="nextPage" class="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    Next
-                </button>
+    <div class="max-w-7xl mx-auto">
+        <div id="paginationContainer" class="hidden mt-8">
+            <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                </div>
+                
+                <div class="flex space-x-2">
+                    <button id="prevPage" class="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Previous
+                    </button>
+                    <button id="nextPage" class="px-3 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     </div>

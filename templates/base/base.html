@@ -21,6 +21,10 @@
     <meta name="browse-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_platforms_per_card', 3) }}">
     <meta name="lazy-load-images" content="{{ performance_config.get('lazy_load_images', true) }}">
     <meta name="base-path" content="{{ base_path }}">
+    {% if alternatives_config %}
+    <meta name="alternatives-show-more-threshold" content="{{ alternatives_config.get('show_more_threshold', 3) }}">
+    <meta name="total-all-applications" content="{{ total_all_applications }}">
+    {% endif %}
 
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">

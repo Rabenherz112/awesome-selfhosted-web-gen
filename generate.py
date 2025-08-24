@@ -152,10 +152,6 @@ def cmd_build(config, fetch_first=False, verbose=False):
         markdown_data = data.get('markdown', {})
         
         print(f"📚 Loaded {len(applications)} applications from cache")
-
-        if config.get('alternatives.enabled', False):
-            alternatives_count = sum(1 for app in applications if app.alternative_to)
-            print(f"🔄 Alternatives page enabled - {alternatives_count} apps have alternative_to data")
         
         # Generate the site
         generator = SiteGenerator(config)
@@ -296,9 +292,11 @@ def cmd_info(config):
     
     # Generation Configuration
     generation_config = config.get_generation_config()
+    alternatives_config = config.get_alternatives_config()
     print(f"\n⚙️  Generation Options:")
     print(f"   Items per page: {generation_config.get('items_per_page', 60)}")
     print(f"   Enable search index: {generation_config.get('enable_search_index', True)}")
+    print(f"   Enable alternatives: {alternatives_config.get('enabled', False)}")
     print(f"   Minify HTML: {generation_config.get('minify_html', False)}")
     print(f"   Generate sitemap: {generation_config.get('generate_sitemap', True)}")
     print(f"   Enable pagination: {generation_config.get('enable_pagination', True)}")

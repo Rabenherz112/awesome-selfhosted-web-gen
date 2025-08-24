@@ -129,6 +129,9 @@ class SiteGenerator:
         # Generate alternatives page
         if self.config.get("alternatives.enabled", False):
             self._generate_alternatives_page(applications)
+            # Generate alternatives data file for client-side loading
+            alternatives_data = self._generate_alternatives_data_file(applications)
+            print("Alternatives data file generated")
 
         # Generate additional files
         if self.config.get("generation.generate_sitemap", True):
@@ -327,7 +330,8 @@ class SiteGenerator:
             alternatives_statistics=alternatives_data['statistics'],
             total_software=len(filtered_alternatives),
             total_alternatives=sum(len(apps) for apps in filtered_alternatives.values()),
-            config=self.config.get("alternatives", {}),
+            total_all_applications=len(applications),  # Total applications in the dataset
+            alternatives_config=self.config.get("alternatives", {}),
             page_title="Alternative Software"
         )
 
@@ -958,6 +962,40 @@ class SiteGenerator:
             json.dump(search_data, f, separators=(",", ":"))
 
         print("Search data file generated")
+
+    def _generate_alternatives_data_file(self, applications: List[Application]) -> Dict[str, Any]:
+        """Generate alternatives data JSON file for client-side alternatives page."""
+        from .data_processor import DataProcessor
+        from dataclasses import asdict
+        
+        processor = DataProcessor(self.config)
+        alternatives_data = processor.generate_alternatives_data(applications)
+        
+        # Apply minimum alternatives filter
+        min_alternatives = self.config.get("alternatives.min_alternatives", 2)
+        filtered_alternatives = {
+            name: [asdict(app) for app in apps]
+            for name, apps in alternatives_data['alternatives'].items()
+            if len(apps) >= min_alternatives
+        }
+        
+        # Create the data structure for the JSON file
+        json_data = {
+            "alternatives": filtered_alternatives,
+            "statistics": alternatives_data['statistics'],
+            "total_software": len(filtered_alternatives),
+            "total_alternatives": sum(len(apps) for apps in filtered_alternatives.values()),
+            "config": self.config.get("alternatives", {})
+        }
+        
+        # Write to file
+        alternatives_file = self.config.output_dir / "static" / "data" / "alternatives.json"
+        alternatives_file.parent.mkdir(exist_ok=True)
+        
+        with open(alternatives_file, "w", encoding="utf-8") as f:
+            json.dump(json_data, f, separators=(",", ":"))
+        
+        return json_data
 
     def _generate_sitemap(self, applications: List[Application]):
         """Generate XML sitemap."""
