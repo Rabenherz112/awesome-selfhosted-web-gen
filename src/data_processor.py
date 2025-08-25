@@ -504,6 +504,43 @@ class DataProcessor:
             "apps_with_multiple_platforms": apps_with_multiple_platforms,
         }
 
+    def generate_alternatives_data(self, applications: List[Application]) -> Dict[str, Any]:
+        """Generate alternatives data for the alternatives page."""
+        alternatives_map = {}
+        
+        for app in applications:
+            if app.alternative_to:
+                for alternative in app.alternative_to:
+                    # Normalize the alternative name (case-insensitive, strip whitespace)
+                    alt_key = alternative.strip()
+                    if alt_key:
+                        if alt_key not in alternatives_map:
+                            alternatives_map[alt_key] = []
+                        alternatives_map[alt_key].append(app)
+        
+        # Sort alternatives by name and sort apps within each alternative by stars
+        sorted_alternatives = {}
+        for alt_name in sorted(alternatives_map.keys(), key=str.lower):
+            apps = alternatives_map[alt_name]
+            # Sort apps by stars (descending), then by name
+            sorted_apps = sorted(apps, key=lambda x: (-(x.stars or 0), x.name.lower()))
+            sorted_alternatives[alt_name] = sorted_apps
+        
+        # Calculate statistics
+        total_alternatives = len(sorted_alternatives)
+        total_alternative_apps = len([app for app in applications if app.alternative_to])
+        most_alternatives = max(len(apps) for apps in sorted_alternatives.values()) if sorted_alternatives else 0
+        
+        return {
+            'alternatives': sorted_alternatives,
+            'statistics': {
+                'total_alternatives': total_alternatives,
+                'total_alternative_apps': total_alternative_apps,
+                'most_alternatives': most_alternatives,
+                'avg_alternatives_per_software': round(sum(len(apps) for apps in sorted_alternatives.values()) / total_alternatives, 1) if  total_alternatives > 0 else 0
+            }
+        }
+
     def _load_markdown_files(self, data_dir: Path) -> Dict[str, str]:
         """Load markdown files (footer.md only now)."""
         markdown_files = {}

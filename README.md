@@ -115,6 +115,7 @@ awesome-selfhosted-web-gen/
 │   ├── pages/
 │   │   ├── index.html           # Homepage
 │   │   ├── browse.html          # Browse page
+│   │   ├── alternatives.html    # Alternatives page
 │   │   ├── statistics.html      # Statistics page
 │   │   └── app_detail.html      # App detail pages
 │   └── sitemap.xml              # Sitemap template
@@ -179,6 +180,7 @@ Templates use Jinja2 with extensive helper functions:
 - `base/base.html` - Configurable layout with dynamic navigation and footer
 - `pages/index.html` - Homepage with featured applications
 - `pages/browse.html` - Enhanced filtering and pagination
+- `pages/alternatives.html` - Alternative software
 - `pages/statistics.html` - Data insights and trends
 - `pages/app_detail.html` - Detailed app information with commit graphs and related apps
 
@@ -197,6 +199,7 @@ Client-side functionality is organized into specialized modules:
 
 - `app.js` - Main application logic and initialization
 - `browse.js` - Advanced filtering, sorting, and pagination
+- `alternatives.js` - Alternatives page functionality and search
 - `search.js` - Real-time search with mobile support
 - `app-detail.js` - Commit graphs and detail page interactions
 - `theme.js` - Dark/light theme toggle
@@ -212,6 +215,17 @@ The website includes powerful search capabilities:
 - **Smart Linking**: Search results link to detail pages
 - **Filtering**: Advanced filters with dynamic license options
 - **Sorting**: Multiple sorting options with visual feedback
+
+## 🔄 Alternatives Discovery
+
+The alternatives page helps users find selfhosted alternatives to popular software:
+
+- **Smart Grouping**: Applications are automatically grouped by what they're alternatives to
+- **Multi-alternative Apps**: Single applications can appear in multiple groups (e.g., Mixpost for both Hootsuite and Buffer)
+- **Real-time Search**: Search through alternatives with instant filtering
+- **Statistics Dashboard**: View coverage metrics and alternative counts
+- **Sorting Options**: Sort by name or number of alternatives
+- **Responsive Design**: Mobile-friendly interface with touch-optimized controls
 
 ## 🚀 Deployment
 
@@ -276,6 +290,21 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the amazing curated list
 - [Tailwind CSS](https://tailwindcss.com/) - For the CSS framework
 - [Jinja2](https://jinja.palletsprojects.com/) - For the templating engine
+
+## 📜 Disclaimer
+
+This project was created with the assistance of Large Language Models (LLMs).
+Some portions of the code, documentation, and/or design may have been generated or refined using AI-based tools.
+
+For transparency, the following models/tools were used during development:
+
+- [OpenAI GPT-5](https://openai.com/index/introducing-gpt-5/) (for code suggestions, and documentation drafting)
+- [OpenAI GPT-4o](https://openai.com/index/introducing-gpt-4o/) (for code suggestions, and documentation drafting)
+- [Claude 4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1) (for code suggestions, and some design suggestions)
+- [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (for code suggestions)
+- [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (for code suggestions)
+
+While AI was used as a development aid, all outputs have been reviewed and, where necessary, modified by a human contributor.
 
 ## TODOs
 

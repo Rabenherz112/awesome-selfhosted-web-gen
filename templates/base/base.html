@@ -21,6 +21,14 @@
     <meta name="browse-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_platforms_per_card', 3) }}">
     <meta name="lazy-load-images" content="{{ performance_config.get('lazy_load_images', true) }}">
     <meta name="base-path" content="{{ base_path }}">
+    {% if alternatives_config %}
+    <meta name="alternatives-show-more-threshold" content="{{ alternatives_config.get('show_more_threshold', 3) }}">
+    <meta name="alternatives-description-length" content="{{ ui_config.get('truncation', {}).get('alternatives_description_length', 90) }}">
+    <meta name="alternatives-description-full" content="{{ ui_config.get('truncation', {}).get('alternatives_description_full', false) }}">
+    <meta name="alternatives-max-categories-per-card" content="{{ ui_config.get('limits', {}).get('alternatives_max_categories_per_card', 2) }}">
+    <meta name="alternatives-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('alternatives_max_platforms_per_card', 3) }}">
+    <meta name="total-all-applications" content="{{ total_all_applications }}">
+    {% endif %}
 
     <!-- Open Graph tags -->
     <meta property="og:title" content="{% block og_title %}{% if page_title %}{{ ui_config.get('title_format', '{page_title} - {site_title}').replace('{page_title}', page_title).replace('{site_title}', site_config.title) }}{% else %}{{ site_config.title }}{% endif %}{% endblock %}">
@@ -108,7 +116,7 @@
                     
                     <!-- Main Navigation -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
-                        {% for nav_item in navigation_config %}
+                        {% for nav_item in filter_navigation(navigation_config) %}
                         <a href="{{ url_for(nav_item.url) }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
                             {{ nav_item.title }}
                         </a>
@@ -160,12 +168,11 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="md:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                <a href="{{ url_for('/browse.html') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                    Browse
+                {% for nav_item in filter_navigation(navigation_config) %}
+                <a href="{{ url_for(nav_item.url) }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                    {{ nav_item.title }}
                 </a>
-                <a href="{{ url_for('/statistics.html') }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                    Statistics
-                </a>
+                {% endfor %}
                 <!-- Mobile Search -->
                 <div class="px-3 py-2 relative">
                     <input type="text" 
