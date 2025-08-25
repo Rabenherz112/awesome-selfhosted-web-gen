@@ -59,6 +59,7 @@ ui:
     homepage_recently_updated: 8
     homepage_random_picks: 6
     homepage_category_stats: 8
+    homepage_alternatives: 6
     related_apps: 6
     browse_max_categories_per_card: 2
     browse_max_platforms_per_card: 3
@@ -83,6 +84,7 @@ ui:
       - popular_apps
       - recently_updated
       - random_picks
+      - alternatives
       - statistics
       - popular_categories
       - footer_markdown

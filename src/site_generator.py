@@ -16,7 +16,7 @@ except ImportError:
     MINIFY_AVAILABLE = False
 
 from .config import Config
-from .data_processor import Application
+from .data_processor import Application, DataProcessor
 from .template_helpers import TemplateHelpers
 
 
@@ -207,6 +207,24 @@ class SiteGenerator:
         random.shuffle(quality_apps)
         random_picks = quality_apps[: limits.get("homepage_random_picks", 6)]
 
+        # Get alternatives
+        processor = DataProcessor(self.config)
+        alternatives_data = processor.generate_alternatives_data(applications)
+
+        # Get top alternatives (by number of alternative apps)
+        min_alternatives = self.config.get("alternatives.min_alternatives", 2)
+        filtered_alternatives = {
+        name: apps for name, apps in alternatives_data['alternatives'].items()
+        if len(apps) >= min_alternatives
+        }
+
+        # Sort by number of alternatives and take top ones for homepage
+        top_alternatives = sorted(
+            filtered_alternatives.items(),
+            key=lambda x: len(x[1]),
+            reverse=True
+        )[: limits.get("homepage_alternatives", 6)]
+
         # Get top categories by app count
         category_stats = []
         for cat_id, cat_info in categories.items():
@@ -230,6 +248,7 @@ class SiteGenerator:
             popular_apps=popular_apps,
             recent_apps=recent_apps,
             random_picks=random_picks,
+            alternatives=top_alternatives,
             categories=category_stats[: limits.get("homepage_popular_categories", 8)],
             statistics=statistics,
             total_applications=len(applications),

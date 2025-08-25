@@ -62,6 +62,7 @@ ui:
     homepage_recently_updated: 8
     homepage_random_picks: 6
     homepage_category_stats: 8
+    homepage_alternatives: 6
     related_apps: 6
     browse_max_categories_per_card: 2
     browse_max_platforms_per_card: 3
@@ -86,6 +87,7 @@ ui:
       - popular_apps
       - recently_updated
       - random_picks
+      - alternatives
       - statistics
       - popular_categories
       - footer_markdown
@@ -213,7 +215,7 @@ pages:
 # ALTERNATIVES PAGE CONFIGURATION
 # =============================================================================
 alternatives:
-  enabled: false  # Set to false to disable the alternatives page
+  enabled: true  # Set to false to disable the alternatives page
   min_alternatives: 2  # Minimum number of alternatives required to show a software
   show_more_threshold: 3 # Show "Show More" button if there are more than this number of alternatives
   show_statistics: true  # Show statistics section on the page
@@ -237,7 +239,7 @@ search:
 related_apps:
   scoring:
     semantic_similarity:
-      enabled: true
+      enabled: false
       max_score: 25
     categories:
       enabled: true

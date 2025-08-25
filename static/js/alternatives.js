@@ -41,6 +41,7 @@ class AlternativesPage {
         this.setupEventListeners();
         this.updateSortButtons('sortAlphabetical');
         this.renderAllAlternatives();
+        this.parseUrlParameters();
     }
 
     async loadConfig() {
@@ -139,6 +140,11 @@ class AlternativesPage {
                 }
             });
         }
+
+        // Handle hash changes (when user navigates back/forward or clicks another hash link)
+        window.addEventListener('hashchange', () => {
+            this.parseUrlParameters();
+        });
 
         // Sort buttons
         const sortButtons = {
@@ -752,6 +758,27 @@ class AlternativesPage {
         return licenses.some(license => 
             this.nonFreeLicenses.has(license)
         );
+    }
+
+    parseUrlParameters() {
+        const hash = window.location.hash;
+        if (hash && hash.length > 1) {
+            // Remove the # and decode any URL encoding
+            const searchTerm = decodeURIComponent(hash.substring(1));
+            
+            // Set the search input value
+            const heroSearch = document.getElementById('alternatives-search');
+            if (heroSearch) {
+                heroSearch.value = searchTerm;
+                
+                // Trigger the search
+                this.filterAlternatives(searchTerm);
+                this.renderAlternatives();
+                
+                // Scroll to the search input
+                heroSearch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
     }
 
     showError(message) {
