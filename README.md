@@ -12,6 +12,7 @@ A Python-based static site generator that creates a beautiful, interactive websi
 - **📈 Enhanced Analytics**: Line chart commit graphs with smart data requirements
 - **🏷️ Smart Licensing**: Automatic non-free license detection using upstream data
 - **🔍 Smart Description Parsing**: Extracts relevant information from the description of the application
+- **🔍 Alternatives**: Optionally generate an alternatives page with smart grouping of applications
 
 ## 🚀 Quick Start
 
@@ -115,6 +116,7 @@ awesome-selfhosted-web-gen/
 │   ├── pages/
 │   │   ├── index.html           # Homepage
 │   │   ├── browse.html          # Browse page
+│   │   ├── alternatives.html    # Alternatives page
 │   │   ├── statistics.html      # Statistics page
 │   │   └── app_detail.html      # App detail pages
 │   └── sitemap.xml              # Sitemap template
@@ -179,6 +181,7 @@ Templates use Jinja2 with extensive helper functions:
 - `base/base.html` - Configurable layout with dynamic navigation and footer
 - `pages/index.html` - Homepage with featured applications
 - `pages/browse.html` - Enhanced filtering and pagination
+- `pages/alternatives.html` - Alternative software
 - `pages/statistics.html` - Data insights and trends
 - `pages/app_detail.html` - Detailed app information with commit graphs and related apps
 
@@ -197,21 +200,10 @@ Client-side functionality is organized into specialized modules:
 
 - `app.js` - Main application logic and initialization
 - `browse.js` - Advanced filtering, sorting, and pagination
+- `alternatives.js` - Alternatives page functionality and search
 - `search.js` - Real-time search with mobile support
 - `app-detail.js` - Commit graphs and detail page interactions
 - `theme.js` - Dark/light theme toggle
-
-## 🔍 Enhanced Search Features
-
-The website includes powerful search capabilities:
-
-- **Fuzzy Search**: Finds results even with typos
-- **Multi-field**: Searches names, descriptions, and categories
-- **Real-time**: Instant results as you type
-- **Mobile Support**: Dedicated mobile search interface
-- **Smart Linking**: Search results link to detail pages
-- **Filtering**: Advanced filters with dynamic license options
-- **Sorting**: Multiple sorting options with visual feedback
 
 ## 🚀 Deployment
 
@@ -277,6 +269,21 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - [Tailwind CSS](https://tailwindcss.com/) - For the CSS framework
 - [Jinja2](https://jinja.palletsprojects.com/) - For the templating engine
 
+## 📜 Disclaimer
+
+This project was created with the assistance of Large Language Models (LLMs).
+Some portions of the code, documentation, and/or design may have been generated or refined using AI-based tools.
+
+For transparency, the following models/tools were used during development:
+
+- [OpenAI GPT-5](https://openai.com/index/introducing-gpt-5/) (for code suggestions, and documentation drafting)
+- [OpenAI GPT-4o](https://openai.com/index/introducing-gpt-4o/) (for code suggestions, and documentation drafting)
+- [Claude 4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1) (for code suggestions, and some design suggestions)
+- [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (for code suggestions)
+- [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (for code suggestions)
+
+While AI was used as a development aid, all outputs have been reviewed and, where necessary, modified by a human contributor.
+
 ## TODOs
 
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen` - How to do this? - Paused for now
@@ -287,3 +294,6 @@ The generated content includes data from [awesome-selfhosted-data](https://githu
 - Add config ability to add a referer details to all outgoing links - Not required for inital release
 - Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space? - Not required for inital release
 - Simplify Code where possible - Not required for inital release
+- Make homepage more dynamic by being able to define via the config file which sections to include / exclude, which also dynamically change the color to match the current pattern - This release
+- Make license link in app detail page clickable if a license and the url for it are defined
+- Move none SiteGenerator code away from src/site_generator.py (e.g. `_find_related_apps`) - Next release

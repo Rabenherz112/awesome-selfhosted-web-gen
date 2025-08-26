@@ -528,3 +528,34 @@ class TemplateHelpers:
         """Get URL for application detail page."""
         # Don't use url_for here as it will be called from templates
         return f"/apps/{app_id}.html"
+
+    def filter_navigation(self, navigation_items: list) -> list:
+        """Filter navigation items based on enabled conditions."""
+        if not navigation_items:
+            return []
+
+        filtered_items = []
+        for item in navigation_items:
+            # Check if item has enabled condition
+            if 'enabled' in item:
+                enabled_condition = item['enabled']
+
+                # Handle template string evaluation
+                if isinstance(enabled_condition, str) and '{{' in enabled_condition:
+                    try:
+                        # Simple template evaluation for alternatives.enabled
+                        if 'alternatives.enabled' in enabled_condition:
+                            enabled = self.config.get('alternatives.enabled', False)
+                            if not enabled:
+                                continue
+                    except Exception:
+                        # If template evaluation fails, default to enabled
+                        pass
+                elif isinstance(enabled_condition, bool) and not enabled_condition:
+                    # Skip disabled items
+                    continue
+                
+            # Item is enabled, add to filtered list
+            filtered_items.append(item)
+
+        return filtered_items

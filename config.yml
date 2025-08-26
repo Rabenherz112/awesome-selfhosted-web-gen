@@ -7,7 +7,7 @@ site:
   title: "Awesome Selfhosted"
   description: "Discover and explore selfhosted applications"
   url: "https://awesome-selfhosted.net"
-  author: "Awesome Selfhosted Community"
+  author: "awesome selfhosted community"
   base_path: "" # Leave empty for root, or set to "/awesome-selfhosted" for subdirectory
 
 # =============================================================================
@@ -62,9 +62,12 @@ ui:
     homepage_recently_updated: 8
     homepage_random_picks: 6
     homepage_category_stats: 8
+    homepage_alternatives: 6
     related_apps: 6
     browse_max_categories_per_card: 2
     browse_max_platforms_per_card: 3
+    alternatives_max_categories_per_card: 2
+    alternatives_max_platforms_per_card: 3
 
   # Text truncation settings
   truncation:
@@ -72,6 +75,8 @@ ui:
     homepage_description_length: 70
     browse_description_length: 90
     browse_description_full: false
+    alternatives_description_length: 90
+    alternatives_description_full: false
     related_apps_description_length: 100
 
   # Homepage configuration
@@ -82,6 +87,7 @@ ui:
       - popular_apps
       - recently_updated
       - random_picks
+      - alternatives
       - statistics
       - popular_categories
       - footer_markdown
@@ -142,6 +148,9 @@ hero:
 navigation:
   - title: "Browse"
     url: "/browse.html"
+  - title: "Alternatives"
+    url: "/alternatives.html"
+    enabled: "{{ alternatives.enabled }}"  # Conditional navigation
   - title: "Statistics" 
     url: "/statistics.html"
 
@@ -150,7 +159,7 @@ footer:
   tagline: "{{ site.description }}"
   credit_text: "Built with ❤️ for the self-hosting community"
   footer_text: |
-    Copyright © 2015-2025, the {{ site.title }} community. Data from 
+    Copyright © 2015-2025, the {{ site.author }}. Data from 
     <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
     <br>
     <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>
@@ -164,6 +173,9 @@ footer:
           url: "/"
         - title: "Browse"
           url: "/browse.html"
+        - title: "Alternatives"
+          url: "/alternatives.html"
+          enabled: "{{ alternatives.enabled }}"  # Conditional navigation
         - title: "Statistics"
           url: "/statistics.html"
 
@@ -191,9 +203,22 @@ pages:
     title: "Statistics"
     description: "Explore trends and insights from the selfhosted community"
 
+  alternatives:
+    title: "Alternative Software"
+    description: "Find selfhosted alternatives to popular software"
+
   home:
     meta_title: "Discover Selfhosted Applications"
     meta_description: "Find the perfect selfhosted applications for your needs"
+
+# =============================================================================
+# ALTERNATIVES PAGE CONFIGURATION
+# =============================================================================
+alternatives:
+  enabled: false  # Set to false to disable the alternatives page
+  min_alternatives: 2  # Minimum number of alternatives required to show a software
+  show_more_threshold: 3 # Show "Show More" button if there are more than this number of alternatives
+  show_statistics: true  # Show statistics section on the page
 
 # =============================================================================
 # SEARCH CONFIGURATION

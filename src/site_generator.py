@@ -16,7 +16,7 @@ except ImportError:
     MINIFY_AVAILABLE = False
 
 from .config import Config
-from .data_processor import Application
+from .data_processor import Application, DataProcessor
 from .template_helpers import TemplateHelpers
 
 
@@ -76,6 +76,7 @@ class SiteGenerator:
                 "base_path": self.config.get("site.base_path", "").rstrip("/"),
                 "url_for": self.template_helpers.url_for,
                 "asset_url": self.template_helpers.asset_url,
+                "filter_navigation": self.template_helpers.filter_navigation,
             }
         )
 
@@ -124,6 +125,13 @@ class SiteGenerator:
         self._generate_browse_page(applications, categories)
         self._generate_statistics_page(applications, categories, statistics)
         self._generate_app_detail_pages(applications)
+
+        # Generate alternatives page
+        if self.config.get("alternatives.enabled", False):
+            self._generate_alternatives_page(applications)
+            # Generate alternatives data file for client-side loading
+            alternatives_data = self._generate_alternatives_data_file(applications)
+            print("Alternatives data file generated")
 
         # Generate additional files
         if self.config.get("generation.generate_sitemap", True):
@@ -199,6 +207,26 @@ class SiteGenerator:
         random.shuffle(quality_apps)
         random_picks = quality_apps[: limits.get("homepage_random_picks", 6)]
 
+        # Get alternatives
+        top_alternatives = []
+        if self.config.get("alternatives.enabled", False):
+            processor = DataProcessor(self.config)
+            alternatives_data = processor.generate_alternatives_data(applications)
+
+            # Get top alternatives (by number of alternative apps)
+            min_alternatives = self.config.get("alternatives.min_alternatives", 2)
+            filtered_alternatives = {
+            name: apps for name, apps in alternatives_data['alternatives'].items()
+            if len(apps) >= min_alternatives
+            }
+
+            # Sort by number of alternatives and take top ones for homepage
+            top_alternatives = sorted(
+                filtered_alternatives.items(),
+                key=lambda x: len(x[1]),
+                reverse=True
+            )[: limits.get("homepage_alternatives", 6)]
+
         # Get top categories by app count
         category_stats = []
         for cat_id, cat_info in categories.items():
@@ -222,6 +250,7 @@ class SiteGenerator:
             popular_apps=popular_apps,
             recent_apps=recent_apps,
             random_picks=random_picks,
+            alternatives=top_alternatives,
             categories=category_stats[: limits.get("homepage_popular_categories", 8)],
             statistics=statistics,
             total_applications=len(applications),
@@ -295,9 +324,49 @@ class SiteGenerator:
             f"Browse page generated (client-side rendering for {len(applications)} apps)"
         )
 
+    def _generate_alternatives_page(self, applications: List[Application]):
+        """Generate the alternatives page."""
+        from .data_processor import DataProcessor
+        from dataclasses import asdict
+
+        processor = DataProcessor(self.config)
+        alternatives_data = processor.generate_alternatives_data(applications)
+
+        # Apply minimum alternatives filter
+        min_alternatives = self.config.get("alternatives.min_alternatives", 2)
+        filtered_alternatives_raw = {
+            name: apps for name, apps in alternatives_data['alternatives'].items()
+            if len(apps) >= min_alternatives
+        }
+
+        # Convert Application objects to dictionaries for JSON serialization
+        filtered_alternatives = {}
+        for name, apps in filtered_alternatives_raw.items():
+            filtered_alternatives[name] = [asdict(app) for app in apps]
+
+        template = self.jinja_env.get_template("pages/alternatives.html")
+
+        content = template.render(
+            alternatives=filtered_alternatives,
+            alternatives_statistics=alternatives_data['statistics'],
+            total_software=len(filtered_alternatives),
+            total_alternatives=sum(len(apps) for apps in filtered_alternatives.values()),
+            total_all_applications=len(applications),  # Total applications in the dataset
+            alternatives_config=self.config.get("alternatives", {}),
+            page_title="Alternative Software"
+        )
+
+        # Minify HTML if enabled
+        content = self._minify_html_if_enabled(content)
+
+        output_path = self.config.output_dir / "alternatives.html"
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        print(f"Alternatives page generated ({len(filtered_alternatives)} software with alternatives)")
+
     def _generate_statistics_page(
-        self, applications: List[Application], categories: Dict, statistics: Dict
-    ):
+        self, applications: List[Application], categories: Dict, statistics: Dict):
         """Generate the statistics page."""
         template = self.jinja_env.get_template("pages/statistics.html")
 
@@ -915,6 +984,40 @@ class SiteGenerator:
 
         print("Search data file generated")
 
+    def _generate_alternatives_data_file(self, applications: List[Application]) -> Dict[str, Any]:
+        """Generate alternatives data JSON file for client-side alternatives page."""
+        from .data_processor import DataProcessor
+        from dataclasses import asdict
+        
+        processor = DataProcessor(self.config)
+        alternatives_data = processor.generate_alternatives_data(applications)
+        
+        # Apply minimum alternatives filter
+        min_alternatives = self.config.get("alternatives.min_alternatives", 2)
+        filtered_alternatives = {
+            name: [asdict(app) for app in apps]
+            for name, apps in alternatives_data['alternatives'].items()
+            if len(apps) >= min_alternatives
+        }
+        
+        # Create the data structure for the JSON file
+        json_data = {
+            "alternatives": filtered_alternatives,
+            "statistics": alternatives_data['statistics'],
+            "total_software": len(filtered_alternatives),
+            "total_alternatives": sum(len(apps) for apps in filtered_alternatives.values()),
+            "config": self.config.get("alternatives", {})
+        }
+        
+        # Write to file
+        alternatives_file = self.config.output_dir / "static" / "data" / "alternatives.json"
+        alternatives_file.parent.mkdir(exist_ok=True)
+        
+        with open(alternatives_file, "w", encoding="utf-8") as f:
+            json.dump(json_data, f, separators=(",", ":"))
+        
+        return json_data
+
     def _generate_sitemap(self, applications: List[Application]):
         """Generate XML sitemap."""
         template = self.jinja_env.get_template("sitemap.xml")
@@ -925,6 +1028,10 @@ class SiteGenerator:
             {"loc": base_path + "/browse.html", "priority": "1.0"},  # Browse page
             {"loc": base_path + "/statistics.html", "priority": "1.0"},  # Statistics page
         ]
+
+        # Add alternatives page if enabled
+        if self.config.get("alternatives.enabled", False):
+            urls.append({"loc": base_path + "/alternatives.html", "priority": "0.9"})
 
         # Add application pages
         for app in applications:
