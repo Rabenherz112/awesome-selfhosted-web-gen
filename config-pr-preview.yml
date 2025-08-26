@@ -85,8 +85,8 @@ ui:
       - recently_updated
       - random_picks
       - alternatives
-      - statistics
       - popular_categories
+      - statistics
       - footer_markdown
 
   # Footer markdown exclusions

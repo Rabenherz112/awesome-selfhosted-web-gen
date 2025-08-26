@@ -4,6 +4,18 @@
 
 {% set sections = ui_config.get('homepage', {}).get('sections', ['hero', 'popular_apps', 'statistics', 'recently_updated', 'random_picks', 'icon_explanations', 'popular_categories', 'footer_markdown']) %}
 
+{% set section_counter = namespace(value=0) %}
+{% macro get_section_bg_class() %}
+  {% set bg_class = 'bg-white dark:bg-gray-800' if section_counter.value % 2 == 0 else 'bg-gray-50 dark:bg-gray-900' %}
+  {% set section_counter.value = section_counter.value + 1 %}
+  {{ bg_class }}
+{% endmacro %}
+
+{% macro get_card_bg_class() %}
+  {% set card_bg_class = 'bg-gray-50 dark:bg-gray-700' if (section_counter.value - 1) % 2 == 0 else 'bg-white dark:bg-gray-800' %}
+  {{ card_bg_class }}
+{% endmacro %}
+
 {% for section in sections %}
 
   {% if section == 'hero' %}
@@ -78,7 +90,7 @@
 
   {% elif section == 'popular_apps' and popular_apps %}
     <!-- Popular Applications -->
-    <div class="bg-white dark:bg-gray-800 py-16">
+    <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -91,7 +103,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {% for app in popular_apps %}
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full">
+                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full">
                     <div class="p-6 flex flex-col h-full">
                         <div class="flex items-start justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -153,7 +165,7 @@
 
   {% elif section == 'recently_updated' and recent_apps %}
     <!-- Recently Updated -->
-    <div class="bg-gray-50 dark:bg-gray-900 py-16">
+    <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -166,7 +178,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {% for app in recent_apps %}
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 flex flex-col h-full">
+                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 flex flex-col h-full">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-primary-600 dark:hover:text-primary-400">
                             {{ app.name }}
@@ -190,7 +202,7 @@
 
   {% elif section == 'random_picks' and random_picks %}
     <!-- Random Quality Picks -->
-    <div class="bg-white dark:bg-gray-800 py-16">
+    <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -203,7 +215,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for app in random_picks %}
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col h-full">
+                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col h-full">
                     <div class="flex items-start justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-primary-600 dark:hover:text-primary-400">
@@ -235,7 +247,7 @@
 
   {% elif section == 'alternatives' and alternatives %}
     <!-- Popular Alternatives -->
-    <div class="bg-gray-50 dark:bg-gray-900 py-16">
+    <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -248,7 +260,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for software_name, apps in alternatives %}
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col h-full">
+                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col h-full">
                     <div class="flex items-start justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             <a href="{{ url_for('/alternatives.html') }}#{{ software_name|slugify }}" class="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
@@ -303,69 +315,9 @@
         </div>
     </div>
 
-  {% elif section == 'statistics' %}
-    <!-- Detailed Statistics Section -->
-    <div class="bg-white dark:bg-gray-800 py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    Detailed Statistics
-                </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300">
-                    Deep dive into the awesome-selfhosted ecosystem
-                </p>
-            </div>
-            
-            <!-- Additional Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                        {{ statistics.apps_with_multiple_licenses or 0 }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Multi-License Apps
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-                        {{ statistics.apps_with_multiple_platforms or 0 }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Multi-Platform Apps
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                        {{ statistics.total_platforms or 0 }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Platforms & Technologies
-                    </div>
-                </div>
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                        {{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Avg Stars per App
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-center">
-                <a href="{{ url_for('/statistics.html') }}"{{ get_link_target_attrs(url_for('/statistics.html'), true) | safe }} class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
-                    View Full Statistics Dashboard
-                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
-
-  {% elif section == 'popular_categories' and categories %}
+    {% elif section == 'popular_categories' and categories %}
     <!-- Popular Categories -->
-    <div class="bg-gray-50 dark:bg-gray-900 py-16">
+    <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -378,7 +330,7 @@
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for category in categories %}
-                <a href="{{ url_for(category.url) }}"{{ get_link_target_attrs(url_for(category.url), true) | safe }} class="group bg-gray-50 dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600">
+                <a href="{{ url_for(category.url) }}"{{ get_link_target_attrs(url_for(category.url), true) | safe }} class="group {{ get_card_bg_class() }} hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600">
                     <div class="text-2xl font-bold text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
                         {{ category.count }}
                     </div>
@@ -400,9 +352,69 @@
         </div>
     </div>
 
+  {% elif section == 'statistics' %}
+    <!-- Detailed Statistics Section -->
+    <div class="{{ get_section_bg_class() }} py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    Detailed Statistics
+                </h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300">
+                    Deep dive into the awesome-selfhosted ecosystem
+                </p>
+            </div>
+            
+            <!-- Additional Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                        {{ statistics.apps_with_multiple_licenses or 0 }}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Multi-License Apps
+                    </div>
+                </div>
+                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
+                        {{ statistics.apps_with_multiple_platforms or 0 }}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Multi-Platform Apps
+                    </div>
+                </div>
+                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                        {{ statistics.total_platforms or 0 }}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Platforms & Technologies
+                    </div>
+                </div>
+                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
+                    <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                        {{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        Avg Stars per App
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <a href="{{ url_for('/statistics.html') }}"{{ get_link_target_attrs(url_for('/statistics.html'), true) | safe }} class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                    View Full Statistics Dashboard
+                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
   {% elif section == 'footer_markdown' and markdown_data.get('footer') %}
     <!-- Footer Content from awesome-selfhosted-data -->
-    <div class="bg-white dark:bg-gray-800 py-16">
+    <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-left">
                 {{ markdown_to_html(markdown_data.footer) | safe }}
