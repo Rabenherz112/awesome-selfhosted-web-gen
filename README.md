@@ -316,3 +316,7 @@ While AI was used as a development aid, all outputs have been reviewed and, wher
 - Add config ability to add a referer details to all outgoing links - Not required for inital release
 - Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space? - Not required for inital release
 - Simplify Code where possible - Not required for inital release
+- Make homepage more dynamic by being able to define via the config file which sections to include / exclude, which also dynamically change the color to match the current pattern - This release
+- Update Stats Page again... - This release
+- Update footer to use author instead of site title - This release
+- Make license link in app detail page clickable if a license and the url for it are defined
