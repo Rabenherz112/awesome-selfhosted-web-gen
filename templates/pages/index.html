@@ -315,6 +315,43 @@
         </div>
     </div>
 
+    {% elif section == 'popular_categories' and categories %}
+    <!-- Popular Categories -->
+    <div class="{{ get_section_bg_class() }} py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    Popular Categories
+                </h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300">
+                    Explore applications by category
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% for category in categories %}
+                <a href="{{ url_for(category.url) }}"{{ get_link_target_attrs(url_for(category.url), true) | safe }} class="group {{ get_card_bg_class() }} hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600">
+                    <div class="text-2xl font-bold text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
+                        {{ category.count }}
+                    </div>
+                    <div class="text-sm font-medium text-gray-900 dark:text-white mt-2">
+                        {{ category.name }}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="{{ url_for('/browse.html') }}"{{ get_link_target_attrs(url_for('/browse.html'), true) | safe }} class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                    Browse All Categories
+                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
   {% elif section == 'statistics' %}
     <!-- Detailed Statistics Section -->
     <div class="{{ get_section_bg_class() }} py-16">
@@ -367,43 +404,6 @@
             <div class="text-center">
                 <a href="{{ url_for('/statistics.html') }}"{{ get_link_target_attrs(url_for('/statistics.html'), true) | safe }} class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     View Full Statistics Dashboard
-                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
-
-  {% elif section == 'popular_categories' and categories %}
-    <!-- Popular Categories -->
-    <div class="{{ get_section_bg_class() }} py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    Popular Categories
-                </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-300">
-                    Explore applications by category
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {% for category in categories %}
-                <a href="{{ url_for(category.url) }}"{{ get_link_target_attrs(url_for(category.url), true) | safe }} class="group {{ get_card_bg_class() }} hover:bg-primary-50 dark:hover:bg-primary-900 rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-gray-200 dark:border-gray-600">
-                    <div class="text-2xl font-bold text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
-                        {{ category.count }}
-                    </div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-white mt-2">
-                        {{ category.name }}
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-            
-            <div class="text-center mt-12">
-                <a href="{{ url_for('/browse.html') }}"{{ get_link_target_attrs(url_for('/browse.html'), true) | safe }} class="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
-                    Browse All Categories
                     <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
