@@ -8,10 +8,10 @@
     <!-- Page Header -->
     <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            📊 Awesome Selfhosted Statistics
+            Statistics
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-300">
-            Insights and trends from the awesome-selfhosted ecosystem
+            Insights and trends from the {{ site_config.author }}
         </p>
     </div>
 
@@ -200,7 +200,7 @@
         <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
             <h3 class="text-2xl font-bold mb-2">Ready to Explore?</h3>
             <p class="text-blue-100 mb-4">
-                Discover amazing self-hosted applications from {{ statistics.total_apps }} options
+                Discover amazing selfhosted applications from {{ statistics.total_apps }} options
             </p>
             <a href="{{ url_for('/') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 transition-colors duration-200">
                 Browse Applications

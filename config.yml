@@ -7,7 +7,7 @@ site:
   title: "Awesome Selfhosted"
   description: "Discover and explore selfhosted applications"
   url: "https://awesome-selfhosted.net"
-  author: "Awesome Selfhosted Community"
+  author: "awesome selfhosted community"
   base_path: "" # Leave empty for root, or set to "/awesome-selfhosted" for subdirectory
 
 # =============================================================================
@@ -159,7 +159,7 @@ footer:
   tagline: "{{ site.description }}"
   credit_text: "Built with ❤️ for the self-hosting community"
   footer_text: |
-    Copyright © 2015-2025, the {{ site.title }} community. Data from 
+    Copyright © 2015-2025, the {{ site.author }}. Data from 
     <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
     <br>
     <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>

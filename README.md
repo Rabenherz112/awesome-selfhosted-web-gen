@@ -12,6 +12,7 @@ A Python-based static site generator that creates a beautiful, interactive websi
 - **📈 Enhanced Analytics**: Line chart commit graphs with smart data requirements
 - **🏷️ Smart Licensing**: Automatic non-free license detection using upstream data
 - **🔍 Smart Description Parsing**: Extracts relevant information from the description of the application
+- **🔍 Alternatives**: Optionally generate an alternatives page with smart grouping of applications
 
 ## 🚀 Quick Start
 
@@ -204,29 +205,6 @@ Client-side functionality is organized into specialized modules:
 - `app-detail.js` - Commit graphs and detail page interactions
 - `theme.js` - Dark/light theme toggle
 
-## 🔍 Enhanced Search Features
-
-The website includes powerful search capabilities:
-
-- **Fuzzy Search**: Finds results even with typos
-- **Multi-field**: Searches names, descriptions, and categories
-- **Real-time**: Instant results as you type
-- **Mobile Support**: Dedicated mobile search interface
-- **Smart Linking**: Search results link to detail pages
-- **Filtering**: Advanced filters with dynamic license options
-- **Sorting**: Multiple sorting options with visual feedback
-
-## 🔄 Alternatives Discovery
-
-The alternatives page helps users find selfhosted alternatives to popular software:
-
-- **Smart Grouping**: Applications are automatically grouped by what they're alternatives to
-- **Multi-alternative Apps**: Single applications can appear in multiple groups (e.g., Mixpost for both Hootsuite and Buffer)
-- **Real-time Search**: Search through alternatives with instant filtering
-- **Statistics Dashboard**: View coverage metrics and alternative counts
-- **Sorting Options**: Sort by name or number of alternatives
-- **Responsive Design**: Mobile-friendly interface with touch-optimized controls
-
 ## 🚀 Deployment
 
 ### Static Hosting
@@ -317,6 +295,5 @@ While AI was used as a development aid, all outputs have been reviewed and, wher
 - Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space? - Not required for inital release
 - Simplify Code where possible - Not required for inital release
 - Make homepage more dynamic by being able to define via the config file which sections to include / exclude, which also dynamically change the color to match the current pattern - This release
-- Update Stats Page again... - This release
-- Update footer to use author instead of site title - This release
 - Make license link in app detail page clickable if a license and the url for it are defined
+- Move none SiteGenerator code away from src/site_generator.py (e.g. `_find_related_apps`) - Next release
