@@ -30,12 +30,6 @@ class BrowsePage {
     }
 
     async init() {
-        // Hide JavaScript required notification since JavaScript is enabled
-        const jsNotification = document.getElementById('js-required-notification');
-        if (jsNotification) {
-            jsNotification.style.display = 'none';
-        }
-        
         await this.loadSearchData();
         await this.loadLicenseData();
         await this.loadConfig();

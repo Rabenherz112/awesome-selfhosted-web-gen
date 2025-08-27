@@ -29,12 +29,6 @@ class AlternativesPage {
     }
 
     async init() {
-        // Hide JavaScript required notification since JavaScript is enabled
-        const jsNotification = document.getElementById('js-required-notification');
-        if (jsNotification) {
-            jsNotification.style.display = 'none';
-        }
-        
         await this.loadAlternativesData();
         await this.loadLicenseData();
         await this.loadConfig();
