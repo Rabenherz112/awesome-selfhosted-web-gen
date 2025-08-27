@@ -160,8 +160,16 @@ class SiteGenerator:
             if output_static.exists():
                 shutil.rmtree(output_static)
 
+            # Files to exclude from copying
+            exclude_files = {'tailwind-input.css'}
+
             # Copy static files
-            shutil.copytree(self.config.static_dir, output_static)
+            for item in self.config.static_dir.rglob('*'):
+                if item.is_file() and item.name not in exclude_files:
+                    rel_path = item.relative_to(self.config.static_dir)
+                    dst_path = output_static / rel_path
+                    dst_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(item, dst_path)
             print("Static assets copied")
 
     def _generate_homepage(
