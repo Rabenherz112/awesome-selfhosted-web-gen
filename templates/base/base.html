@@ -216,7 +216,7 @@
                         {{ section.title }}
                     </h3>
                     <ul class="space-y-2">
-                        {% for link in section.links %}
+                        {% for link in filter_navigation(section.links) %}
                         <li>
                             <a href="{{ url_for(link.url) }}" 
                                {{ get_link_target_attrs(url_for(link.url), not link.external) | safe }}
