@@ -14,7 +14,7 @@ site:
 # DATA SOURCES
 # =============================================================================
 data:
-  awesome_selfhosted_data_dir: "awesome-selfhosted-data"
+  data_dir: "awesome-selfhosted-data"
   software_dir: "software"
   categories_dir: "tags"
   platforms_dir: "platforms"

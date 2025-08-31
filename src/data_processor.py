@@ -58,7 +58,7 @@ class DataProcessor:
     def fetch_awesome_data(self) -> Dict[str, Any]:
         """Load all awesome-selfhosted data from local YAML files."""
         data_config = self.config.get_data_config()
-        data_dir = Path(data_config["awesome_selfhosted_data_dir"])
+        data_dir = Path(data_config["data_dir"])
 
         if not data_dir.exists():
             raise FileNotFoundError(f"Data directory not found: {data_dir}")

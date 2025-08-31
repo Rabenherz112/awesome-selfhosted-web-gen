@@ -312,7 +312,7 @@ def cmd_info(config):
     # Data Configuration
     data_config = config.get_data_config()
     print(f"\n📊 Data Configuration:")
-    print(f"   Awesome data directory: {data_config.get('awesome_selfhosted_data_dir', 'awesome-selfhosted-data')}")
+    print(f"   Awesome data directory: {data_config.get('data_dir', 'awesome-selfhosted-data')}")
     print(f"   Software directory: {data_config.get('software_dir', 'software')}")
     print(f"   Categories directory: {data_config.get('categories_dir', 'tags')}")
     print(f"   Platforms directory: {data_config.get('platforms_dir', 'platforms')}")
@@ -378,7 +378,7 @@ def cmd_info(config):
         print_build_stats(config.output_dir)
     
     # Data Source Status
-    data_dir = Path(data_config.get('awesome_selfhosted_data_dir', 'awesome-selfhosted-data'))
+    data_dir = Path(data_config.get('data_dir', 'awesome-selfhosted-data'))
     if data_dir.exists():
         print(f"\n📚 Data Source:")
         print(f"   Source directory: {data_dir}")
