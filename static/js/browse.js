@@ -87,9 +87,6 @@ class BrowsePage {
         const sortDateAddedButton = document.getElementById('sortDateAdded');
         if (sortDateAddedButton && this.gitDataAvailable) {
             sortDateAddedButton.style.display = '';
-            console.log('Git data available - showing Date Added sort button');
-        } else {
-            console.log('Git data not available - hiding Date Added sort button');
         }
     }
 
@@ -116,7 +113,6 @@ class BrowsePage {
             
             if (matchingCategory) {
                 this.selectedCategories.add(matchingCategory);
-                console.log(`Category filter applied: "${matchingCategory}"`);
             }
         }
     }
