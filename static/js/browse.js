@@ -18,7 +18,8 @@ class BrowsePage {
         this.sortDirections = {
             'name': 'asc',      // asc = A-Z, desc = Z-A
             'stars': 'desc',    // desc = highest first, asc = lowest first
-            'updated': 'desc'   // desc = newest first, asc = oldest first
+            'updated': 'desc',  // desc = newest first, asc = oldest first
+            'dateAdded': 'desc' // desc = newest first, asc = oldest first
         };
         
         // Pagination settings
@@ -45,6 +46,7 @@ class BrowsePage {
         if (this.enablePagination) {
             this.setupPaginationEventListeners();
         }
+        this.checkAndShowGitSortButton();
         this.updateSortButtons('sortName');
         this.filterSortAndRender();
     }
@@ -75,8 +77,19 @@ class BrowsePage {
             const data = await response.json();
             this.applications = data.apps || [];
             this.filteredApplications = [...this.applications];
+            this.gitDataAvailable = data.git_data_available || false;
         } catch (error) {
             console.error('Failed to load search data:', error);
+        }
+    }
+
+    checkAndShowGitSortButton() {
+        const sortDateAddedButton = document.getElementById('sortDateAdded');
+        if (sortDateAddedButton && this.gitDataAvailable) {
+            sortDateAddedButton.style.display = '';
+            console.log('Git data available - showing Date Added sort button');
+        } else {
+            console.log('Git data not available - hiding Date Added sort button');
         }
     }
 
@@ -267,7 +280,8 @@ class BrowsePage {
         const sortButtons = {
             'sortName': 'name',
             'sortStars': 'stars',
-            'sortUpdated': 'updated'
+            'sortUpdated': 'updated',
+            'sortDateAdded': 'dateAdded'
         };
 
         Object.entries(sortButtons).forEach(([buttonId, sortType]) => {
@@ -468,7 +482,8 @@ class BrowsePage {
         const sortButtons = {
             'sortName': 'name',
             'sortStars': 'stars', 
-            'sortUpdated': 'updated'
+            'sortUpdated': 'updated',
+            'sortDateAdded': 'dateAdded'
         };
         
         Object.entries(sortButtons).forEach(([buttonId, sortType]) => {
@@ -582,6 +597,24 @@ class BrowsePage {
                     comparison = direction === 'asc' ? 
                         dateA.getTime() - dateB.getTime() : 
                         dateB.getTime() - dateA.getTime();
+                    break;
+                case 'dateAdded':
+                    // Handle date added sorting
+                    const parseDateAdded = (dateStr) => {
+                        if (!dateStr) return new Date(0);
+                        // Handle YYYY-MM-DD format
+                        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            return new Date(dateStr + 'T00:00:00Z');
+                        }
+                        // Handle ISO format
+                        return new Date(dateStr);
+                    };
+                    
+                    const addedDateA = parseDateAdded(a.date_added);
+                    const addedDateB = parseDateAdded(b.date_added);
+                    comparison = direction === 'asc' ? 
+                        addedDateA.getTime() - addedDateB.getTime() : 
+                        addedDateB.getTime() - addedDateA.getTime();
                     break;
                 case 'name':
                 default:

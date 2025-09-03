@@ -81,7 +81,7 @@ def cmd_fetch(config, verbose=False):
         
         # Process applications
         print("📊 Processing application data...")
-        applications = processor.process_applications(raw_data['apps'])
+        applications = processor.process_applications(raw_data['apps'], raw_data.get('git_data', {}))
         
         print(f"✅ Processed {len(applications)} applications")
         
