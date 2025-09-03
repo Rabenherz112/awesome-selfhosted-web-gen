@@ -615,11 +615,6 @@ class DataProcessor:
         try:
             # Normalize the path
             normalized_path = self._normalize_filename_git(file_path)
-            
-            # Debug: Show transformation for problematic files (only if needed for debugging)
-            # if '\\' in file_path or file_path != normalized_path:
-            #     print(f"Debug: Path transformation: {repr(file_path)} -> {repr(normalized_path)}")
-            
             # Extract the filename without extension
             if normalized_path.startswith('software/') and normalized_path.endswith('.yml'):
                 filename = normalized_path[9:-4]  # Remove 'software/' and '.yml'
@@ -755,13 +750,6 @@ class DataProcessor:
                         # We want the new filename (current name)
                         software_id = self._extract_software_id_from_path(new_file)
                         if software_id:
-                            # Debug: Track specific Unicode files in renames (disabled)
-                            # unicode_files = ['baïkal', 'engity\'s-bifröst', 'gosɛ', 'motion.tools-antragsgrün', 
-                            #                'salut-à-toi', 'speed-test-by-openspeedtest™', 'takahē', 
-                            #                'µstreamer', 'µtask', 'üwave']
-                            # if software_id in unicode_files:
-                            #     print(f"Debug: Found Unicode file in rename: {software_id} from {repr(old_file)} -> {repr(new_file)}")
-                            
                             # Extract date from commit info
                             _, date_str = current_commit_info.split('|', 1)
                             try:
@@ -777,14 +765,6 @@ class DataProcessor:
             else:
                 software_id = self._extract_software_id_from_path(line)
                 if software_id and current_commit_info:
-                    
-                    # Debug: Track specific Unicode files (disabled)
-                    # unicode_files = ['baïkal', 'engity\'s-bifröst', 'gosɛ', 'motion.tools-antragsgrün', 
-                    #                'salut-à-toi', 'speed-test-by-openspeedtest™', 'takahē', 
-                    #                'µstreamer', 'µtask', 'üwave']
-                    # if software_id in unicode_files:
-                    #     print(f"Debug: Found Unicode file in git: {software_id} from line: {repr(line)}")
-                    
                     # Extract date from commit info
                     _, date_str = current_commit_info.split('|', 1)
                     try:
