@@ -36,6 +36,7 @@ generation:
   minify_html: false
   generate_sitemap: true
   enable_pagination: true
+  use_git_data: true
 
 # =============================================================================
 # UI CONFIGURATION

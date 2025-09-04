@@ -3,9 +3,12 @@ Data processing module for fetching and processing awesome-selfhosted data.
 """
 
 import yaml
+import subprocess
+import unicodedata
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from datetime import datetime
 
 from .config import Config
 
@@ -35,6 +38,8 @@ class Application:
     fork_url: Optional[str] = None
     alternative_to: List[str] = None
     documentation_language: Optional[str] = None
+    # Git data
+    date_added: Optional[str] = None
 
     def __post_init__(self):
         """Initialize default values."""
@@ -54,6 +59,7 @@ class DataProcessor:
     def __init__(self, config: Config):
         """Initialize data processor with configuration."""
         self.config = config
+        self._git_addition_dates_cache = {}
 
     def fetch_awesome_data(self) -> Dict[str, Any]:
         """Load all awesome-selfhosted data from local YAML files."""
@@ -83,6 +89,20 @@ class DataProcessor:
         # Load markdown files
         markdown_data = self._load_markdown_files(data_dir)
 
+        # Collect git data if enabled
+        git_data = {}
+        use_git_data = self.config.get_generation_config().get("use_git_data", True)
+        if use_git_data:
+            git_data = self._collect_git_addition_dates(data_dir)
+            if git_data:
+                # Filter git data to only include existing software files
+                existing_software_ids = {app_data.get("id") for app_data in apps_data if app_data.get("id")}
+                filtered_git_data = {k: v for k, v in git_data.items() if k in existing_software_ids}
+                git_data = filtered_git_data
+                print(f"Loaded git data for {len(git_data)} applications")
+            else:
+                print("Git data collection not available - continuing without git data")
+
         print(
             f"Loaded {len(apps_data)} applications, {len(categories_data)} categories, {len(platforms_data)} platforms, {len(licenses_data)} licenses"
         )
@@ -93,6 +113,7 @@ class DataProcessor:
             "platforms": platforms_data,
             "licenses": licenses_data,
             "markdown": markdown_data,
+            "git_data": git_data,
         }
 
     def _load_software_data(self, software_dir: Path) -> List[Dict]:
@@ -222,7 +243,7 @@ class DataProcessor:
 
         return licenses_data
 
-    def process_applications(self, raw_apps: List[Dict]) -> List[Application]:
+    def process_applications(self, raw_apps: List[Dict], git_data: Dict[str, str] = None) -> List[Application]:
         """Process raw application data into Application objects."""
         applications = []
 
@@ -250,6 +271,11 @@ class DataProcessor:
                 app_data.get("description", "")
             )
 
+            # Get git data if available
+            date_added = None
+            if git_data and app_id in git_data:
+                date_added = git_data[app_id]
+
             app = Application(
                 id=app_id,
                 name=app_data.get("name", ""),
@@ -271,6 +297,8 @@ class DataProcessor:
                 fork_url=desc_data["fork_url"],
                 alternative_to=desc_data["alternative_to"],
                 documentation_language=desc_data["documentation_language"],
+                # Git data
+                date_added=date_added,
             )
 
             applications.append(app)
@@ -561,3 +589,192 @@ class DataProcessor:
             markdown_files["footer"] = ""
 
         return markdown_files
+
+    def _normalize_filename_git(self, filename: str) -> str:
+        """Normalize Unicode filename for consistent processing."""
+        # First, handle git's octal encoding (e.g., "ba\303\257kal" -> "baïkal")
+        if '\\' in filename:
+            try:
+                # Remove surrounding quotes if present
+                if filename.startswith('"') and filename.endswith('"'):
+                    filename = filename[1:-1]
+                
+                # Decode octal sequences
+                decoded = filename.encode('utf-8').decode('unicode_escape').encode('latin1').decode('utf-8')
+                filename = decoded
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                # If decoding fails, use original filename
+                pass
+        
+        # Normalize Unicode to NFC form (canonical composition)
+        normalized = unicodedata.normalize('NFC', filename)
+        return normalized
+
+    def _extract_software_id_from_path(self, file_path: str) -> Optional[str]:
+        """Extract software ID from git file path, handling Unicode properly."""
+        try:
+            # Normalize the path
+            normalized_path = self._normalize_filename_git(file_path)
+            # Extract the filename without extension
+            if normalized_path.startswith('software/') and normalized_path.endswith('.yml'):
+                filename = normalized_path[9:-4]  # Remove 'software/' and '.yml'
+                return filename
+            return None
+        except Exception as e:
+            print(f"Debug: Error extracting ID from path '{file_path}': {e}")
+            return None
+
+    def _check_git_availability(self, data_dir: Path) -> bool:
+        """Check if git is available and the data directory is a git repository."""
+        try:
+            if not data_dir.exists():
+                return False
+
+            # Check if the directory is a git repository
+            subprocess.run(['git', 'rev-parse', '--git-dir'], 
+                         capture_output=True, check=True, cwd=data_dir)
+
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return False
+
+    def _collect_git_addition_dates(self, data_dir: Path) -> Dict[str, str]:
+        """
+        Collect the first addition date for each software file.
+        Returns a dictionary mapping software_id -> ISO date string.
+        """
+        if not self._check_git_availability(data_dir):
+            return {}
+
+        if self._git_addition_dates_cache:
+            return self._git_addition_dates_cache
+        
+        try:
+            # Get all software files and their first commit dates efficiently
+            addition_dates = self._get_file_addition_dates(data_dir)
+            
+            # Cache the results
+            self._git_addition_dates_cache = addition_dates
+            
+            return addition_dates
+            
+        except Exception as e:
+            print(f"Error collecting git data: {e}")
+            return {}
+
+    def _get_file_addition_dates(self, data_dir: Path) -> Dict[str, str]:
+        """Get the first commit date for each software file."""
+        addition_dates = {}
+        
+        try:
+            # First, get all additions
+            additions = self._get_git_log_data(data_dir, '--diff-filter=A')
+            addition_dates.update(additions)
+            
+            # Then, get renames to catch files that were moved/renamed
+            renames = self._get_git_log_data(data_dir, '--diff-filter=R', check_renames=True)
+            
+            # For renames, we want the earliest date (either original or renamed)
+            for software_id, date in renames.items():
+                if software_id not in addition_dates:
+                    addition_dates[software_id] = date
+                else:
+                    # Keep the earlier date
+                    existing_date = datetime.fromisoformat(addition_dates[software_id])
+                    new_date = datetime.fromisoformat(date)
+                    if new_date < existing_date:
+                        addition_dates[software_id] = date
+            
+            return addition_dates
+            
+        except subprocess.TimeoutExpired:
+            print("Git command timed out - repository might be too large")
+            return {}
+        except Exception as e:
+            print(f"Error running git command: {e}")
+            return {}
+
+    def _get_git_log_data(self, data_dir: Path, diff_filter: str, check_renames: bool = False) -> Dict[str, str]:
+        """Get git log data with specified diff filter."""
+        addition_dates = {}
+        
+        cmd = [
+            'git', 'log', 
+            diff_filter,
+            '--name-only',
+            '--pretty=format:%H|%ci',  # Hash|ISO date
+            '--', 'software/'
+        ]
+        
+        if check_renames:
+            # For renames, we also want to see the rename information
+            cmd = [
+                'git', 'log', 
+                diff_filter,
+                '--name-status',  # Show rename information
+                '--pretty=format:%H|%ci',
+                '--', 'software/'
+            ]
+        
+        # Set environment to handle Unicode filenames properly
+        env = {'LC_ALL': 'C.UTF-8', 'LANG': 'C.UTF-8'}
+        result = subprocess.run(cmd, capture_output=True, text=True, 
+                              cwd=data_dir, timeout=30, env=env)
+        
+        if result.returncode != 0:
+            print(f"Git command failed: {result.stderr}")
+            return {}
+        
+        # Parse the output
+        lines = result.stdout.strip().split('\n')
+        current_commit_info = None
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Check if this is a commit info line (contains |)
+            if '|' in line and not line.startswith('software/') and not line.startswith('R'):
+                current_commit_info = line
+                continue
+            
+            # Handle renames (format: R100	old_name	new_name)
+            if check_renames and line.startswith('R') and '\t' in line:
+                if current_commit_info:
+                    parts = line.split('\t')
+                    if len(parts) >= 3:
+                        old_file = parts[1]
+                        new_file = parts[2]
+                        
+                        # We want the new filename (current name)
+                        software_id = self._extract_software_id_from_path(new_file)
+                        if software_id:
+                            # Extract date from commit info
+                            _, date_str = current_commit_info.split('|', 1)
+                            try:
+                                commit_date = datetime.fromisoformat(date_str.strip().replace(' ', 'T'))
+                                iso_date = commit_date.strftime('%Y-%m-%d')
+                                
+                                if software_id not in addition_dates:
+                                    addition_dates[software_id] = iso_date
+                            except ValueError:
+                                continue
+            
+            # Handle regular additions/files
+            else:
+                software_id = self._extract_software_id_from_path(line)
+                if software_id and current_commit_info:
+                    # Extract date from commit info
+                    _, date_str = current_commit_info.split('|', 1)
+                    try:
+                        commit_date = datetime.fromisoformat(date_str.strip().replace(' ', 'T'))
+                        iso_date = commit_date.strftime('%Y-%m-%d')
+                        
+                        # Only store if we don't have this software yet (first occurrence)
+                        if software_id not in addition_dates:
+                            addition_dates[software_id] = iso_date
+                    except ValueError:
+                        continue
+        
+        return addition_dates

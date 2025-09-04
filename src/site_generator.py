@@ -961,6 +961,7 @@ class SiteGenerator:
                 "current_release": app.current_release,
                 "commit_history": app.commit_history,
                 "is_nonfree": self._is_app_nonfree(app),
+                "date_added": app.date_added,
                 "documentation_language": app.documentation_language,
                 "fork_of": app.fork_of,
                 "fork_url": app.fork_url,
@@ -976,10 +977,14 @@ class SiteGenerator:
                 if not lic_info.get("free", True)
             ]
 
+        # Check if git data is available
+        git_data_available = any(app.date_added for app in applications)
+        
         return {
             "apps": search_data,
             "total": len(search_data),
             "nonfree_licenses": nonfree_licenses,
+            "git_data_available": git_data_available,
         }
 
     def _generate_search_data_file(self, search_data: Dict[str, Any]):
