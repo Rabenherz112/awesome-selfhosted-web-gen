@@ -85,7 +85,7 @@ python generate.py build --fetch-first
 python generate.py watch --interval 3
 
 # Use custom config file
-python generate.py -c custom-config.yaml build
+python generate.py --config custom-config.yaml build
 ```
 
 ### CSS Development
