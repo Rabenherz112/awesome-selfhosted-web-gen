@@ -52,6 +52,9 @@ class AlternativesPage {
             this.alternativesMaxCategoriesPerCard = getConfigValue('alternatives-max-categories-per-card', 2);
             this.alternativesMaxPlatformsPerCard = getConfigValue('alternatives-max-platforms-per-card', 3);
             this.alternativesShowMoreThreshold = getConfigValue('alternatives-show-more-threshold', 3);
+            this.minQueryLength = getConfigValue('search-min-query-length', 3);
+            this.searchMaxResults = getConfigValue('search-max-results', 8);
+            this.searchFuzzyThreshold = getConfigValue('search-fuzzy-threshold', 0.3);
         } catch (error) {
             console.log('Using default configuration values');
         }
@@ -108,8 +111,9 @@ class AlternativesPage {
 
             // Handle focus to show suggestions
             heroSearch.addEventListener('focus', (e) => {
-                if (e.target.value.trim()) {
-                    this.showSearchSuggestions(e.target.value.trim());
+                const query = e.target.value.trim();
+                if (query && query.length >= this.minQueryLength) {
+                    this.showSearchSuggestions(query);
                 }
             });
 
@@ -196,7 +200,7 @@ class AlternativesPage {
             // Show all alternatives when search is empty
             this.filteredAlternatives = { ...this.alternatives };
             this.hideSearchSuggestions();
-        } else if (query.length >= 2) {
+        } else if (query.length >= this.minQueryLength) {
             // Show search suggestions
             this.showSearchSuggestions(query);
             // Filter alternatives based on query
@@ -224,7 +228,7 @@ class AlternativesPage {
 
         suggestionsContainer.innerHTML = '';
         
-        suggestions.slice(0, 8).forEach((suggestion, index) => {
+        suggestions.slice(0, this.searchMaxResults).forEach((suggestion, index) => {
             const suggestionElement = document.createElement('div');
             suggestionElement.className = 'px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center justify-between';
             suggestionElement.setAttribute('data-index', index);
