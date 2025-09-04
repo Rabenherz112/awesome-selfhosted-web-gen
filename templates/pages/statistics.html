@@ -1,7 +1,7 @@
 {% extends "base/base.html" %}
 
 {% block title %}{% if ui_config.get('title_format') %}{{ ui_config.title_format.replace('{page_title}', 'Statistics').replace('{site_title}', site_config.title) }}{% else %}Statistics - {{ site_config.title }}{% endif %}{% endblock %}
-{% block description %}Comprehensive statistics and insights about self-hosted applications{% endblock %}
+{% block description %}Comprehensive statistics and insights about selfhosted applications{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

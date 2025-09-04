@@ -419,7 +419,7 @@ class SiteGenerator:
             content = template.render(
                 app=app,
                 related_apps=related_apps[:related_apps_limit],
-                page_title=f"{app.name} - Self-Hosted Application",
+                page_title=f"{app.name} - Applications",
             )
 
             # Minify HTML if enabled
