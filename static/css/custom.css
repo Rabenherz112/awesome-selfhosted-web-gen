@@ -415,3 +415,103 @@ input:checked + .toggle-slider:before {
         gap: 1rem;
     }
 }
+
+/* App-Details - Mobile-specific improvements */
+@media (max-width: 640px) {
+    /* App detail page mobile optimization */
+    .prose {
+        font-size: 0.95rem;
+    }
+    
+    /* Ensure buttons have minimum touch target size */
+    .app-detail-buttons a {
+        min-height: 44px;
+    }
+    
+    /* Better spacing for mobile cards */
+    .app-detail-metadata > div {
+        padding: 0.75rem;
+    }
+    
+    /* Commit graph mobile scroll */
+    .commit-graph {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Related apps grid on mobile */
+    .related-apps-grid {
+        gap: 1rem;
+    }
+}
+
+/* Ensure metadata badges don't overflow on mobile */
+@media (max-width: 480px) {
+    .metadata-badges {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+}
+
+/* App-Details - Commit graph mobile - ONLY apply scrollbar on mobile */
+@media (max-width: 640px) {
+    .commit-graph svg {
+        min-width: 320px;
+    }
+    
+    /* Smooth horizontal scrolling on mobile only */
+    .commit-graph .overflow-x-auto {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    /* Custom scrollbar for mobile commit graph */
+    .commit-graph .overflow-x-auto::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .commit-graph .overflow-x-auto::-webkit-scrollbar-track {
+        background: rgba(156, 163, 175, 0.1);
+        border-radius: 3px;
+    }
+    
+    .commit-graph .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+        border-radius: 3px;
+    }
+    
+    .dark .commit-graph .overflow-x-auto::-webkit-scrollbar-track {
+        background: rgba(75, 85, 99, 0.3);
+    }
+    
+    .dark .commit-graph .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+    }
+}
+
+/* Desktop - ensure no scrollbar */
+@media (min-width: 641px) {
+    .commit-graph .overflow-visible {
+        overflow: visible !important;
+    }
+    
+    .commit-graph svg {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Scroll hint animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

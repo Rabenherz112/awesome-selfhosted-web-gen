@@ -288,9 +288,6 @@ While AI was used as a development aid, all outputs have been reviewed and, wher
 
 - Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen` - How to do this? - Paused for now
 - Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings. - Is correctly generated (so webserver or browser issue?) - Maybe we define `_self` when we want to open in the same tab. - Defined, still not works as it get's replaced by `_blank`?? - Paused for now
-- Long App Names can break the buttons both in desktop and mobile view - Already tried to fix this.. - Paused for now
-  - https://fs.ravshort.com/4wB7c.png
-  - https://fs.ravshort.com/j0n1R.png
 - Add config ability to add a referer details to all outgoing links - Not required for inital release
 - Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space? - Not required for inital release
 - Simplify Code where possible - Not required for inital release
