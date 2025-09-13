@@ -443,6 +443,13 @@ class SiteGenerator:
         if debug:
             print(f"\n=== Finding related apps for {target_app.name} ===")
 
+        # Pre-compute phrases for all apps if semantic similarity is enabled
+        app_phrases = None
+        if scoring_config.get("semantic_similarity", {}).get("enabled", True):
+            if not hasattr(self, '_cached_app_phrases'):
+                self._cached_app_phrases = self._precompute_app_phrases(all_applications)
+            app_phrases = self._cached_app_phrases
+
         for app in all_applications:
             if app.id == target_app.id:
                 continue
@@ -452,7 +459,7 @@ class SiteGenerator:
 
             # 1. Semantic similarity in descriptions
             if scoring_config.get("semantic_similarity", {}).get("enabled", True):
-                semantic_score = self._calculate_semantic_similarity(target_app, app)
+                semantic_score = self._calculate_semantic_similarity(target_app, app, app_phrases)
                 score += semantic_score
                 score_breakdown["semantic"] = semantic_score
 
@@ -561,21 +568,35 @@ class SiteGenerator:
 
         return result_apps
 
+    def _precompute_app_phrases(self, applications: List[Application]) -> Dict[str, set]:
+        """Pre-compute phrase sets for all applications."""
+        app_phrases = {}
+
+        for app in applications:
+            if app.description:
+                app_phrases[app.id] = self._extract_significant_phrases(app.description)
+            else:
+                app_phrases[app.id] = set()
+
+        return app_phrases
+
     def _calculate_semantic_similarity(
-        self, target_app: Application, app: Application
+        self, target_app: Application, app: Application, app_phrases: Dict[str, set]
     ) -> int:
-        """Calculate semantic similarity using automatic phrase detection and TF-IDF-like scoring."""
-        if not target_app.description or not app.description:
+        """Calculate semantic similarity using automatic phrase detection and pre-computed phrase sets."""
+        target_phrases = app_phrases.get(target_app.id, set())
+        app_phrases_set = app_phrases.get(app.id, set())
+
+        if not target_phrases or not app_phrases_set:
             return 0
 
-        # Get significant phrases from both descriptions
-        target_phrases = self._extract_significant_phrases(target_app.description)
-        app_phrases = self._extract_significant_phrases(app.description)
+        # Find common phrases
+        common_phrases = target_phrases & app_phrases_set
 
-        # Find common phrases and calculate weighted score
+        if not common_phrases:
+            return 0
+
         score = 0
-        common_phrases = target_phrases & app_phrases
-
         for phrase in common_phrases:
             # Calculate phrase weight based on characteristics
             phrase_weight = self._calculate_phrase_weight(phrase)
@@ -615,21 +636,17 @@ class SiteGenerator:
             weight *= 1.1
 
         # 4. Reduce weight for very common tech buzzwords
+        # Words in here are still considered, but their weight is reduced
         common_buzzwords = [
-            "best",
-            "new",
-            "free",
-            "powerful",
-            "easy",
-            "simple",
-            "fast",
-            "secure",
-            "reliable",
-            "free",
-            "open-source",
-            "self-hosted",
+            "server",
+            "web",
+            "management",
+            "platform",
+            "system",
+            "application",
             "lightweight",
             "high-performance",
+            "modern",
         ]
         if any(buzz in phrase for buzz in common_buzzwords):
             weight *= 0.9
@@ -675,6 +692,7 @@ class SiteGenerator:
     def _is_generic_word(self, word: str) -> bool:
         """Check if a single word is too generic to be meaningful."""
         # Common words that don't indicate similarity
+        # Words in here recieve a weight of 0
         generic_words = {
             # Articles and prepositions
             "the",
@@ -703,6 +721,7 @@ class SiteGenerator:
             "below",
             "between",
             "among",
+            "your",
             # Common verbs
             "is",
             "are",
@@ -802,9 +821,10 @@ class SiteGenerator:
             "fast",
             "secure",
             "reliable",
-            "free",
             "open-source",
+            "open source",
             "self-hosted",
+            "self hosted",
             "community",
             "enterprise",
             "lightweight",
@@ -835,6 +855,7 @@ class SiteGenerator:
             return False
 
         # 2. Reject phrases that start with generic connectors/articles
+        # Patterns in here recieve a weight of 0
         useless_patterns = [
             r"^(with|and|for|the|a|an)\s",
             r"^(is|are|can|will|has|have)\s",
