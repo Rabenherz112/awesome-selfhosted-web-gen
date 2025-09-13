@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Targeted analysis on cached data for analyzing improvements to the semantic similarity algorithm.
-This script checks the for words that are too generic or marketing buzzwords and provides recommendations to improve the semantic similarity algorithm.
+This script checks for words that are too generic or marketing buzzwords and provides recommendations to improve the semantic similarity algorithm.
 """
 
 import json
