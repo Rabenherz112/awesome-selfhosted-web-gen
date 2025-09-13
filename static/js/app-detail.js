@@ -41,7 +41,7 @@ class AppDetail {
         const sortedMonths = Object.keys(commitHistory).sort();
         
         if (sortedMonths.length < 3) return;
-
+    
         // Calculate max commits for scaling and average for display
         const maxCommits = Math.max(...Object.values(commitHistory));
         const totalCommits = Object.values(commitHistory).reduce((sum, commits) => sum + commits, 0);
@@ -55,9 +55,9 @@ class AppDetail {
         const graph = document.createElement('div');
         graph.className = 'commit-graph flex flex-col space-y-4';
         
-        // Add title and stats
+        // Add title and stats - responsive text sizes
         const stats = document.createElement('div');
-        stats.className = 'flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-4';
+        stats.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 gap-2';
         stats.innerHTML = `
             <div>
                 <span class="font-medium">${sortedMonths.length}</span> months of activity
@@ -67,16 +67,26 @@ class AppDetail {
             </div>
         `;
         graph.appendChild(stats);
-
-        // Create SVG line chart
-        const svgWidth = Math.max(800, sortedMonths.length * 70);
-        const svgHeight = 200;
-        const padding = { top: 20, right: 30, bottom: 40, left: 40 };
+    
+        // Adjust dimensions based on screen size
+        const isMobile = window.innerWidth < 640;
+        const monthWidth = isMobile ? 50 : 70;
+        // For desktop, ensure width fits without scroll; for mobile, allow scroll
+        const svgWidth = isMobile 
+            ? Math.max(320, sortedMonths.length * monthWidth)
+            : Math.min(800, Math.max(600, sortedMonths.length * 70)); // Desktop fits in container
+        const svgHeight = isMobile ? 150 : 200;
+        const padding = { 
+            top: 20, 
+            right: isMobile ? 20 : 30, 
+            bottom: isMobile ? 35 : 40, 
+            left: isMobile ? 30 : 40 
+        };
         const chartWidth = svgWidth - padding.left - padding.right;
         const chartHeight = svgHeight - padding.top - padding.bottom;
         
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '100%');
+        svg.setAttribute('width', svgWidth);
         svg.setAttribute('height', svgHeight);
         svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
         svg.setAttribute('class', 'overflow-visible');
@@ -100,12 +110,13 @@ class AppDetail {
         area.setAttribute('class', 'transition-all duration-200');
         svg.appendChild(area);
         
-        // Add data points
+        // Add data points - smaller on mobile
+        const circleRadius = isMobile ? '3' : '4';
         points.forEach(point => {
             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circle.setAttribute('cx', point.x);
             circle.setAttribute('cy', point.y);
-            circle.setAttribute('r', '4');
+            circle.setAttribute('r', circleRadius);
             circle.setAttribute('fill', 'rgb(34, 197, 94)'); // green-500
             circle.setAttribute('stroke', 'white');
             circle.setAttribute('stroke-width', '2');
@@ -121,30 +132,31 @@ class AppDetail {
             svg.appendChild(circle);
         });
         
-        // Add X-axis labels
+        // Add X-axis labels - fewer labels on mobile
+        const labelInterval = isMobile ? Math.ceil(points.length / 6) : Math.ceil(points.length / 8);
         points.forEach((point, index) => {
-            if (index % Math.ceil(points.length / 8) === 0 || index === points.length - 1) {
+            if (index % labelInterval === 0 || index === points.length - 1) {
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', point.x);
-                text.setAttribute('y', svgHeight - 10);
+                text.setAttribute('y', svgHeight - (isMobile ? 5 : 10));
                 text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('class', 'text-xs fill-gray-500 dark:fill-gray-400');
+                text.setAttribute('class', `${isMobile ? 'text-[10px]' : 'text-xs'} fill-gray-500 dark:fill-gray-400`);
                 text.textContent = this.formatMonth(point.month);
                 svg.appendChild(text);
             }
         });
         
-        // Add Y-axis labels
-        const yTicks = 5;
+        // Add Y-axis labels - fewer on mobile
+        const yTicks = isMobile ? 3 : 5;
         for (let i = 0; i <= yTicks; i++) {
             const value = Math.round((maxCommits / yTicks) * i);
             const y = padding.top + chartHeight - (i / yTicks) * chartHeight;
             
             const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', padding.left - 10);
+            text.setAttribute('x', padding.left - (isMobile ? 5 : 10));
             text.setAttribute('y', y + 4);
             text.setAttribute('text-anchor', 'end');
-            text.setAttribute('class', 'text-xs fill-gray-500 dark:fill-gray-400');
+            text.setAttribute('class', `${isMobile ? 'text-[10px]' : 'text-xs'} fill-gray-500 dark:fill-gray-400`);
             text.textContent = value;
             svg.appendChild(text);
             
@@ -159,12 +171,35 @@ class AppDetail {
             svg.appendChild(line);
         }
         
-        // Add chart container with overflow scroll
+        // Add chart container with horizontal scroll for mobile
         const chartContainer = document.createElement('div');
-        chartContainer.className = 'w-full overflow-x-auto';
+        // Only add overflow-x-auto on mobile when needed
+        if (isMobile && svgWidth > window.innerWidth - 32) {
+            chartContainer.className = 'w-full overflow-x-auto overscroll-x-contain';
+            chartContainer.style.WebkitOverflowScrolling = 'touch';
+        } else {
+            chartContainer.className = 'w-full overflow-visible'; // No scroll on desktop
+        }
         chartContainer.appendChild(svg);
         graph.appendChild(chartContainer);
-        
+
+        // Add scroll hint for mobile and scroll to right
+        if (isMobile && svgWidth > window.innerWidth - 32) {
+            const scrollHint = document.createElement('div');
+            scrollHint.className = 'text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2 animate-pulse';
+            scrollHint.innerHTML = '← Scroll to see more →';
+            graph.appendChild(scrollHint);
+
+            // Scroll to the right (most recent data) on load
+            setTimeout(() => {
+                chartContainer.scrollLeft = chartContainer.scrollWidth;
+            }, 100);
+
+            // Remove hint after first scroll
+            chartContainer.addEventListener('scroll', () => {
+                scrollHint.style.display = 'none';
+            }, { once: true });
+        }
         // Clear container and add graph
         container.innerHTML = '';
         container.appendChild(graph);
