@@ -231,7 +231,7 @@ search:
 related_apps:
   scoring:
     semantic_similarity:
-      enabled: false  # Disabled for faster PR builds
+      enabled: true
       max_score: 25
     categories:
       enabled: true
