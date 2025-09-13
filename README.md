@@ -263,12 +263,6 @@ This project is licensed under the AGPL-3.0 License - see the LICENSE file for d
 
 The generated content includes data from [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) which is licensed under [CC-BY-SA 3.0](https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE).
 
-## 🙏 Acknowledgments
-
-- [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) - For the amazing curated list
-- [Tailwind CSS](https://tailwindcss.com/) - For the CSS framework
-- [Jinja2](https://jinja.palletsprojects.com/) - For the templating engine
-
 ## 📜 Disclaimer
 
 This project was created with the assistance of Large Language Models (LLMs).
