@@ -403,15 +403,6 @@ class SiteGenerator:
         apps_dir = self.config.output_dir / "apps"
         apps_dir.mkdir(exist_ok=True)
 
-        if (
-            self.related_apps_config.get("scoring", {})
-            .get("semantic_similarity", {})
-            .get("enabled", True)
-        ):
-            print(
-                "Semantic similarity scoring is enabled. The generation of the app detail pages will take longer..."
-            )
-
         for app in applications:
             # Find related applications
             related_apps = self._find_related_apps(app, applications)
@@ -692,7 +683,7 @@ class SiteGenerator:
     def _is_generic_word(self, word: str) -> bool:
         """Check if a single word is too generic to be meaningful."""
         # Common words that don't indicate similarity
-        # Words in here recieve a weight of 0
+        # Words in here receive a weight of 0
         generic_words = {
             # Articles and prepositions
             "the",

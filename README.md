@@ -160,7 +160,8 @@ The generator processes data from awesome-selfhosted-data in several stages:
 The system uses an automatic semantic similarity algorithm to suggest related applications. The algorithm discovers relationships by analyzing application descriptions without requiring manual keyword lists.
 
 **Scoring factors:**
-- **Semantic Similarity** (up to 25 points) - Automatic phrase matching between descriptions (performance intensive)
+
+- **Semantic Similarity** (up to 25 points) - Automatic phrase matching between descriptions
 - **Common Categories** (+4 points per shared category)
 - **Alternative-to Relationships** (+6 points per shared alternative)
 - **Fork Relationships** (+8 points for forks of same project)

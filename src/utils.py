@@ -91,7 +91,7 @@ def print_build_stats(output_dir: Path) -> None:
     total_size = get_directory_size(output_dir)
     total_files = sum(stats.values())
 
-    print(f"\n📊 Build Statistics:")
+    print(f"\nBuild Statistics:")
     print(f"   Total files: {total_files}")
     print(f"   Total size: {format_bytes(total_size)}")
     print(f"   Output directory: {output_dir}")
@@ -111,7 +111,7 @@ def timer_decorator(func):
         result = func(*args, **kwargs)
         end_time = time.time()
         execution_time = end_time - start_time
-        print(f"⏱️  {func.__name__} completed in {execution_time:.2f} seconds")
+        print(f"{func.__name__} completed in {execution_time:.2f} seconds")
         return result
 
     return wrapper

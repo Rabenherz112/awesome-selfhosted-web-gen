@@ -28,6 +28,7 @@ When you create or update a pull request:
 ## Configuration
 
 The PR preview system uses `config-pr-preview.yml` which:
+
 - Disables semantic similarity processing for faster builds
 - Uses the same templates and styling as the main site
 - Includes all core functionality for testing
