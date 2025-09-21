@@ -99,7 +99,7 @@ class DataProcessor:
                 existing_software_ids = {app_data.get("id") for app_data in apps_data if app_data.get("id")}
                 filtered_git_data = {k: v for k, v in git_data.items() if k in existing_software_ids}
                 git_data = filtered_git_data
-                print(f"Loaded git data for {len(git_data)} applications")
+                print(f"    Loaded git data for {len(git_data)} applications")
             else:
                 print("Git data collection not available - continuing without git data")
 
@@ -125,7 +125,7 @@ class DataProcessor:
             return apps_data
 
         yaml_files = list(software_dir.glob("*.yml"))
-        print(f"Loading {len(yaml_files)} software files...")
+        print(f"    Loading {len(yaml_files)} software files...")
 
         for yaml_file in yaml_files:
             try:
@@ -149,7 +149,7 @@ class DataProcessor:
             return categories_data
 
         yaml_files = list(categories_dir.glob("*.yml"))
-        print(f"Loading {len(yaml_files)} category files...")
+        print(f"    Loading {len(yaml_files)} category files...")
 
         for yaml_file in yaml_files:
             try:
@@ -177,7 +177,7 @@ class DataProcessor:
             return platforms_data
 
         yaml_files = list(platforms_dir.glob("*.yml"))
-        print(f"Loading {len(yaml_files)} platform files...")
+        print(f"    Loading {len(yaml_files)} platform files...")
 
         for yaml_file in yaml_files:
             try:
