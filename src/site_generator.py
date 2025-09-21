@@ -115,10 +115,10 @@ class SiteGenerator:
         if self.config.get("generation.enable_search_index", True):
             search_data = self._generate_search_data(applications)
             self._generate_search_data_file(search_data)
-            print("Search index enabled - search data generated")
+            print("  Search index enabled - search data generated")
         else:
             search_data = None
-            print("Search index disabled - skipping search data generation")
+            print("  Search index disabled - skipping search data generation")
 
         # Generate pages
         self._generate_homepage(applications, categories, statistics, markdown_data)
@@ -143,13 +143,13 @@ class SiteGenerator:
         # Show minification status
         if self.config.get("generation.minify_html", False):
             if MINIFY_AVAILABLE:
-                print("HTML minification enabled")
+                print("  HTML minification enabled")
             else:
-                print("HTML minification enabled but minify-html library not available")
+                print("  HTML minification enabled but minify-html library not available")
         else:
-            print("HTML minification disabled")
+            print("  HTML minification disabled")
 
-        print(f"Site generation complete! Output in: {self.config.output_dir}")
+        print(f"Site generation complete!")
 
     def _copy_static_assets(self):
         """Copy static assets to output directory."""
@@ -170,7 +170,7 @@ class SiteGenerator:
                     dst_path = output_static / rel_path
                     dst_path.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(item, dst_path)
-            print("Static assets copied")
+            print("  Static assets copied")
 
     def _generate_homepage(
         self,
@@ -274,7 +274,7 @@ class SiteGenerator:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print("Homepage generated")
+        print("  Homepage generated")
 
     def _generate_browse_page(self, applications: List[Application], categories: Dict):
         """Generate the browse page at /browse.html with client-side pagination."""
@@ -298,7 +298,7 @@ class SiteGenerator:
             f.write(content)
 
         print(
-            f"Browse page generated (client-side rendering for {len(applications)} apps)"
+            f"  Browse page generated (client-side rendering for {len(applications)} apps)"
         )
 
     def _generate_browse_as_homepage(
@@ -329,7 +329,7 @@ class SiteGenerator:
             f.write(content)
 
         print(
-            f"Browse page generated (client-side rendering for {len(applications)} apps)"
+            f"  Browse page generated (client-side rendering for {len(applications)} apps)"
         )
 
     def _generate_alternatives_page(self, applications: List[Application]):
@@ -392,7 +392,7 @@ class SiteGenerator:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print("Statistics page generated")
+        print("  Statistics page generated")
 
     def _generate_app_detail_pages(self, applications: List[Application]):
         """Generate individual application detail pages."""
@@ -420,7 +420,7 @@ class SiteGenerator:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
-        print(f"Application detail pages generated ({len(applications)} apps)")
+        print(f"  Application detail pages generated ({len(applications)} apps)")
 
     def _find_related_apps(
         self, target_app: Application, all_applications: List[Application]
@@ -1007,7 +1007,7 @@ class SiteGenerator:
         with open(search_file, "w", encoding="utf-8") as f:
             json.dump(search_data, f, separators=(",", ":"))
 
-        print("Search data file generated")
+        print("  Search data file generated")
 
     def _generate_alternatives_data_file(self, applications: List[Application]) -> Dict[str, Any]:
         """Generate alternatives data JSON file for client-side alternatives page."""
@@ -1071,7 +1071,7 @@ class SiteGenerator:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
-        print("Sitemap generated")
+        print("  Sitemap generated")
 
     def _generate_robots_txt(self):
         """Generate robots.txt file."""
@@ -1110,7 +1110,7 @@ class SiteGenerator:
         with open(robots_path, "w", encoding="utf-8") as f:
             f.write("\n".join(content))
 
-        print("Robots.txt generated")
+        print("  Robots.txt generated")
 
     def _minify_html_if_enabled(self, html_content: str) -> str:
         """Minify HTML content if enabled in configuration."""

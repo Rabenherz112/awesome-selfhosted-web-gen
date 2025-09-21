@@ -70,26 +70,26 @@ def load_config(config_path, verbose=False):
 
 def cmd_fetch(config, verbose=False):
     """Fetch and process awesome-selfhosted data."""
-    print("🌐 Fetching awesome-selfhosted data...")
+    print("  Fetching awesome-selfhosted data...")
     
     try:
         processor = DataProcessor(config)
         
         # Fetch raw data
-        print("Fetching data files...")
+        print("  Fetching data files...")
         raw_data = processor.fetch_awesome_data()
         
         # Process applications
         print("Processing application data...")
         applications = processor.process_applications(raw_data['apps'], raw_data.get('git_data', {}))
         
-        print(f"Processed {len(applications)} applications")
+        print(f"  Processed {len(applications)} applications")
         
         # Generate additional data structures
         categories = processor.create_category_hierarchy(applications, raw_data['categories'])
         statistics = processor.generate_statistics(applications, categories)
         
-        print(f"Statistics: {statistics['total_apps']} apps, {statistics['categories_count']} categories")
+        print(f"  Statistics: {statistics['total_apps']} apps, {statistics['categories_count']} categories")
         
         # Cache processed data
         cache_file = config.data_cache_dir / 'processed_data.json'
@@ -151,7 +151,7 @@ def cmd_build(config, fetch_first=False, verbose=False):
         statistics = data['statistics']
         markdown_data = data.get('markdown', {})
         
-        print(f"Loaded {len(applications)} applications from cache")
+        print(f"  Loaded {len(applications)} applications from cache")
         
         # Generate the site
         generator = SiteGenerator(config)
@@ -162,14 +162,12 @@ def cmd_build(config, fetch_first=False, verbose=False):
         else:
             print("Building for root deployment (/)")
         
-        print("Generating site...")
         generator.generate_site(applications, categories, statistics, data.get('licenses', {}), markdown_data)
         
         # Print build statistics
         print_build_stats(config.output_dir)
         
         print(f"Website generated successfully!")
-        print(f"Output directory: {config.output_dir}")
         
     except Exception as e:
         print(f"Error building site: {e}", file=sys.stderr)
