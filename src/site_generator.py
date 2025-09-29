@@ -219,7 +219,7 @@ class SiteGenerator:
         top_alternatives = []
         if self.config.get("alternatives.enabled", False):
             processor = DataProcessor(self.config)
-            alternatives_data = processor.generate_alternatives_data(filtered_apps)
+            alternatives_data = processor.generate_alternatives_data(applications)
 
             # Get top alternatives (by number of alternative apps)
             min_alternatives = self.config.get("alternatives.min_alternatives", 2)
