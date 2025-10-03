@@ -14,6 +14,14 @@ A Python-based static site generator that creates a beautiful, interactive websi
 - **🔍 Smart Description Parsing**: Extracts relevant information from the description of the application
 - **🔍 Alternatives**: Optionally generate an alternatives page with smart grouping of applications
 
+## 📷 Screenshots
+
+![Homepage](https://assets.theravenhub.com/github/aswg/aswg-homepage.png)
+![Browse](https://assets.theravenhub.com/github/aswg/aswg-browse.png)
+![App Detail](https://assets.theravenhub.com/github/aswg/aswg-app-page.png)
+![Alternatives](https://assets.theravenhub.com/github/aswg/aswg-alternative-software.png)
+![Statistics](https://assets.theravenhub.com/github/aswg/aswg-statistics.png)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
