@@ -16,11 +16,23 @@ A Python-based static site generator that creates a beautiful, interactive websi
 
 ## 📷 Screenshots
 
-![Homepage](https://assets.theravenhub.com/github/aswg/aswg-homepage.png)
-![Browse](https://assets.theravenhub.com/github/aswg/aswg-browse.png)
-![App Detail](https://assets.theravenhub.com/github/aswg/aswg-app-page.png)
-![Alternatives](https://assets.theravenhub.com/github/aswg/aswg-alternative-software.png)
-![Statistics](https://assets.theravenhub.com/github/aswg/aswg-statistics.png)
+<div align="center">
+  <a href="https://assets.theravenhub.com/github/aswg/aswg-homepage.png">
+    <img src="https://assets.theravenhub.com/github/aswg/aswg-homepage.png" alt="Homepage" width="300">
+  </a>
+  <a href="https://assets.theravenhub.com/github/aswg/aswg-browse.png">
+    <img src="https://assets.theravenhub.com/github/aswg/aswg-browse.png" alt="Browse" width="300">
+  </a>
+  <a href="https://assets.theravenhub.com/github/aswg/aswg-app-page.png">
+    <img src="https://assets.theravenhub.com/github/aswg/aswg-app-page.png" alt="App Detail" width="300">
+  </a>
+  <a href="https://assets.theravenhub.com/github/aswg/aswg-alternative-software.png">
+    <img src="https://assets.theravenhub.com/github/aswg/aswg-alternative-software.png" alt="Alternatives" width="300">
+  </a>
+  <a href="https://assets.theravenhub.com/github/aswg/aswg-statistics.png">
+    <img src="https://assets.theravenhub.com/github/aswg/aswg-statistics.png" alt="Statistics" width="300">
+  </a>
+</div>
 
 ## 🚀 Quick Start
 
