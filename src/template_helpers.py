@@ -559,3 +559,19 @@ class TemplateHelpers:
             filtered_items.append(item)
 
         return filtered_items
+
+    def get_license_url(self, license_id: str) -> str:
+        """Get the URL for a license."""
+        if not license_id or not self.licenses_data:
+            return ""
+        
+        # Try exact match
+        if license_id in self.licenses_data:
+            return self.licenses_data[license_id].get("url", "")
+        
+        # Try case-insensitive match
+        for lic_id, lic_info in self.licenses_data.items():
+            if lic_id.lower() == license_id.lower():
+                return lic_info.get("url", "")
+        
+        return ""

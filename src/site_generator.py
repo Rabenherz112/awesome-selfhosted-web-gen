@@ -77,6 +77,7 @@ class SiteGenerator:
                 "url_for": self.template_helpers.url_for,
                 "asset_url": self.template_helpers.asset_url,
                 "filter_navigation": self.template_helpers.filter_navigation,
+                "get_license_url": self.template_helpers.get_license_url,
             }
         )
 

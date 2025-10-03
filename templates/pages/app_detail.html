@@ -185,6 +185,14 @@
                             {% else %}
                                 {{ format_license(license) }}
                             {% endif %}
+                            {% set license_url = get_license_url(license) %}
+                            {% if license_url %}
+                            <a href="{{ license_url }}"{{ get_link_target_attrs(license_url, false) | safe }} class="inline-block align-super ml-0.5 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                            </a>
+                            {% endif %}
                             {%- if not loop.last %} / {% endif %}
                         {% endfor %}
                     {% else %}
@@ -192,6 +200,14 @@
                             <span class="text-orange-700 dark:text-orange-300">{{ format_license(app.license) }}</span>
                         {% else %}
                             {{ format_license(app.license) }}
+                        {% endif %}
+                        {% set license_url = get_license_url(app.license) %}
+                        {% if license_url %}
+                        <a href="{{ license_url }}"{{ get_link_target_attrs(license_url, false) | safe }} class="inline-block align-super ml-0.5 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                        </a>
                         {% endif %}
                     {% endif %}
                 </div>
