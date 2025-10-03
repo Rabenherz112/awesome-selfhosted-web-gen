@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /static/data/
-
-Sitemap: https://rabenherz112.github.io/awesome-selfhosted-web-gen/pr-14/sitemap.xml
