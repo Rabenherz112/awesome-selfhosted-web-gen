@@ -223,8 +223,21 @@ class SiteGenerator:
 
             # Get top alternatives (by number of alternative apps)
             min_alternatives = self.config.get("alternatives.min_alternatives", 2)
+            
+            # Filter alternatives based on include_nonfree setting
+            if include_nonfree:
+                # Include all apps
+                alternatives_for_homepage = alternatives_data['alternatives']
+            else:
+                # Filter out nonfree apps from each alternative group
+                alternatives_for_homepage = {}
+                for name, apps in alternatives_data['alternatives'].items():
+                    filtered_apps_for_alt = [app for app in apps if not self._is_app_nonfree(app)]
+                    if filtered_apps_for_alt:  # Only include if there are free alternatives
+                        alternatives_for_homepage[name] = filtered_apps_for_alt
+            
             filtered_alternatives = {
-            name: apps for name, apps in alternatives_data['alternatives'].items()
+            name: apps for name, apps in alternatives_for_homepage.items()
             if len(apps) >= min_alternatives
             }
 
