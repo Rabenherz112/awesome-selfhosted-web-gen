@@ -1,0 +1,517 @@
+/* Custom styles for the awesome-selfhosted website */
+
+/* Smooth transitions */
+* {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #6b7280;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Enhanced Filter Checkboxes */
+.filter-checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    margin-right: 8px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.filter-checkbox:hover {
+    border-color: #3b82f6;
+    background-color: #f3f4f6;
+}
+
+.filter-checkbox:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.filter-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.filter-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Dark mode filter checkboxes */
+.dark .filter-checkbox {
+    background: #374151;
+    border-color: #6b7280;
+}
+
+.dark .filter-checkbox:hover {
+    border-color: #3b82f6;
+    background-color: #4b5563;
+}
+
+.dark .filter-checkbox:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+/* Filter Labels */
+.filter-label {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #374151;
+    user-select: none; /* Prevent text selection when clicking */
+}
+
+.filter-label:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+.filter-label:has(.filter-checkbox:checked) {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+}
+
+.dark .filter-label {
+    color: #d1d5db;
+}
+
+.dark .filter-label:hover {
+    background-color: #4b5563;
+    color: #f3f4f6;
+}
+
+.dark .filter-label:has(.filter-checkbox:checked) {
+    background-color: #1e3a8a;
+    color: #93c5fd;
+}
+
+/* Sort Buttons */
+.sort-button {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    color: #6b7280;
+}
+
+.sort-button:hover {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.sort-button.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    font-weight: 600;
+}
+
+.dark .sort-button {
+    background: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+}
+
+.dark .sort-button:hover {
+    background-color: #4b5563;
+    color: #d1d5db;
+}
+
+.dark .sort-button.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Enhanced Toggle Switch for Non-Free License */
+.custom-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.custom-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e0;
+    transition: all 0.3s ease;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: all 0.3s ease;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input:checked + .toggle-slider {
+    background-color: #3b82f6;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+.dark .toggle-slider {
+    background-color: #4b5563;
+}
+
+.dark input:checked + .toggle-slider {
+    background-color: #3b82f6;
+}
+
+/* Language color dots */
+.language-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+/* Search results */
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+    background-color: #f9fafb;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.dark .search-result-item {
+    border-bottom-color: #374151;
+}
+
+.dark .search-result-item:hover {
+    background-color: #374151;
+}
+
+/* Focus states */
+.focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Commit Activity Graph Styles */
+.commit-graph {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+.commit-graph .bar-container {
+    position: relative;
+}
+
+.commit-graph .bar {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.commit-graph .bar:hover {
+    opacity: 0.8;
+    transform: scaleY(1.1);
+}
+
+.commit-graph .month-label {
+    font-size: 10px;
+    text-anchor: middle;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+}
+
+/* Responsive commit graph */
+@media (max-width: 768px) {
+    .commit-graph .month-label {
+        font-size: 8px;
+    }
+    
+    .commit-graph .bar {
+        min-width: 16px;
+    }
+}
+
+/* Tooltip enhancements */
+[title] {
+    position: relative;
+}
+
+/* Custom tooltip styling for better visibility */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Badge styles */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-primary {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.dark .badge-primary {
+    background-color: #1e3a8a;
+    color: #93c5fd;
+}
+
+/* Banner animations and styling */
+.banner-container,
+#site-banner {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Banner responsive adjustments */
+@media (max-width: 640px) {
+    #site-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+    
+    #site-banner .flex-1 {
+        flex: none;
+        width: 100%;
+    }
+    
+    #site-banner .flex-wrap {
+        justify-content: center;
+    }
+}
+
+/* Ensure banner decorative elements don't interfere on mobile */
+@media (max-width: 768px) {
+    #site-banner [aria-hidden="true"] {
+        display: none;
+    }
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .grid-responsive {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* App-Details - Mobile-specific improvements */
+@media (max-width: 640px) {
+    /* App detail page mobile optimization */
+    .prose {
+        font-size: 0.95rem;
+    }
+    
+    /* Ensure buttons have minimum touch target size */
+    .app-detail-buttons a {
+        min-height: 44px;
+    }
+    
+    /* Better spacing for mobile cards */
+    .app-detail-metadata > div {
+        padding: 0.75rem;
+    }
+    
+    /* Commit graph mobile scroll */
+    .commit-graph {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Related apps grid on mobile */
+    .related-apps-grid {
+        gap: 1rem;
+    }
+}
+
+/* Ensure metadata badges don't overflow on mobile */
+@media (max-width: 480px) {
+    .metadata-badges {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+}
+
+/* App-Details - Commit graph mobile - ONLY apply scrollbar on mobile */
+@media (max-width: 640px) {
+    .commit-graph svg {
+        min-width: 320px;
+    }
+    
+    /* Smooth horizontal scrolling on mobile only */
+    .commit-graph .overflow-x-auto {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    /* Custom scrollbar for mobile commit graph */
+    .commit-graph .overflow-x-auto::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .commit-graph .overflow-x-auto::-webkit-scrollbar-track {
+        background: rgba(156, 163, 175, 0.1);
+        border-radius: 3px;
+    }
+    
+    .commit-graph .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+        border-radius: 3px;
+    }
+    
+    .dark .commit-graph .overflow-x-auto::-webkit-scrollbar-track {
+        background: rgba(75, 85, 99, 0.3);
+    }
+    
+    .dark .commit-graph .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.3);
+    }
+}
+
+/* Desktop - ensure no scrollbar */
+@media (min-width: 641px) {
+    .commit-graph .overflow-visible {
+        overflow: visible !important;
+    }
+    
+    .commit-graph svg {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Scroll hint animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
