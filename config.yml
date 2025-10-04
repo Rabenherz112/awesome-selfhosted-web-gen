@@ -293,5 +293,5 @@ robots:
   allow:
     - "/"
   disallow:
-    - "/static/data/"
+    - "/static/"
   sitemap_url: "/sitemap.xml"
