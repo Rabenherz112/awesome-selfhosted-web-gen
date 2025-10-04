@@ -159,8 +159,11 @@ class TemplateHelpers:
         html_parts = []
         for platform in platforms:
             if platform:
+                color = self.get_platform_color(platform)
                 html_parts.append(
-                    f'<span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm px-2 py-1 rounded">{platform}</span>'
+                    f'<span class="inline-flex items-center text-gray-500 dark:text-gray-400 text-sm mr-2 mb-1">'
+                    f'<div class="w-3 h-3 rounded-full mr-2" style="background-color: {color};"></div>'
+                    f'{platform}</span>'
                 )
 
         return " ".join(html_parts)
