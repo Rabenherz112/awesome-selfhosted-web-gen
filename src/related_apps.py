@@ -410,7 +410,7 @@ class RelatedAppsFinder:
             "provides",
             "allows",
             "supports",
-            # Common adverisment words
+            # Common advertisement words
             "best",
             "new",
             "free",
