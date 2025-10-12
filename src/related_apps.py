@@ -452,7 +452,7 @@ class RelatedAppsFinder:
             return False
 
         # 2. Reject phrases that start with generic connectors/articles
-        # Patterns in here recieve a weight of 0
+        # Patterns in here receive a weight of 0
         useless_patterns = [
             r"^(with|and|for|the|a|an)\s",
             r"^(is|are|can|will|has|have)\s",
