@@ -1058,22 +1058,31 @@ class SiteGenerator:
 
     def _generate_sitemap(self, applications: List[Application]):
         """Generate XML sitemap."""
+        from datetime import datetime
+        
         template = self.jinja_env.get_template("sitemap.xml")
         base_path = self.config.get('site.base_path', '').rstrip('/')
+        
+        # Current date in W3C Datetime format (YYYY-MM-DD)
+        current_date = datetime.now().strftime('%Y-%m-%d')
 
         urls = [
-            {"loc": base_path + "/", "priority": "1.0"},  # Homepage
-            {"loc": base_path + "/browse.html", "priority": "1.0"},  # Browse page
-            {"loc": base_path + "/statistics.html", "priority": "1.0"},  # Statistics page
+            {"loc": base_path + "/", "lastmod": current_date, "priority": "1.0"},  # Homepage
+            {"loc": base_path + "/browse.html", "lastmod": current_date, "priority": "0.9"},  # Browse page
+            {"loc": base_path + "/statistics.html", "lastmod": current_date, "priority": "0.7"},  # Statistics page
         ]
 
         # Add alternatives page if enabled
         if self.config.get("alternatives.enabled", False):
-            urls.append({"loc": base_path + "/alternatives.html", "priority": "0.9"})
+            urls.append({"loc": base_path + "/alternatives.html", "lastmod": current_date, "priority": "0.8"})
 
         # Add application pages
         for app in applications:
-            urls.append({"loc": base_path + f"/apps/{app.id}.html", "priority": "0.7"})
+            urls.append({
+                "loc": base_path + f"/apps/{app.id}.html",
+                "lastmod": current_date,
+                "priority": "0.1"
+            })
 
         content = template.render(
             urls=urls,
