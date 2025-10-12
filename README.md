@@ -274,6 +274,5 @@ While AI was used as a development aid, all outputs have been reviewed and, wher
 - Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings. - Is correctly generated (so webserver or browser issue?) - Maybe we define `_self` when we want to open in the same tab. - Defined, still not works as it get's replaced by `_blank`?? - Paused for now
 - Add config ability to add a referer details to all outgoing links - Not required for inital release
 - Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space? - Not required for inital release
-- Simplify Code where possible - Not required for inital release
 - Make license link in app detail page clickable if a license and the url for it are defined
 - Move none SiteGenerator code away from src/site_generator.py (e.g. `_find_related_apps`) - Next release
