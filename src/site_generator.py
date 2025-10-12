@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 from typing import Dict, List, Any
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from datetime import datetime
 
 try:
     from minify_html import minify
@@ -1058,7 +1059,6 @@ class SiteGenerator:
 
     def _generate_sitemap(self, applications: List[Application]):
         """Generate XML sitemap."""
-        from datetime import datetime
         
         template = self.jinja_env.get_template("sitemap.xml")
         base_path = self.config.get('site.base_path', '').rstrip('/')
