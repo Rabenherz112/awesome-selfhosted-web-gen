@@ -107,6 +107,7 @@ awesome-selfhosted-web-gen/
 │   ├── __init__.py               # Package initialization
 │   ├── config.py                 # Configuration management
 │   ├── data_processor.py         # Data fetching and processing
+│   ├── related_apps.py           # Related applications algorithm
 │   ├── site_generator.py         # HTML generation engine
 │   ├── template_helpers.py       # Jinja2 template utilities
 │   └── utils.py                  # Utility functions
@@ -128,6 +129,7 @@ awesome-selfhosted-web-gen/
 │   ├── js/
 │   │   ├── app.js               # Main application JS
 │   │   ├── app-detail.js        # Commit graph and detail page logic
+│   │   ├── alternatives.js      # Alternatives page logic
 │   │   ├── browse.js            # Browse page filtering and pagination
 │   │   ├── search.js            # Search functionality with mobile support
 │   │   └── theme.js             # Theme toggle
