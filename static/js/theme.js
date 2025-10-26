@@ -34,5 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         updateThemeIcons();
+        themeToggle.blur();
     });
 }); 
