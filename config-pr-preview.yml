@@ -34,7 +34,7 @@ build:
 generation:
   items_per_page: 60
   enable_search_index: true
-  minify_html: false
+  minify_html: true
   generate_sitemap: true
   enable_pagination: true
   use_git_data: true
