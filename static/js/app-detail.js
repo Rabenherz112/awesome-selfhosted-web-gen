@@ -28,6 +28,14 @@ class AppDetail {
                 return;
             }
             
+            // Check if all values are zero - if so, display a message instead of rendering the graph
+            const totalCommits = Object.values(commitHistory).reduce((sum, commits) => sum + commits, 0);
+            if (totalCommits === 0) {
+                const monthCount = Object.keys(commitHistory).length;
+                graphContainer.innerHTML = `<div class="text-gray-500 dark:text-gray-400 text-center py-8">This project has no recorded commits in the last ${monthCount} months</div>`;
+                return;
+            }
+            
             this.createCommitLineGraph(graphContainer, commitHistory);
         } catch (error) {
             console.error('Error parsing commit history data:', error);
