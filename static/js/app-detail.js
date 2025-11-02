@@ -79,10 +79,10 @@ class AppDetail {
         // Adjust dimensions based on screen size
         const isMobile = window.innerWidth < 640;
         const monthWidth = isMobile ? 50 : 70;
-        // For desktop, ensure width fits without scroll; for mobile, allow scroll
+        // For desktop, use full container width; for mobile, allow scroll
         const svgWidth = isMobile 
             ? Math.max(320, sortedMonths.length * monthWidth)
-            : Math.min(800, Math.max(600, sortedMonths.length * 70)); // Desktop fits in container
+            : (container.getBoundingClientRect().width || container.offsetWidth || Math.max(600, sortedMonths.length * 70));
         const svgHeight = isMobile ? 150 : 200;
         const padding = { 
             top: 20, 
