@@ -271,12 +271,22 @@ class SiteGenerator:
 
         category_stats.sort(key=lambda x: x["count"], reverse=True)
 
+        # Deduplicate categories while preserving order (highest counts first)
+        unique_category_stats = []
+        seen_category_slugs = set()
+        for category in category_stats:
+            category_slug = self.template_helpers.slugify(category["name"])
+            if category_slug in seen_category_slugs:
+                continue
+            seen_category_slugs.add(category_slug)
+            unique_category_stats.append(category)
+
         content = template.render(
             popular_apps=popular_apps,
             recent_apps=recent_apps,
             random_picks=random_picks,
             alternatives=top_alternatives,
-            categories=category_stats[: limits.get("homepage_popular_categories", 8)],
+            categories=unique_category_stats[: limits.get("homepage_popular_categories", 8)],
             statistics=statistics,
             total_applications=len(applications),
             markdown_data=markdown_data or {},
