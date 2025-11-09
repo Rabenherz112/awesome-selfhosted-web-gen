@@ -178,7 +178,7 @@
                 </div>
                 {% if interactive_demo_percent is not none %}
                 <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                    ≈{{ interactive_demo_percent|round(0) }}% of catalog
+                    ≈{{ interactive_demo_percent|round(1) }}% of catalog
                 </div>
                 {% endif %}
             {% else %}
@@ -201,7 +201,7 @@
                 </div>
                 {% if new_apps_percent is not none %}
                 <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                    ≈{{ new_apps_percent|round(0) }}% added this year
+                    ≈{{ new_apps_percent|round(1) }}% added this year
                 </div>
                 {% endif %}
             {% else %}
@@ -224,7 +224,7 @@
                 </div>
                 {% if active_apps_percent is not none %}
                 <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                    ≈{{ active_apps_percent|round(0) }}% updated in 12 months
+                    ≈{{ active_apps_percent|round(1) }}% updated in 12 months
                 </div>
                 {% endif %}
             {% else %}
@@ -247,7 +247,7 @@
                 </div>
                 {% if releases_percent is not none %}
                 <div class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                    ≈{{ releases_percent|round(0) }}% publish releases
+                    ≈{{ releases_percent|round(1) }}% publish releases
                 </div>
                 {% endif %}
             {% else %}
