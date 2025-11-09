@@ -8,7 +8,7 @@ import unicodedata
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date, timedelta, timezone
 
 from .config import Config
 
@@ -482,8 +482,20 @@ class DataProcessor:
         self, applications: List[Application], categories: Dict
     ) -> Dict[str, Any]:
         """Generate site statistics."""
+        def parse_date(date_str: Optional[str]) -> Optional[date]:
+            if not date_str:
+                return None
+
+            try:
+                if "T" in date_str:
+                    return datetime.fromisoformat(date_str.replace("Z", "+00:00")).date()
+                return datetime.strptime(date_str, "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                return None
         license_counts = {}
         platform_counts = {}
+
+        today = datetime.now(timezone.utc).date()
 
         for app in applications:
             # Count all platforms - ensure we have the platforms data
@@ -512,6 +524,40 @@ class DataProcessor:
             if hasattr(app, "platforms") and app.platforms and len(app.platforms) > 1
         )
 
+        demo_counts_available = any(app.demo_url for app in applications)
+        apps_with_demo = (
+            sum(1 for app in applications if app.demo_url) if demo_counts_available else None
+        )
+
+        release_counts_available = any(app.current_release for app in applications)
+        apps_with_releases = (
+            sum(1 for app in applications if app.current_release)
+            if release_counts_available
+            else None
+        )
+
+        last_updated_dates = [
+            parsed
+            for app in applications
+            if (parsed := parse_date(getattr(app, "last_updated", None)))
+        ]
+        active_apps_last_365 = None
+        if last_updated_dates:
+            cutoff_date = today - timedelta(days=365)
+            active_apps_last_365 = sum(1 for parsed_date in last_updated_dates if parsed_date >= cutoff_date)
+
+        date_added_dates = [
+            parsed
+            for app in applications
+            if (parsed := parse_date(getattr(app, "date_added", None)))
+        ]
+        new_apps_current_year = None
+        new_apps_current_year_label = None
+        if date_added_dates:
+            year_start = date(today.year, 1, 1)
+            new_apps_current_year = sum(1 for parsed_date in date_added_dates if parsed_date >= year_start)
+            new_apps_current_year_label = today.year
+
         return {
             "total_apps": len(applications),
             "categories_count": len([c for c in categories.values() if c["count"] > 0]),
@@ -530,6 +576,11 @@ class DataProcessor:
             "total_stars": sum(app.stars or 0 for app in applications),
             "apps_with_multiple_licenses": apps_with_multiple_licenses,
             "apps_with_multiple_platforms": apps_with_multiple_platforms,
+            "apps_with_demo": apps_with_demo,
+            "apps_with_recent_activity": active_apps_last_365,
+            "apps_with_releases": apps_with_releases,
+            "new_apps_current_year": new_apps_current_year,
+            "new_apps_current_year_label": new_apps_current_year_label,
         }
 
     def generate_alternatives_data(self, applications: List[Application]) -> Dict[str, Any]:
