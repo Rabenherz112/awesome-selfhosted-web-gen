@@ -387,7 +387,7 @@
                         </div>
                         {% if interactive_demo_percent is not none %}
                         <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            ≈{{ interactive_demo_percent|round(1) }}% of catalog
+                            ≈{{ interactive_demo_percent|round(0, 'common')|int }}% of catalog
                         </div>
                         {% endif %}
                     {% else %}
@@ -409,7 +409,7 @@
                         </div>
                         {% if new_apps_percent is not none %}
                         <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            ≈{{ new_apps_percent|round(1) }}% added this year
+                            ≈{{ new_apps_percent|round(0, 'common')|int }}% added this year
                         </div>
                         {% endif %}
                     {% else %}
@@ -427,11 +427,11 @@
                             {{ active_apps_last_365 }}
                         </div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            Actively Maintained Apps
+                            Actively maintained Apps
                         </div>
                         {% if active_apps_percent is not none %}
                         <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            ≈{{ active_apps_percent|round(1) }}% updated in 12 months
+                            ≈{{ active_apps_percent|round(0, 'common')|int }}% updated in 12 months
                         </div>
                         {% endif %}
                     {% else %}
@@ -449,11 +449,11 @@
                             {{ apps_with_releases }}
                         </div>
                         <div class="text-sm text-gray-600 dark:text-gray-400">
-                            Apps with Tagged Releases
+                            Apps with tagged releases
                         </div>
                         {% if releases_percent is not none %}
                         <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            ≈{{ releases_percent|round(1) }}% publish releases
+                            ≈{{ releases_percent|round(0, 'common')|int }}% publish releases
                         </div>
                         {% endif %}
                     {% else %}
