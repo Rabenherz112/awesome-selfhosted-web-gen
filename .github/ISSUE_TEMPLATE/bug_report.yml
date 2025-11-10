@@ -32,74 +32,12 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: os
-    attributes:
-      label: Operating System (if generator related)
-      description: What operating system are you using?
-      options:
-        - Windows
-        - macOS
-        - Linux
-        - Other / Not applicable
-    validations:
-      required: false
-
-  - type: input
-    id: os-version
-    attributes:
-      label: OS Version (if generator related)
-      description: Specific version of your operating system (e.g., Windows 10, Ubuntu 22.04, macOS 14)
-      placeholder: e.g., Windows 10, Ubuntu 22.04
-    validations:
-      required: false
-
-  - type: input
-    id: python-version
-    attributes:
-      label: Python Version (if generator related)
-      description: What version of Python are you using?
-      placeholder: e.g., 3.11.0
-    validations:
-      required: false
-
-  - type: input
-    id: generator-version
-    attributes:
-      label: Generator Version/Commit (if self-hosted)
-      description: What version or commit of the generator are you using?
-      placeholder: e.g., main branch, commit hash, tag v1.0.0
-    validations:
-      required: false
-
-  - type: input
-    id: browser-version
-    attributes:
-      label: Browser and Version (if UI-related)
-      description: Specific browser version (if applicable)
-      placeholder: e.g., Chrome 120, Firefox 121
-    validations:
-      required: false
-
-  - type: textarea
-    id: configuration
-    attributes:
-      label: Configuration (if self-hosted)
-      description: If relevant, please share relevant parts of your `config.yml` (remove any sensitive information)
-      placeholder: |
-        ```yaml
-        # Relevant config sections here
-        ```
-      render: yaml
-    validations:
-      required: false
-
   - type: textarea
     id: additional-context
     attributes:
       label: Additional Context
       description: Add any other context about the problem here
-      placeholder: Any additional information that might be helpful...
+      placeholder: Any additional information that might be helpful (e.g. screenshots, logs, etc.) or information about your environment (e.g. operating system, browser, python version, generator version, etc.) if related to generator.
     validations:
       required: false
 

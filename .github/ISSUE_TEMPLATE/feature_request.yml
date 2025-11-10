@@ -28,36 +28,6 @@ body:
         Currently, users face the following problem...
         This feature would solve it by...
     validations:
-      required: true
-
-  - type: textarea
-    id: proposed-solution
-    attributes:
-      label: Proposed Solution
-      description: Describe how you envision this feature working
-      placeholder: |
-        The feature should work like this:
-        - Step 1...
-        - Step 2...
-    validations:
-      required: true
-
-  - type: dropdown
-    id: scope
-    attributes:
-      label: Scope
-      description: What area of the project would this feature affect? (optional)
-      options:
-        - UI/UX
-        - Data Processing
-        - Configuration
-        - Performance
-        - Documentation
-        - Templates
-        - JavaScript/Client-side
-        - Build System
-        - Other
-    validations:
       required: false
 
   - type: textarea

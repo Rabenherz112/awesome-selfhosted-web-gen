@@ -269,10 +269,3 @@ For transparency, the following models/tools were used during development:
 - [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (for code suggestions)
 
 While AI was used as a development aid, all outputs have been reviewed and, where necessary, modified by a human contributor.
-
-## TODOs
-
-- Make this into a proper Python package with `setup.py` and `pyproject.toml`, so it can be installed with `pip install awesome-selfhosted-web-gen` - How to do this? - Paused for now
-- Bug: Action Buttons in the app detail page are not respecting the `open_in_new_tab_for_internal_links` and `open_in_new_tab_for_external_links` settings. - Is correctly generated (so webserver or browser issue?) - Maybe we define `_self` when we want to open in the same tab. - Defined, still not works as it get's replaced by `_blank`?? - Paused for now
-- Add config ability to add a referer details to all outgoing links - Not required for inital release
-- Can we put the filtering / sorting options on mobile under a menu to stop it take so much screen space? - Not required for inital release
