@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/blob/main/README.md
+    about: Check the README for installation and usage instructions
