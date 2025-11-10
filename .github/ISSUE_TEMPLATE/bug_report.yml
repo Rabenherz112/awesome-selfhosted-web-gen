@@ -32,24 +32,6 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: expected-behavior
-    attributes:
-      label: Expected Behavior
-      description: What you expected to happen
-      placeholder: I expected that...
-    validations:
-      required: true
-
-  - type: textarea
-    id: actual-behavior
-    attributes:
-      label: Actual Behavior
-      description: What actually happened
-      placeholder: But instead...
-    validations:
-      required: true
-
   - type: dropdown
     id: os
     attributes:
@@ -90,26 +72,10 @@ body:
     validations:
       required: false
 
-  - type: dropdown
-    id: browser
-    attributes:
-      label: Browser (if UI-related)
-      description: What browser are you using? (Only relevant for UI/frontend bugs)
-      options:
-        - Not applicable (backend/generator issue)
-        - Chrome
-        - Firefox
-        - Safari
-        - Microsoft Edge
-        - Opera
-        - Other
-    validations:
-      required: false
-
   - type: input
     id: browser-version
     attributes:
-      label: Browser Version (if UI-related)
+      label: Browser and Version (if UI-related)
       description: Specific browser version (if applicable)
       placeholder: e.g., Chrome 120, Firefox 121
     validations:
@@ -129,30 +95,11 @@ body:
       required: false
 
   - type: textarea
-    id: error-messages
-    attributes:
-      label: Error Messages/Logs (if generator related)
-      description: Please copy and paste any error messages or relevant log output
-      placeholder: Paste error messages or logs here...
-      render: shell
-    validations:
-      required: false
-
-  - type: textarea
     id: additional-context
     attributes:
       label: Additional Context
       description: Add any other context about the problem here
       placeholder: Any additional information that might be helpful...
-    validations:
-      required: false
-
-  - type: textarea
-    id: possible-solution
-    attributes:
-      label: Possible Solution
-      description: If you have ideas on how to fix this, please share them here
-      placeholder: I think the issue might be...
     validations:
       required: false
 
