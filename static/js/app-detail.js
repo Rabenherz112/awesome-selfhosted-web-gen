@@ -28,14 +28,6 @@ class AppDetail {
                 return;
             }
             
-            // Check if all values are zero - if so, display a message instead of rendering the graph
-            const totalCommits = Object.values(commitHistory).reduce((sum, commits) => sum + commits, 0);
-            if (totalCommits === 0) {
-                const monthCount = Object.keys(commitHistory).length;
-                graphContainer.innerHTML = `<div class="text-gray-500 dark:text-gray-400 text-center py-8">This project has no recorded commits in the last ${monthCount} months</div>`;
-                return;
-            }
-            
             this.createCommitLineGraph(graphContainer, commitHistory);
         } catch (error) {
             console.error('Error parsing commit history data:', error);
@@ -50,9 +42,11 @@ class AppDetail {
         
         if (sortedMonths.length < 3) return;
     
-        // Calculate max commits for scaling and average for display
-        const maxCommits = Math.max(...Object.values(commitHistory));
-        const totalCommits = Object.values(commitHistory).reduce((sum, commits) => sum + commits, 0);
+        // Calculate max commits for scaling and average for display (forces a minimum of 10 commits per month)
+        const commitValues = Object.values(commitHistory);
+        const rawMaxCommits = Math.max(...commitValues);
+        const maxCommits = Math.max(10, rawMaxCommits);
+        const totalCommits = commitValues.reduce((sum, commits) => sum + commits, 0);
         const averageCommits = Math.round(totalCommits / sortedMonths.length);
         
         // Get current month for dotted line indicator
