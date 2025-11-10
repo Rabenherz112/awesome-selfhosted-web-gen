@@ -41,14 +41,14 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate.ps1
 ```
 
-4. **Install dependencies:**
+4. **Install the package:**
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 5. **Generate the website:**
 ```bash
-python generate.py build
+aswg build
 ```
 
 6. **View your website:**
@@ -60,32 +60,39 @@ python generate.py build
 
 ```bash
 # Fetch and process data
-python generate.py fetch
+aswg fetch
 
 # Build the complete website
-python generate.py build
+aswg build
 
 # Watch for changes and rebuild automatically
-python generate.py watch
+aswg watch
 
 # Clean output and cache directories
-python generate.py clean
+aswg clean
 
 # Show configuration info
-python generate.py info
+aswg info
 ```
 
 ### Command Options
 
 ```bash
 # Build with fresh data
-python generate.py build --fetch-first
+aswg build --fetch-first
 
 # Watch with custom interval
-python generate.py watch --interval 3
+aswg watch --interval 3
 
 # Use custom config file
-python generate.py --config custom-config.yaml build
+aswg --config custom-config.yaml build
+```
+
+### Development Mode
+
+For development, you can also run the package as a module:
+```bash
+python -m aswg.cli build
 ```
 
 ### CSS Development
@@ -103,15 +110,20 @@ This will update the `static/css/tailwind.css` file to the latest version and in
 
 ```text
 awesome-selfhosted-web-gen/
-├── src/                          # Source code
+├── aswg/                         # Package source code
 │   ├── __init__.py               # Package initialization
+│   ├── cli.py                    # Command-line interface
 │   ├── config.py                 # Configuration management
 │   ├── data_processor.py         # Data fetching and processing
 │   ├── related_apps.py           # Related applications algorithm
 │   ├── site_generator.py         # HTML generation engine
 │   ├── template_helpers.py       # Jinja2 template utilities
-│   └── utils.py                  # Utility functions
-├── templates/                    # Jinja2 templates
+│   ├── utils.py                  # Utility functions
+│   ├── templates/                # Jinja2 templates (package data)
+│   └── static/                   # Static assets (package data)
+├── config/                       # Configuration files
+│   └── config.yml                # Main configuration
+├── templates/                    # Jinja2 templates (for development)
 │   ├── base/
 │   │   └── base.html            # Base template with navigation
 │   ├── pages/
@@ -139,8 +151,7 @@ awesome-selfhosted-web-gen/
 │       └── logo.svg             # Site logo
 ├── output/                      # Generated website (created after build)
 ├── data/                        # Cached data files (created after fetch)
-├── config.yml                   # Main configuration
-├── generate.py                  # CLI entry point
+├── pyproject.toml              # Package configuration
 ├── requirements.txt             # Python dependencies
 ├── package.json                 # Node.js dependencies for CSS build
 ├── LICENSE                      # Project license
@@ -240,11 +251,11 @@ jobs:
           python-version: '3.13'
       - name: Clone data repository
         run: git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      # You probably want to add a step to overwrite the default config.yml with your own config.yml
+      - name: Install package
+        run: pip install .
+      # You probably want to add a step to overwrite the default config/config.yml with your own config.yml
       - name: Build website
-        run: python ./generate.py build
+        run: aswg build
       - name: Deploy
         # Deploy the output/ directory to your hosting service
 ```
