@@ -366,38 +366,104 @@
             </div>
             
             <!-- Additional Stats Grid -->
+            {% set total_apps = statistics.total_apps or 0 %}
+            {% set interactive_demo_count = statistics.get('apps_with_demo') %}
+            {% set interactive_demo_percent = (interactive_demo_count / total_apps * 100) if interactive_demo_count is not none and total_apps else None %}
+            {% set new_apps_current_year = statistics.get('new_apps_current_year') %}
+            {% set new_apps_current_year_label = statistics.get('new_apps_current_year_label') %}
+            {% set new_apps_percent = (new_apps_current_year / total_apps * 100) if new_apps_current_year is not none and total_apps else None %}
+            {% set active_apps_last_365 = statistics.get('apps_with_recent_activity') %}
+            {% set active_apps_percent = (active_apps_last_365 / total_apps * 100) if active_apps_last_365 is not none and total_apps else None %}
+            {% set apps_with_releases = statistics.get('apps_with_releases') %}
+            {% set releases_percent = (apps_with_releases / total_apps * 100) if apps_with_releases is not none and total_apps else None %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                        {{ statistics.apps_with_multiple_licenses or 0 }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Multi-License Apps
-                    </div>
+                    {% if interactive_demo_count is not none %}
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            {{ interactive_demo_count }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Apps with interactive Demos
+                        </div>
+                        {% if interactive_demo_percent is not none %}
+                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            ≈{{ interactive_demo_percent|round(0, 'common')|int }}% of catalog
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            {{ statistics.apps_with_multiple_licenses or 0 }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Multi-License Apps
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
-                        {{ statistics.apps_with_multiple_platforms or 0 }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Multi-Platform Apps
-                    </div>
+                    {% if new_apps_current_year is not none and new_apps_current_year_label is not none %}
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
+                            {{ new_apps_current_year }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            New in {{ new_apps_current_year_label }}
+                        </div>
+                        {% if new_apps_percent is not none %}
+                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            ≈{{ new_apps_percent|round(0, 'common')|int }}% added this year
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-2">
+                            {{ statistics.apps_with_multiple_platforms or 0 }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Multi-Platform Apps
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                        {{ statistics.total_platforms or 0 }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Platforms & Technologies
-                    </div>
+                    {% if active_apps_last_365 is not none %}
+                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                            {{ active_apps_last_365 }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Actively maintained Apps
+                        </div>
+                        {% if active_apps_percent is not none %}
+                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            ≈{{ active_apps_percent|round(0, 'common')|int }}% updated in 12 months
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                            {{ statistics.total_platforms or 0 }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Platforms & Technologies
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                        {{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        Avg Stars per App
-                    </div>
+                    {% if apps_with_releases is not none %}
+                        <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                            {{ apps_with_releases }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Apps with tagged releases
+                        </div>
+                        {% if releases_percent is not none %}
+                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            ≈{{ releases_percent|round(0, 'common')|int }}% publish releases
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-2">
+                            {{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">
+                            Avg Stars per App
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             
