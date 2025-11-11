@@ -277,14 +277,6 @@ links:
   open_in_new_tab_for_external_links: false
 
 # =============================================================================
-# PERFORMANCE OPTIMIZATIONS - Not implemented
-# =============================================================================
-performance:
-  lazy_load_images: true
-  generate_webp: false
-  inline_critical_css: true
-
-# =============================================================================
 # SEO & ROBOTS
 # =============================================================================
 robots:
