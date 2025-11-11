@@ -518,11 +518,11 @@ class AlternativesPage {
             if (isInternal && openInternalInNewTab) {
                 return ' target="_blank" rel="noopener"';
             } else if (isInternal && !openInternalInNewTab) {
-                return ' target="_self" rel="noopener"';
+                return ' target="_self"';
             } else if (!isInternal && openExternalInNewTab) {
                 return ' target="_blank" rel="noopener noreferrer"';
             } else if (!isInternal && !openExternalInNewTab) {
-                return ' target="_self" rel="noopener noreferrer"';
+                return ' target="_self" rel="noreferrer"';
             }
             return '';
         };
