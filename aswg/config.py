@@ -11,7 +11,7 @@ from typing import Dict, Any
 class Config:
     """Configuration management class."""
 
-    def __init__(self, config_path: str = "config.yaml"):
+    def __init__(self, config_path: str = "config/config.yml"):
         """Initialize configuration from YAML file."""
         self.config_path = Path(config_path)
         self._config = self._load_config()
@@ -61,6 +61,10 @@ class Config:
         """Get performance configuration."""
         return self._config.get("performance", {})
 
+    def get_alternatives_config(self) -> Dict[str, Any]:
+        """Get alternatives configuration."""
+        return self._config.get("alternatives", {})
+
     @property
     def output_dir(self) -> Path:
         """Get output directory path."""
@@ -69,12 +73,38 @@ class Config:
     @property
     def template_dir(self) -> Path:
         """Get template directory path."""
-        return Path(self.get("build.template_dir", "templates"))
+        template_path = Path(self.get("build.template_dir", "templates"))
+        # If local template directory exists, use it; otherwise try package data
+        if template_path.exists():
+            return template_path
+        # Try to find templates in package data
+        try:
+            import importlib.resources
+            # Use files() API for Python 3.9+
+            template_ref = importlib.resources.files("aswg") / "templates"
+            # Convert Traversable to string path (works for both files and dirs)
+            return Path(str(template_ref))
+        except (ImportError, ModuleNotFoundError, (AttributeError, TypeError)):
+            pass
+        return template_path
 
     @property
     def static_dir(self) -> Path:
         """Get static files directory path."""
-        return Path(self.get("build.static_dir", "static"))
+        static_path = Path(self.get("build.static_dir", "static"))
+        # If local static directory exists, use it; otherwise try package data
+        if static_path.exists():
+            return static_path
+        # Try to find static files in package data
+        try:
+            import importlib.resources
+            # Use files() API for Python 3.9+
+            static_ref = importlib.resources.files("aswg") / "static"
+            # Convert Traversable to string path (works for both files and dirs)
+            return Path(str(static_ref))
+        except (ImportError, ModuleNotFoundError, (AttributeError, TypeError)):
+            pass
+        return static_path
 
     @property
     def data_cache_dir(self) -> Path:

@@ -40,20 +40,20 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          pip install -r requirements.txt
+          pip install .
 
       - name: Generate website
         shell: bash
         run: |
           set -o pipefail
           # Create a temporary config file with dynamic base_path
-          cp config-pr-preview.yml config-pr-preview-temp.yml 2>&1 | tee -a build.log
+          cp ./config/config-pr-preview.yml ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
           # Update base_path to include repository name and PR number
-          sed -i 's|base_path: ""|base_path: "/awesome-selfhosted-web-gen/pr-${{ github.event.number }}"|g' config-pr-preview-temp.yml 2>&1 | tee -a build.log
+          sed -i 's|base_path: ""|base_path: "/awesome-selfhosted-web-gen/pr-${{ github.event.number }}"|g' ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
           # Generate website with the modified config
-          python generate.py -c config-pr-preview-temp.yml build 2>&1 | tee -a build.log
+          aswg --config ./config/config-pr-preview-temp.yml build 2>&1 | tee -a build.log
           # Clean up temporary config file
-          rm -f config-pr-preview-temp.yml 2>&1 | tee -a build.log
+          rm -f ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
 
       # Deploy only if everything above succeeded
       - name: Deploy to GitHub Pages branch
