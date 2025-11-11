@@ -272,12 +272,12 @@ class TemplateHelpers:
             if links_config.get("open_in_new_tab_for_internal_links", False):
                 target_attrs = ' target="_blank" rel="noopener"'
             else:
-                target_attrs = ' target="_self"'
+                target_attrs = ' target="_self" rel="noopener"'
         else:
             if links_config.get("open_in_new_tab_for_external_links", False):
                 target_attrs = ' target="_blank" rel="noopener noreferrer"'
             else:
-                target_attrs = ' target="_self"'
+                target_attrs = ' target="_self" rel="noopener noreferrer"'
 
         return target_attrs
 
