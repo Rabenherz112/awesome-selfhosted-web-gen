@@ -1,60 +1,54 @@
 # Awesome Selfhosted Website Generator (ASWG)
 
-A Python-based static site generator that creates a beautiful, interactive website from the [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data/) dataset.
+A Python-based static site generator that creates an interactive website from the [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data/) dataset.
 
-## ✨ Features
+## Features
 
-- **📊 Data-Driven**: Automatically processes data from awesome-selfhosted-data repository (or any other repository with the same structure)
-- **🎨 Modern UI**: Responsive design with dark/light themes and enhanced filters
-- **🔍 Powerful Search**: Fuzzy search with mobile support
-- **⚡ Static & Fast**: Pre-compiled HTML for fast loading
-- **⚙️ Highly Configurable**: Configuration options for UI, navigation, and content
-- **📈 Enhanced Analytics**: Line chart commit graphs with smart data requirements
-- **🏷️ Smart Licensing**: Automatic non-free license detection using upstream data
-- **🔍 Smart Description Parsing**: Extracts relevant information from the description of the application
-- **🔍 Alternatives**: Optionally generate an alternatives page with smart grouping of applications
+- **Data-Driven**: Automatically processes data from awesome-selfhosted-data repository
+- **Modern UI**: Responsive design with dark/light themes and enhanced filters
+- **Powerful Search**: Fuzzy search with mobile support
+- **Static & Fast**: Pre-compiled HTML for fast loading
+- **Highly Configurable**: Configuration options for UI, navigation, and content
+- **Analytics**: Line chart commit graphs with smart data requirements
+- **Smart Licensing**: Automatic non-free license detection using upstream data
+- **Description Parsing**: Extracts relevant information from application descriptions
+- **Alternatives**: Optionally generate an alternatives page with smart grouping
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11 or higher
-- pip package manager
-- Cloned [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data/) repository
+## Quick Start
 
 ### Installation
 
-1. **Clone the repository:**
-```bash
-git clone https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git
-cd awesome-selfhosted-web-gen
-```
+1. Create a virtual environment:
 
-2. **Clone the data repository:**
-```bash
-git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data/
-```
+  ```bash
+  sudo apt install python3-venv python3-pip
+  python3 -m venv ~/.venv
+  source ~/.venv/bin/activate
+  ```
 
-3. **Create a virtual environment:**
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate.ps1
-```
+2. Install the package:
 
-4. **Install the package:**
-```bash
-pip install -e .
-```
+  ```bash
+  pip install https://github.com/Rabenherz112/awesome-selfhosted-web-gen/releases/latest
+  ```
 
-5. **Generate the website:**
-```bash
-aswg build
-```
+3. Clone the data repository:
 
-6. **View your website:**
-   Open the `output/index.html` file in your browser to see your generated website!
+  ```bash
+  git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
+  ```
 
-## 📋 CLI Commands
+4. Generate the website:
+
+  ```bash
+  aswg build
+  ```
+
+5. View your website:
+
+   Open the `output/index.html` file in your browser.
+
+## CLI Commands
 
 ### Main Commands
 
@@ -81,86 +75,37 @@ aswg info
 # Build with fresh data
 aswg build --fetch-first
 
-# Watch with custom interval
+# Watch with custom interval (seconds)
 aswg watch --interval 3
 
 # Use custom config file
 aswg --config custom-config.yaml build
 ```
 
-### Development Mode
+## Development
 
-For development, you can also run the package as a module:
+### Installing from Source
+
 ```bash
-python -m aswg.cli build
+git clone https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git
+cd awesome-selfhosted-web-gen
+pip install -e .
 ```
 
 ### CSS Development
 
-When making changes to the website's styling (modifying `static/css/tailwind-input.css`), using new Tailwind classes, you need to rebuild the CSS file:
+When modifying `static/css/tailwind-input.css` or using new Tailwind classes, rebuild the CSS:
 
 ```bash
 npm install
 npm run build-css
 ```
 
-This will update the `static/css/tailwind.css` file to the latest version and include any classes needed.
+This updates `static/css/tailwind.css` with the latest version and includes any new classes.
 
-## 📁 Project Structure
+## How It Works
 
-```text
-awesome-selfhosted-web-gen/
-├── aswg/                         # Package source code
-│   ├── __init__.py               # Package initialization
-│   ├── cli.py                    # Command-line interface
-│   ├── config.py                 # Configuration management
-│   ├── data_processor.py         # Data fetching and processing
-│   ├── related_apps.py           # Related applications algorithm
-│   ├── site_generator.py         # HTML generation engine
-│   ├── template_helpers.py       # Jinja2 template utilities
-│   ├── utils.py                  # Utility functions
-│   ├── templates/                # Jinja2 templates (package data)
-│   └── static/                   # Static assets (package data)
-├── config/                       # Configuration files
-│   └── config.yml                # Main configuration
-├── templates/                    # Jinja2 templates (for development)
-│   ├── base/
-│   │   └── base.html            # Base template with navigation
-│   ├── pages/
-│   │   ├── index.html           # Homepage
-│   │   ├── browse.html          # Browse page
-│   │   ├── alternatives.html    # Alternatives page
-│   │   ├── statistics.html      # Statistics page
-│   │   └── app_detail.html      # App detail pages
-│   └── sitemap.xml              # Sitemap template
-├── static/                      # Static assets
-│   ├── css/
-│   │   ├── custom.css           # Custom styles and enhanced filters
-│   │   ├── tailwind.css         # Compiled Tailwind CSS
-│   │   └── tailwind-input.css   # Tailwind source file
-│   ├── js/
-│   │   ├── app.js               # Main application JS
-│   │   ├── app-detail.js        # Commit graph and detail page logic
-│   │   ├── alternatives.js      # Alternatives page logic
-│   │   ├── browse.js            # Browse page filtering and pagination
-│   │   ├── search.js            # Search functionality with mobile support
-│   │   └── theme.js             # Theme toggle
-│   └── images/                  # Static images
-│       ├── awesome.png          # Awesome logo
-│       ├── favicon.ico          # Site favicon
-│       └── logo.svg             # Site logo
-├── output/                      # Generated website (created after build)
-├── data/                        # Cached data files (created after fetch)
-├── pyproject.toml              # Package configuration
-├── requirements.txt             # Python dependencies
-├── package.json                 # Node.js dependencies for CSS build
-├── LICENSE                      # Project license
-└── README.md                    # This file
-```
-
-## 📊 Data Processing
-
-The generator processes data from awesome-selfhosted-data in several stages:
+The generator processes data in several stages:
 
 1. **Fetch**: Loads YAML data from the cloned repository including license information
 2. **Process**: Converts raw data into structured Application objects with category-based organization
@@ -170,63 +115,28 @@ The generator processes data from awesome-selfhosted-data in several stages:
 
 ### Related Applications Algorithm
 
-The system uses an automatic semantic similarity algorithm to suggest related applications. The algorithm discovers relationships by analyzing application descriptions without requiring manual keyword lists.
+The system uses an automatic semantic similarity algorithm to suggest related applications by analyzing application descriptions.
 
 **Scoring factors:**
 
-- **Semantic Similarity** (up to 25 points) - Automatic phrase matching between descriptions
-- **Common Categories** (+4 points per shared category)
-- **Alternative-to Relationships** (+6 points per shared alternative)
-- **Fork Relationships** (+8 points for forks of same project)
-- **Platform Compatibility** (+2 points per shared platform)
-- **License Type** (+2 points for same license category: free/non-free)
-- **Popularity Tier** (+1 point for similar star count ranges)
-- **Dependency Status** (+1 point for matching third-party dependency requirements)
+- Semantic Similarity (up to 25 points) - Automatic phrase matching between descriptions
+- Common Categories (+4 points per shared category)
+- Alternative-to Relationships (+6 points per shared alternative)
+- Fork Relationships (+8 points for forks of same project)
+- Platform Compatibility (+2 points per shared platform)
+- License Type (+2 points for same license category: free/non-free)
+- Popularity Tier (+1 point for similar star count ranges)
+- Dependency Status (+1 point for matching third-party dependency requirements)
 
-## ⚙️ Configuration
+## Configuration
 
-The `config.yml` file is used to configure the generator, and has the ability to re-brand the website and many more options.
-To see all options possible and default values, see [config.yml](/config.yml).
+The `config.yml` file configures the generator and allows rebranding the website. See [config.yml](./config/config.yml) for all available options and default values.
 
-### Templates
-
-Templates use Jinja2 with extensive helper functions:
-
-- `base/base.html` - Configurable layout with dynamic navigation and footer
-- `pages/index.html` - Homepage with featured applications
-- `pages/browse.html` - Enhanced filtering and pagination
-- `pages/alternatives.html` - Alternative software
-- `pages/statistics.html` - Data insights and trends
-- `pages/app_detail.html` - Detailed app information with commit graphs and related apps
-
-### Styling
-
-The website uses Tailwind CSS with custom enhancements:
-
-- Enhanced filter styling in `custom.css`
-- Dark/light theme support
-- Mobile-responsive design
-- Custom color schemes configurable via templates
-
-### JavaScript Modules
-
-Client-side functionality is organized into specialized modules:
-
-- `app.js` - Main application logic and initialization
-- `browse.js` - Advanced filtering, sorting, and pagination
-- `alternatives.js` - Alternatives page functionality and search
-- `search.js` - Real-time search with mobile support
-- `app-detail.js` - Commit graphs and detail page interactions
-- `theme.js` - Dark/light theme toggle
-
-## 🚀 Deployment
+## Deployment
 
 ### Static Hosting
 
-The generated website can be deployed to any static hosting service:
-
-- Any static hosting service that supports HTML, CSS, and JavaScript
-- Use the `output/` directory as the root of your website, no additional configuration is required
+The generated website can be deployed to any static hosting service. Use the `output/` directory as the root of your website - no additional configuration is required.
 
 ### Build Pipeline
 
@@ -244,15 +154,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
       - name: Clone data repository
-        run: git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
-      - name: Install package
-        run: pip install .
+        run: pip install https://github.com/Rabenherz112/awesome-selfhosted-web-gen/releases/latest
       # You probably want to add a step to overwrite the default config/config.yml with your own config.yml
       - name: Build website
         run: aswg build
@@ -260,23 +168,20 @@ jobs:
         # Deploy the output/ directory to your hosting service
 ```
 
-## 📄 License
+## License
 
 This project is licensed under the AGPL-3.0 License - see the LICENSE file for details.
 
 The generated content includes data from [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) which is licensed under [CC-BY-SA 3.0](https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE).
 
-## 📜 Disclaimer
+## Disclaimer
 
-This project was created with the assistance of Large Language Models (LLMs).
-Some portions of the code, documentation, and/or design may have been generated or refined using AI-based tools.
+This project was created with the assistance of Large Language Models (LLMs). Some portions of the code, documentation, and/or design may have been generated or refined using AI-based tools.
 
 For transparency, the following models/tools were used during development:
 
-- [OpenAI GPT-5](https://openai.com/index/introducing-gpt-5/) (for code suggestions, and documentation drafting)
-- [OpenAI GPT-4o](https://openai.com/index/introducing-gpt-4o/) (for code suggestions, and documentation drafting)
-- [Claude 4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1) (for code suggestions, and some design suggestions)
-- [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (for code suggestions)
-- [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (for code suggestions)
+- OpenAI [GPT-5](https://openai.com/index/introducing-gpt-5/), [GPT-4o](https://openai.com/index/introducing-gpt-4o/) (code suggestions and documentation drafting)
+- [Claude 4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1), [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (code suggestions and design suggestions)
+- [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (code suggestions)
 
 While AI was used as a development aid, all outputs have been reviewed and, where necessary, modified by a human contributor.
