@@ -1087,6 +1087,24 @@ class BrowsePage {
             drawer.classList.remove('hidden');
             drawer.classList.add('show');
             document.body.classList.add('mobile-drawer-open');
+
+            // Sync mobile sort buttons to show current state
+            this.syncMobileSortState();
+        }
+    }
+
+    syncMobileSortState() {
+        // Find which sort button should be active based on currentSort
+        const sortButtonMap = {
+            'name': 'mobileSortName',
+            'stars': 'mobileSortStars',
+            'updated': 'mobileSortUpdated',
+            'dateAdded': 'mobileSortDateAdded'
+        };
+
+        const activeButtonId = sortButtonMap[this.currentSort];
+        if (activeButtonId) {
+            this.updateMobileSortButtons(activeButtonId);
         }
     }
 
