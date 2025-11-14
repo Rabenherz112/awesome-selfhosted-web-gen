@@ -926,9 +926,9 @@ body.mobile-drawer-open {
 */
 
 @media (max-width: 480px) {
-    /* Increase max height on very small screens */
+    /* Reduce max height on very small screens to ensure Apply button is visible */
     #mobileFilterContent {
-        max-height: 90vh;
+        max-height: 70vh;
     }
 
     /* Reduce padding on very small screens */

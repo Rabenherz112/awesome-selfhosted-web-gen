@@ -1001,22 +1001,29 @@ class BrowsePage {
     handleResponsiveUI() {
         const mobileButtonContainer = document.getElementById('mobileFilterButtonContainer');
         const desktopSidebar = document.getElementById('desktopFilterSidebar');
+        const desktopSortControls = document.getElementById('desktopSortControls');
 
         if (this.isMobile) {
-            // Show mobile button, hide desktop sidebar
+            // Show mobile button, hide desktop sidebar and sort controls
             if (mobileButtonContainer) {
                 mobileButtonContainer.classList.remove('hidden');
             }
             if (desktopSidebar) {
                 desktopSidebar.classList.add('hidden');
             }
+            if (desktopSortControls) {
+                desktopSortControls.classList.add('hidden');
+            }
         } else {
-            // Hide mobile button, show desktop sidebar
+            // Hide mobile button, show desktop sidebar and sort controls
             if (mobileButtonContainer) {
                 mobileButtonContainer.classList.add('hidden');
             }
             if (desktopSidebar) {
                 desktopSidebar.classList.remove('hidden');
+            }
+            if (desktopSortControls) {
+                desktopSortControls.classList.remove('hidden');
             }
         }
     }
