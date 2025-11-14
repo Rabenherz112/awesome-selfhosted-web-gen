@@ -13,7 +13,7 @@ class BrowsePage {
         this.showNonFreeOnly = false;
         this.currentSort = 'name';
         this.basePath = document.querySelector('meta[name="base-path"]')?.content || '';
-        
+
         // Sort direction tracking
         this.sortDirections = {
             'name': 'asc',      // asc = A-Z, desc = Z-A
@@ -21,12 +21,16 @@ class BrowsePage {
             'updated': 'desc',  // desc = newest first, asc = oldest first
             'dateAdded': 'desc' // desc = newest first, asc = oldest first
         };
-        
+
         // Pagination settings
         this.currentPage = 1;
         this.itemsPerPage = 60;
         this.totalPages = 1;
         this.enablePagination = true;
+
+        // Mobile detection
+        this.isMobile = window.innerWidth < 640;
+
         this.init();
     }
 
@@ -49,10 +53,16 @@ class BrowsePage {
         this.checkAndShowGitSortButton();
         this.updateSortButtons('sortName');
 
-        // Setup mobile filter drawer
+        // Setup mobile/desktop UI
+        this.handleResponsiveUI();
         this.setupMobileFilterDrawer();
         this.setupMobileFilters();
         this.setupMobileFilterSearch();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
 
         this.filterSortAndRender();
     }
@@ -983,6 +993,46 @@ class BrowsePage {
             }
         } else {
             paginationContainer.classList.add('hidden');
+        }
+    }
+
+    // MOBILE/DESKTOP RESPONSIVE UI METHODS
+
+    handleResponsiveUI() {
+        const mobileButtonContainer = document.getElementById('mobileFilterButtonContainer');
+        const desktopSidebar = document.getElementById('desktopFilterSidebar');
+
+        if (this.isMobile) {
+            // Show mobile button, hide desktop sidebar
+            if (mobileButtonContainer) {
+                mobileButtonContainer.classList.remove('hidden');
+            }
+            if (desktopSidebar) {
+                desktopSidebar.classList.add('hidden');
+            }
+        } else {
+            // Hide mobile button, show desktop sidebar
+            if (mobileButtonContainer) {
+                mobileButtonContainer.classList.add('hidden');
+            }
+            if (desktopSidebar) {
+                desktopSidebar.classList.remove('hidden');
+            }
+        }
+    }
+
+    handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth < 640;
+
+        // Only update UI if mobile state changed
+        if (wasMobile !== this.isMobile) {
+            this.handleResponsiveUI();
+
+            // Close mobile drawer if switching from mobile to desktop
+            if (!this.isMobile) {
+                this.closeMobileFilterDrawer();
+            }
         }
     }
 

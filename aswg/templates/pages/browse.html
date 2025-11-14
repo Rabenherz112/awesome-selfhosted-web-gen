@@ -48,7 +48,7 @@
     </div>
 
     <!-- Mobile Filter Button (visible only on mobile) -->
-    <div class="lg:hidden mb-6">
+    <div id="mobileFilterButtonContainer" class="hidden mb-6">
         <button id="mobileFilterButton" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-colors duration-200 flex items-center justify-center gap-2">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Mobile Filter Drawer (visible only on mobile) -->
-    <div id="mobileFilterDrawer" class="lg:hidden fixed inset-0 z-50 hidden">
+    <div id="mobileFilterDrawer" class="fixed inset-0 z-50 hidden">
         <!-- Backdrop -->
         <div id="mobileFilterBackdrop" class="absolute inset-0 bg-black bg-opacity-50"></div>
 
@@ -175,7 +175,7 @@
     <!-- Filter Sidebar and Content -->
     <div class="lg:grid lg:grid-cols-5 lg:gap-8">
         <!-- Filters Sidebar (hidden on mobile, visible on desktop) -->
-        <div class="hidden lg:block lg:col-span-1 mb-8 lg:mb-0 space-y-6">
+        <div id="desktopFilterSidebar" class="lg:col-span-1 mb-8 lg:mb-0 space-y-6">
             <!-- Category Filter -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <div class="flex items-center justify-between mb-4">
