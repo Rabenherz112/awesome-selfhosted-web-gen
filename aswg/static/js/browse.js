@@ -1373,7 +1373,7 @@ class BrowsePage {
     }
 
     filterMobileCheckboxes(searchId, query) {
-        const filterType = searchId.replace('mobileSearch', '').replace('Search', '');
+        const filterType = searchId.replace('mobile', '').replace('Search', '');
         const filtersContainer = document.getElementById('mobile' + filterType + 'Filters');
 
         if (!filtersContainer) return;
@@ -1408,7 +1408,7 @@ class BrowsePage {
     }
 
     clearMobileFilterSearch(searchId) {
-        const filterType = searchId.replace('mobileSearch', '').replace('Search', '');
+        const filterType = searchId.replace('mobile', '').replace('Search', '');
         const filtersContainer = document.getElementById('mobile' + filterType + 'Filters');
 
         if (!filtersContainer) return;
