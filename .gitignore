@@ -1,7 +1,9 @@
-.venv
-awesome-selfhosted-data
-output
-data
+.venv/
+awesome-selfhosted-data/
+output/
+data/
 __pycache__
-node_modules
+node_modules/
 package-lock.json
+build/
+*.egg-info/

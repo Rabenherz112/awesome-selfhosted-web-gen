@@ -1,5 +1,4 @@
-# Fast configuration for PR previews - based on config.yml but optimized for speed
-# Semantic similarity is disabled to speed up the build process
+# Awesome Self-Hosted Website Generator Configuration
 
 # =============================================================================
 # SITE METADATA
@@ -7,9 +6,9 @@
 site:
   title: "Awesome Selfhosted"
   description: "Discover and explore selfhosted applications"
-  url: "https://rabenherz112.github.io"
+  url: "https://awesome-selfhosted.net"
   author: "awesome selfhosted community"
-  base_path: "" # Required for PR preview deployments to subdirectories
+  base_path: "" # Leave empty for root, or set to "/awesome-selfhosted" for subdirectory
 
 # =============================================================================
 # DATA SOURCES
@@ -34,7 +33,7 @@ build:
 generation:
   items_per_page: 60
   enable_search_index: true
-  minify_html: true
+  minify_html: false
   generate_sitemap: true
   enable_pagination: true
   use_git_data: true
@@ -49,10 +48,14 @@ ui:
 
   # Banner configuration
   banner:
-    enabled: true
-    dismissible: false
-    style: "warning"  # info, warning, success, announcement
-    text: "**PR Preview** This is a preview build for testing purposes"
+    enabled: false
+    dismissible: true
+    style: "info"  # info, warning, success, announcement
+    text: "**New Release!** Check out our latest features and improvements" # Markdown bold (**text**) is supported
+    button:
+      text: "Release Notes"
+      url: "https://github.com/awesome-selfhosted/awesome-selfhosted/releases" # this can also be "/browse.html" if external is set to false
+      external: true
 
   # Content limits for different sections
   limits:
@@ -95,6 +98,8 @@ ui:
     exclude_sections:
       - "Anti-features"
       - "Contributing"
+      # - "External Links"
+      # - "License"
 
 # =============================================================================
 # HERO SECTION
@@ -103,7 +108,7 @@ hero:
   title: "Awesome Selfhosted"
   subtitle: "Discover amazing selfhosted Applications"
   description: 'Self-hosting is the practice of hosting and managing applications on your own server(s) instead of consuming from <a href="https://www.gnu.org/philosophy/who-does-that-server-really-serve.html">SaaSS</a> providers. This is a list of <a href="https://en.wikipedia.org/wiki/Free_software">Free Software</a> <a href="https://en.wikipedia.org/wiki/Network_service">network services</a> and <a href="https://en.wikipedia.org/wiki/Web_application">web applications</a> which can be hosted on your own server(s).'
-
+  
   # Badges to display
   badges:
     - name: "Awesome"
@@ -171,7 +176,7 @@ footer:
           url: "/browse.html"
         - title: "Alternatives"
           url: "/alternatives.html"
-          enabled: "{{ alternatives.enabled }}"
+          enabled: "{{ alternatives.enabled }}"  # Conditional navigation
         - title: "Statistics"
           url: "/statistics.html"
 
@@ -199,6 +204,10 @@ pages:
     title: "Statistics"
     description: "Explore trends and insights from the selfhosted community"
 
+  alternatives:
+    title: "Alternative Software"
+    description: "Find selfhosted alternatives to popular software"
+
   home:
     meta_title: "Discover Selfhosted Applications"
     meta_description: "Find the perfect selfhosted applications for your needs"
@@ -207,7 +216,7 @@ pages:
 # ALTERNATIVES PAGE CONFIGURATION
 # =============================================================================
 alternatives:
-  enabled: true  # Set to false to disable the alternatives page
+  enabled: false  # Set to false to disable the alternatives page
   min_alternatives: 2  # Minimum number of alternatives required to show a software
   show_more_threshold: 3 # Show "Show More" button if there are more than this number of alternatives
   show_statistics: true  # Show statistics section on the page
@@ -226,7 +235,7 @@ search:
   placeholder_text: "Search applications..."
 
 # =============================================================================
-# RELATED APPS ALGORITHM - OPTIMIZED FOR SPEED
+# RELATED APPS ALGORITHM
 # =============================================================================
 related_apps:
   scoring:
@@ -266,14 +275,6 @@ related_apps:
 links:
   open_in_new_tab_for_internal_links: false
   open_in_new_tab_for_external_links: false
-
-# =============================================================================
-# PERFORMANCE OPTIMIZATIONS - Not implemented
-# =============================================================================
-performance:
-  lazy_load_images: true
-  generate_webp: false
-  inline_critical_css: true
 
 # =============================================================================
 # SEO & ROBOTS

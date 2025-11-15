@@ -4,7 +4,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         initializeMobileMenu();
         initializeScrollToTop();
-        initializeExternalLinks();
         initializeBanner();
     });
     
@@ -51,17 +50,6 @@
                 top: 0,
                 behavior: 'smooth'
             });
-        });
-    }
-    
-    // Add target="_blank" and rel="noopener" to external links
-    function initializeExternalLinks() {
-        const links = document.querySelectorAll('a[href^="http"]');
-        links.forEach(link => {
-            if (!link.hostname || link.hostname !== window.location.hostname) {
-                link.setAttribute('target', '_blank');
-                link.setAttribute('rel', 'noopener noreferrer');
-            }
         });
     }
     
