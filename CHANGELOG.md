@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file. The format 
 
 - Added a mobile sort and filtering menu to the browse page to improve mobile usability
 - Added configurable `.htaccess` file generation to remove `.html` extensions from URLs for Apache servers
+- Added `{{current_year}}` placeholder support for `credit_text` and `footer_text` configuration fields to dynamically insert the current year
 
 ### Bug Fixes
 

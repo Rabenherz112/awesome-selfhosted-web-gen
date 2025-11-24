@@ -234,7 +234,10 @@ class TemplateHelpers:
         from jinja2 import Template
 
         # Merge with site config by default
-        full_context = {"site": self.config.get_site_config()}
+        full_context = {
+            "site": self.config.get_site_config(),
+            "current_year": datetime.now().year
+        }
         if context:
             full_context.update(context)
 
