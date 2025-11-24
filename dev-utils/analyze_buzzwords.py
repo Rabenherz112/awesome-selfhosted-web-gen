@@ -11,9 +11,9 @@ import sys
 # Add project root directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.config import Config
+from aswg.config import Config
 
-# Current generic words (from src/site_generator.py)
+# Current generic words (from aswg/site_generator.py)
 CURRENT_GENERIC = {
     # Articles and prepositions
     "the",
@@ -155,7 +155,7 @@ CURRENT_GENERIC = {
     "software",
 }
 
-# Current buzzwords (from src/site_generator.py)
+# Current buzzwords (from aswg/site_generator.py)
 CURRENT_BUZZWORDS = {
     "server",
     "web",
@@ -273,7 +273,7 @@ def main():
     print("🎯 Running targeted analysis for cached data...")
     
     # Load data
-    config = Config('config.yml')
+    config = Config('config/config.yml')
     cache_file = config.data_cache_dir / 'processed_data.json'
     
     if not cache_file.exists():
