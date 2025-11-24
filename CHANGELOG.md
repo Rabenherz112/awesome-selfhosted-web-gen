@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
+## [Unreleased]
+
+### Additions
+
+- Added a mobile sort and filtering menu to the browse page to improve mobile usability
+
+### Bug Fixes
+
+- Fixed link behavior for internal and external links
+- Removed unnecessary target attributes for links
+
+### Other changes
+
+- Refactored the project structure to python package
+- Removed planned but never implemented modules
+- Removed unused options from `config.yml` and `config-pr-preview.yml`
+- Removed `PR_PREVIEW.md` file
+- Updated AI Disclaimer
+
 ## [1.5.2] - 2025-11-10
 
 ### Additions
