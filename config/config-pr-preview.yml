@@ -278,3 +278,11 @@ robots:
   disallow:
     - "/static/"
   sitemap_url: "/sitemap.xml"
+
+# =============================================================================
+# HTACCESS CONFIGURATION
+# =============================================================================
+# Important: .htaccess files are only supported by Apache Servers, if you are using a diffrent web server, this will be ignored.
+htaccess: 
+  generate: false  # Set to true to generate .htaccess file
+  remove_html_extension: true  # Remove .html extension from URLs

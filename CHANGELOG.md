@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. The format 
 ### Additions
 
 - Added a mobile sort and filtering menu to the browse page to improve mobile usability
+- Added configurable `.htaccess` file generation to remove `.html` extensions from URLs for Apache servers
 
 ### Bug Fixes
 

@@ -409,6 +409,12 @@ def cmd_info(config):
     print(f"   Generate robots.txt: {robots_config.get('generate', True)}")
     print(f"   User agent: {robots_config.get('user_agent', '*')}")
     print(f"   Sitemap URL: {robots_config.get('sitemap_url', '/sitemap.xml')}")
+    
+    # Htaccess Configuration
+    htaccess_config = config._config.get('htaccess', {})
+    print(f"\nHtaccess Configuration:")
+    print(f"   Generate .htaccess: {htaccess_config.get('generate', False)}")
+    print(f"   Remove HTML extension: {htaccess_config.get('remove_html_extension', True)}")
 
 
 def main():
