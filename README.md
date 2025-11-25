@@ -170,7 +170,7 @@ jobs:
 
 ## License
 
-This project is licensed under the AGPL-3.0 License - see the LICENSE file for details.
+This project is licensed under the AGPL-3.0 License - see the [LICENSE](./LICENSE) file for details.
 
 The generated content includes data from [awesome-selfhosted-data](https://github.com/awesome-selfhosted/awesome-selfhosted-data) which is licensed under [CC-BY-SA 3.0](https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE).
 
