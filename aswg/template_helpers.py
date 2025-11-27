@@ -234,7 +234,10 @@ class TemplateHelpers:
         from jinja2 import Template
 
         # Merge with site config by default
-        full_context = {"site": self.config.get_site_config()}
+        full_context = {
+            "site": self.config.get_site_config(),
+            "current_year": datetime.now().year
+        }
         if context:
             full_context.update(context)
 
@@ -277,7 +280,7 @@ class TemplateHelpers:
             if links_config.get("open_in_new_tab_for_external_links", False):
                 target_attrs = ' target="_blank" rel="noopener noreferrer"'
             else:
-                target_attrs = ' target="_self"'
+                target_attrs = ' target="_self" rel="noreferrer"'
 
         return target_attrs
 

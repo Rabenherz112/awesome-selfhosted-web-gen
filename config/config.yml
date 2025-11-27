@@ -160,7 +160,7 @@ footer:
   tagline: "{{ site.description }}"
   credit_text: "Built with ❤️ for the self-hosting community"
   footer_text: |
-    Copyright © 2015-2025, the {{ site.author }}. Data from 
+    Copyright © 2015-{{ current_year }}, the {{ site.author }}. Data from 
     <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data" class="text-primary-600 hover:text-primary-500">awesome-selfhosted-data</a>
     <br>
     <a href="https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/LICENSE" class="text-primary-600     hover:text-primary-500">Content under CC-BY-SA 3.0 license</a>
@@ -277,14 +277,6 @@ links:
   open_in_new_tab_for_external_links: false
 
 # =============================================================================
-# PERFORMANCE OPTIMIZATIONS - Not implemented
-# =============================================================================
-performance:
-  lazy_load_images: true
-  generate_webp: false
-  inline_critical_css: true
-
-# =============================================================================
 # SEO & ROBOTS
 # =============================================================================
 robots:
@@ -295,3 +287,11 @@ robots:
   disallow:
     - "/static/"
   sitemap_url: "/sitemap.xml"
+
+# =============================================================================
+# HTACCESS CONFIGURATION
+# =============================================================================
+# Important: .htaccess files are only supported by Apache Servers, if you are using a different web server, this will be ignored.
+htaccess:
+  generate: false  # Set to true to generate .htaccess file
+  remove_html_extension: true  # Remove .html extension from URLs

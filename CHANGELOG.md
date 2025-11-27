@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
+## [2.0.0] - 2025-11-27
+
+### Additions
+
+- Added a mobile sort and filtering menu to the browse page to improve mobile usability
+- Added configurable `.htaccess` file generation to remove `.html` extensions from URLs for Apache servers
+- Added `{{current_year}}` placeholder support for `credit_text` and `footer_text` configuration fields to dynamically insert the current year
+
+### Bug Fixes
+
+- Fixed link behavior for internal and external links
+- Removed unnecessary target attributes for links
+
+### Other changes
+
+- Refactored the project structure to python package
+- Removed planned but never implemented modules
+- Removed unused options from `config.yml` and `config-pr-preview.yml`
+- Removed `PR_PREVIEW.md` file
+- Updated AI Disclaimer
+
 ## [1.5.2] - 2025-11-10
 
 ### Additions

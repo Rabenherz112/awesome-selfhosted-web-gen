@@ -13,7 +13,7 @@ class BrowsePage {
         this.showNonFreeOnly = false;
         this.currentSort = 'name';
         this.basePath = document.querySelector('meta[name="base-path"]')?.content || '';
-        
+
         // Sort direction tracking
         this.sortDirections = {
             'name': 'asc',      // asc = A-Z, desc = Z-A
@@ -21,12 +21,16 @@ class BrowsePage {
             'updated': 'desc',  // desc = newest first, asc = oldest first
             'dateAdded': 'desc' // desc = newest first, asc = oldest first
         };
-        
+
         // Pagination settings
         this.currentPage = 1;
         this.itemsPerPage = 60;
         this.totalPages = 1;
         this.enablePagination = true;
+
+        // Mobile detection
+        this.isMobile = window.innerWidth < 640;
+
         this.init();
     }
 
@@ -48,6 +52,18 @@ class BrowsePage {
         }
         this.checkAndShowGitSortButton();
         this.updateSortButtons('sortName');
+
+        // Setup mobile/desktop UI
+        this.handleResponsiveUI();
+        this.setupMobileFilterDrawer();
+        this.setupMobileFilters();
+        this.setupMobileFilterSearch();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
+
         this.filterSortAndRender();
     }
 
@@ -264,10 +280,22 @@ class BrowsePage {
             showNonFreeToggle.addEventListener('change', (e) => {
                 this.showNonFreeOnly = e.target.checked;
                 this.currentPage = 1; // Reset to first page
-                
+
+                // Sync with mobile toggle
+                const mobileToggle = document.getElementById('mobileShowNonFree');
+                if (mobileToggle) {
+                    mobileToggle.checked = e.target.checked;
+                }
+
                 // Re-setup license filters when toggle changes
                 this.setupLicenseFilters();
-                
+
+                // Re-setup mobile license filters if they exist
+                const mobileLicenseContainer = document.getElementById('mobileLicenseFilters');
+                if (mobileLicenseContainer) {
+                    this.setupMobileLicenseFilters();
+                }
+
                 this.filterSortAndRender();
             });
         }
@@ -334,6 +362,7 @@ class BrowsePage {
                 }
                 this.currentPage = 1; // Reset to first page
                 this.filterSortAndRender();
+                this.syncMobilePlatformFilter(platform, e.target.checked);
             });
 
             platformFiltersContainer.appendChild(filterDiv);
@@ -391,6 +420,7 @@ class BrowsePage {
                 }
                 this.currentPage = 1; // Reset to first page
                 this.filterSortAndRender();
+                this.syncMobileLicenseFilter(license, e.target.checked);
             });
 
             licenseFiltersContainer.appendChild(filterDiv);
@@ -435,6 +465,7 @@ class BrowsePage {
                 }
                 this.currentPage = 1; // Reset to first page
                 this.filterSortAndRender();
+                this.syncMobileCategoryFilter(category, e.target.checked);
             });
 
             categoryFiltersContainer.appendChild(filterDiv);
@@ -674,8 +705,12 @@ class BrowsePage {
 
             if (isInternal && openInternalInNewTab) {
                 return ' target="_blank" rel="noopener"';
+            } else if (isInternal && !openInternalInNewTab) {
+                return ' target="_self"';
             } else if (!isInternal && openExternalInNewTab) {
                 return ' target="_blank" rel="noopener noreferrer"';
+            } else if (!isInternal && !openExternalInNewTab) {
+                return ' target="_self" rel="noreferrer"';
             }
             return '';
         };
@@ -945,19 +980,510 @@ class BrowsePage {
 
         if (this.totalPages > 1) {
             paginationContainer.classList.remove('hidden');
-            
+
             if (currentPageElement) currentPageElement.textContent = this.currentPage;
             if (totalPagesElement) totalPagesElement.textContent = this.totalPages;
-            
+
             if (prevButton) {
                 prevButton.disabled = this.currentPage <= 1;
             }
-            
+
             if (nextButton) {
                 nextButton.disabled = this.currentPage >= this.totalPages;
             }
         } else {
             paginationContainer.classList.add('hidden');
+        }
+    }
+
+    // MOBILE/DESKTOP RESPONSIVE UI METHODS
+
+    handleResponsiveUI() {
+        const mobileButtonContainer = document.getElementById('mobileFilterButtonContainer');
+        const desktopSidebar = document.getElementById('desktopFilterSidebar');
+        const desktopSortControls = document.getElementById('desktopSortControls');
+
+        if (this.isMobile) {
+            // Show mobile button, hide desktop sidebar and sort controls
+            if (mobileButtonContainer) {
+                mobileButtonContainer.classList.remove('hidden');
+            }
+            if (desktopSidebar) {
+                desktopSidebar.classList.add('hidden');
+            }
+            if (desktopSortControls) {
+                desktopSortControls.classList.add('hidden');
+            }
+        } else {
+            // Hide mobile button, show desktop sidebar and sort controls
+            if (mobileButtonContainer) {
+                mobileButtonContainer.classList.add('hidden');
+            }
+            if (desktopSidebar) {
+                desktopSidebar.classList.remove('hidden');
+            }
+            if (desktopSortControls) {
+                desktopSortControls.classList.remove('hidden');
+            }
+        }
+    }
+
+    handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth < 640;
+
+        // Only update UI if mobile state changed
+        if (wasMobile !== this.isMobile) {
+            this.handleResponsiveUI();
+
+            // Close mobile drawer if switching from mobile to desktop
+            if (!this.isMobile) {
+                this.closeMobileFilterDrawer();
+            }
+        }
+    }
+
+    // MOBILE FILTER DRAWER METHODS
+
+    setupMobileFilterDrawer() {
+        const mobileFilterButton = document.getElementById('mobileFilterButton');
+        const mobileFilterDrawer = document.getElementById('mobileFilterDrawer');
+        const mobileFilterClose = document.getElementById('mobileFilterClose');
+        const mobileFilterBackdrop = document.getElementById('mobileFilterBackdrop');
+        const mobileApplyFilters = document.getElementById('mobileApplyFilters');
+
+        if (!mobileFilterButton || !mobileFilterDrawer) return;
+
+        // Open drawer
+        mobileFilterButton.addEventListener('click', () => {
+            this.openMobileFilterDrawer();
+        });
+
+        // Close drawer
+        if (mobileFilterClose) {
+            mobileFilterClose.addEventListener('click', () => {
+                this.closeMobileFilterDrawer();
+            });
+        }
+
+        // Close drawer when clicking backdrop
+        if (mobileFilterBackdrop) {
+            mobileFilterBackdrop.addEventListener('click', () => {
+                this.closeMobileFilterDrawer();
+            });
+        }
+
+        // Apply filters and close drawer
+        if (mobileApplyFilters) {
+            mobileApplyFilters.addEventListener('click', () => {
+                this.closeMobileFilterDrawer();
+            });
+        }
+    }
+
+    openMobileFilterDrawer() {
+        const drawer = document.getElementById('mobileFilterDrawer');
+        if (drawer) {
+            drawer.classList.remove('hidden');
+            drawer.classList.add('show');
+            document.body.classList.add('mobile-drawer-open');
+
+            // Sync mobile sort buttons to show current state
+            this.syncMobileSortState();
+        }
+    }
+
+    syncMobileSortState() {
+        // Find which sort button should be active based on currentSort
+        const sortButtonMap = {
+            'name': 'mobileSortName',
+            'stars': 'mobileSortStars',
+            'updated': 'mobileSortUpdated',
+            'dateAdded': 'mobileSortDateAdded'
+        };
+
+        const activeButtonId = sortButtonMap[this.currentSort];
+        if (activeButtonId) {
+            this.updateMobileSortButtons(activeButtonId);
+        }
+    }
+
+    closeMobileFilterDrawer() {
+        const drawer = document.getElementById('mobileFilterDrawer');
+        if (drawer) {
+            drawer.classList.add('hidden');
+            drawer.classList.remove('show');
+            document.body.classList.remove('mobile-drawer-open');
+        }
+    }
+
+    setupMobileFilters() {
+        // Setup mobile platform filters
+        this.setupMobilePlatformFilters();
+
+        // Setup mobile license filters
+        this.setupMobileLicenseFilters();
+
+        // Setup mobile category filters
+        this.setupMobileCategoryFilters();
+
+        // Setup mobile sort buttons
+        this.setupMobileSortButtons();
+
+        // Setup mobile non-free toggle
+        this.setupMobileNonFreeToggle();
+    }
+
+    setupMobilePlatformFilters() {
+        const mobilePlatformFiltersContainer = document.getElementById('mobilePlatformFilters');
+        if (!mobilePlatformFiltersContainer) return;
+
+        const sortedPlatforms = Array.from(this.platforms).sort();
+
+        sortedPlatforms.forEach(platform => {
+            const platformCount = this.applications.filter(app =>
+                app.platforms && app.platforms.includes(platform)
+            ).length;
+
+            const filterDiv = document.createElement('label');
+            filterDiv.className = 'filter-label cursor-pointer';
+            filterDiv.setAttribute('for', `mobile-platform-${this.sanitizeId(platform)}`);
+
+            filterDiv.innerHTML = `
+                <input type="checkbox" id="mobile-platform-${this.sanitizeId(platform)}"
+                       class="filter-checkbox"
+                       data-platform="${platform}">
+                <span class="flex-1">
+                    ${platform}
+                    <span class="text-xs opacity-70 ml-1">(${platformCount})</span>
+                </span>
+            `;
+
+            const checkbox = filterDiv.querySelector('input');
+
+            // Check if this platform is already selected
+            if (this.selectedPlatforms.has(platform)) {
+                checkbox.checked = true;
+            }
+
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.selectedPlatforms.add(platform);
+                } else {
+                    this.selectedPlatforms.delete(platform);
+                }
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncDesktopPlatformFilter(platform, e.target.checked);
+            });
+
+            mobilePlatformFiltersContainer.appendChild(filterDiv);
+        });
+    }
+
+    setupMobileLicenseFilters() {
+        const mobileLicenseFiltersContainer = document.getElementById('mobileLicenseFilters');
+        if (!mobileLicenseFiltersContainer) return;
+
+        mobileLicenseFiltersContainer.innerHTML = '';
+
+        const allLicenses = Array.from(this.licenses).sort();
+        const filteredLicenses = allLicenses.filter(license => {
+            if (!this.showNonFreeOnly && this.isNonFreeLicense([license])) {
+                return false;
+            }
+            return true;
+        });
+
+        filteredLicenses.forEach(license => {
+            const licenseCount = this.applications.filter(app =>
+                app.license && app.license.includes(license)
+            ).length;
+
+            const filterDiv = document.createElement('label');
+            filterDiv.className = 'filter-label cursor-pointer';
+            filterDiv.setAttribute('for', `mobile-license-${this.sanitizeId(license)}`);
+
+            filterDiv.innerHTML = `
+                <input type="checkbox" id="mobile-license-${this.sanitizeId(license)}"
+                       class="filter-checkbox"
+                       data-license="${license}">
+                <span class="flex-1">
+                    ${license}
+                    <span class="text-xs opacity-70 ml-1">(${licenseCount})</span>
+                </span>
+            `;
+
+            const checkbox = filterDiv.querySelector('input');
+
+            if (this.selectedLicenses.has(license)) {
+                checkbox.checked = true;
+            }
+
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.selectedLicenses.add(license);
+                } else {
+                    this.selectedLicenses.delete(license);
+                }
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncDesktopLicenseFilter(license, e.target.checked);
+            });
+
+            mobileLicenseFiltersContainer.appendChild(filterDiv);
+        });
+    }
+
+    setupMobileCategoryFilters() {
+        const mobileCategoryFiltersContainer = document.getElementById('mobileCategoryFilters');
+        if (!mobileCategoryFiltersContainer) return;
+
+        const sortedCategories = Array.from(this.categories).sort();
+
+        sortedCategories.forEach(category => {
+            const categoryCount = this.applications.filter(app =>
+                app.categories && app.categories.includes(category)
+            ).length;
+
+            const filterDiv = document.createElement('label');
+            filterDiv.className = 'filter-label cursor-pointer';
+            filterDiv.setAttribute('for', `mobile-category-${this.sanitizeId(category)}`);
+
+            filterDiv.innerHTML = `
+                <input type="checkbox" id="mobile-category-${this.sanitizeId(category)}"
+                       class="filter-checkbox"
+                       data-category="${category}">
+                <span class="flex-1">
+                    ${category}
+                    <span class="text-xs opacity-70 ml-1">(${categoryCount})</span>
+                </span>
+            `;
+
+            const checkbox = filterDiv.querySelector('input');
+
+            if (this.selectedCategories.has(category)) {
+                checkbox.checked = true;
+            }
+
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.selectedCategories.add(category);
+                } else {
+                    this.selectedCategories.delete(category);
+                }
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncDesktopCategoryFilter(category, e.target.checked);
+            });
+
+            mobileCategoryFiltersContainer.appendChild(filterDiv);
+        });
+    }
+
+    setupMobileSortButtons() {
+        const sortButtons = {
+            'mobileSortName': 'name',
+            'mobileSortStars': 'stars',
+            'mobileSortUpdated': 'updated',
+            'mobileSortDateAdded': 'dateAdded'
+        };
+
+        Object.entries(sortButtons).forEach(([buttonId, sortType]) => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                // Show git sort button if available
+                if (buttonId === 'mobileSortDateAdded' && this.gitDataAvailable) {
+                    button.style.display = '';
+                }
+
+                button.addEventListener('click', () => {
+                    if (this.currentSort === sortType) {
+                        this.sortDirections[sortType] = this.sortDirections[sortType] === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.currentSort = sortType;
+                    }
+
+                    this.updateSortButtons('sort' + sortType.charAt(0).toUpperCase() + sortType.slice(1));
+                    this.updateMobileSortButtons(buttonId);
+                    this.currentPage = 1;
+                    this.filterSortAndRender();
+                });
+            }
+        });
+    }
+
+    setupMobileNonFreeToggle() {
+        const mobileShowNonFreeToggle = document.getElementById('mobileShowNonFree');
+        if (mobileShowNonFreeToggle) {
+            // Sync initial state with desktop
+            const desktopToggle = document.getElementById('showNonFree');
+            if (desktopToggle) {
+                mobileShowNonFreeToggle.checked = desktopToggle.checked;
+            }
+
+            mobileShowNonFreeToggle.addEventListener('change', (e) => {
+                this.showNonFreeOnly = e.target.checked;
+                this.currentPage = 1;
+
+                // Sync with desktop toggle
+                if (desktopToggle) {
+                    desktopToggle.checked = e.target.checked;
+                }
+
+                // Re-setup both mobile and desktop license filters
+                this.setupLicenseFilters();
+                this.setupMobileLicenseFilters();
+
+                this.filterSortAndRender();
+            });
+        }
+    }
+
+    setupMobileFilterSearch() {
+        // Handle mobile search toggle buttons
+        document.querySelectorAll('.mobile-filter-search-toggle').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.getAttribute('data-target');
+                const searchContainer = document.getElementById(targetId);
+                const searchInput = searchContainer.querySelector('input');
+
+                if (searchContainer.classList.contains('hidden')) {
+                    searchContainer.classList.remove('hidden');
+                    searchInput.focus();
+                } else {
+                    searchContainer.classList.add('hidden');
+                    searchInput.value = '';
+                    this.clearMobileFilterSearch(targetId);
+                }
+            });
+        });
+
+        // Handle mobile search input
+        const mobileSearchInputs = ['mobileCategorySearch', 'mobilePlatformSearch', 'mobileLicenseSearch'];
+        mobileSearchInputs.forEach(searchId => {
+            const searchContainer = document.getElementById(searchId);
+            if (searchContainer) {
+                const searchInput = searchContainer.querySelector('input');
+                searchInput.addEventListener('input', (e) => {
+                    this.filterMobileCheckboxes(searchId, e.target.value);
+                });
+            }
+        });
+    }
+
+    filterMobileCheckboxes(searchId, query) {
+        const filterType = searchId.replace('mobile', '').replace('Search', '');
+        const filtersContainer = document.getElementById('mobile' + filterType + 'Filters');
+
+        if (!filtersContainer) return;
+
+        const labels = filtersContainer.querySelectorAll('.filter-label');
+        const lowerQuery = query.toLowerCase();
+
+        labels.forEach(label => {
+            const textSpan = label.querySelector('span.flex-1');
+            if (textSpan) {
+                const clonedSpan = textSpan.cloneNode(true);
+                const countSpan = clonedSpan.querySelector('.text-xs.opacity-70');
+                if (countSpan) {
+                    countSpan.remove();
+                }
+                const text = clonedSpan.textContent.trim().toLowerCase();
+
+                if (text.includes(lowerQuery)) {
+                    label.style.display = '';
+                } else {
+                    label.style.display = 'none';
+                }
+            } else {
+                const text = label.textContent.toLowerCase();
+                if (text.includes(lowerQuery)) {
+                    label.style.display = '';
+                } else {
+                    label.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    clearMobileFilterSearch(searchId) {
+        const filterType = searchId.replace('mobile', '').replace('Search', '');
+        const filtersContainer = document.getElementById('mobile' + filterType + 'Filters');
+
+        if (!filtersContainer) return;
+
+        const labels = filtersContainer.querySelectorAll('.filter-label');
+        labels.forEach(label => {
+            label.style.display = '';
+        });
+    }
+
+    updateMobileSortButtons(activeButtonId) {
+        const sortButtons = {
+            'mobileSortName': 'name',
+            'mobileSortStars': 'stars',
+            'mobileSortUpdated': 'updated',
+            'mobileSortDateAdded': 'dateAdded'
+        };
+
+        Object.entries(sortButtons).forEach(([buttonId, sortType]) => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                let baseText = button.textContent.replace(/[↑↓]/g, '').trim();
+
+                if (buttonId === activeButtonId) {
+                    button.className = 'sort-button active text-sm';
+                    const direction = this.sortDirections[sortType];
+                    const arrow = direction === 'asc' ? '↑' : '↓';
+                    button.textContent = `${baseText} ${arrow}`;
+                } else {
+                    button.className = 'sort-button text-sm';
+                    button.textContent = baseText;
+                }
+            }
+        });
+    }
+
+    syncDesktopPlatformFilter(platform, checked) {
+        const desktopCheckbox = document.querySelector(`#platformFilters input[data-platform="${platform}"]`);
+        if (desktopCheckbox) {
+            desktopCheckbox.checked = checked;
+        }
+    }
+
+    syncDesktopLicenseFilter(license, checked) {
+        const desktopCheckbox = document.querySelector(`#licenseFilters input[data-license="${license}"]`);
+        if (desktopCheckbox) {
+            desktopCheckbox.checked = checked;
+        }
+    }
+
+    syncDesktopCategoryFilter(category, checked) {
+        const desktopCheckbox = document.querySelector(`#categoryFilters input[data-category="${category}"]`);
+        if (desktopCheckbox) {
+            desktopCheckbox.checked = checked;
+        }
+    }
+
+    syncMobilePlatformFilter(platform, checked) {
+        const mobileCheckbox = document.querySelector(`#mobilePlatformFilters input[data-platform="${platform}"]`);
+        if (mobileCheckbox) {
+            mobileCheckbox.checked = checked;
+        }
+    }
+
+    syncMobileLicenseFilter(license, checked) {
+        const mobileCheckbox = document.querySelector(`#mobileLicenseFilters input[data-license="${license}"]`);
+        if (mobileCheckbox) {
+            mobileCheckbox.checked = checked;
+        }
+    }
+
+    syncMobileCategoryFilter(category, checked) {
+        const mobileCheckbox = document.querySelector(`#mobileCategoryFilters input[data-category="${category}"]`);
+        if (mobileCheckbox) {
+            mobileCheckbox.checked = checked;
         }
     }
 }

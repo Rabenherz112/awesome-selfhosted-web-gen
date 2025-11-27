@@ -853,3 +853,101 @@ input:checked + .toggle-slider:before {
 .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* MOBILE FILTER DRAWER STYLES
+
+   Styling for the mobile-specific filter drawer that provides a slide-in
+   interface for filtering and sorting options on smaller screens.
+
+   Used by: Mobile filter drawer in browse.html
+   Templates: browse.html
+   Breakpoint: Below lg (1024px)
+   Interaction: Slides up from bottom with backdrop overlay
+*/
+
+/* Mobile drawer slide animation keyframes */
+@keyframes slideUpDrawer {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile drawer slide animation class */
+.mobile-drawer-slide {
+    animation: slideUpDrawer 0.3s ease-out;
+}
+
+/* Prevent body scrolling when drawer is open */
+body.mobile-drawer-open {
+    overflow: hidden;
+}
+
+/* Mobile filter drawer shown state */
+#mobileFilterDrawer.show {
+    display: block !important;
+}
+
+/* Backdrop fade-in animation */
+#mobileFilterBackdrop {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Ensure drawer is above all other content */
+#mobileFilterDrawer {
+    z-index: 9999;
+}
+
+/* Mobile filter button hover effect enhancement */
+#mobileFilterButton:active {
+    transform: scale(0.98);
+}
+
+/* Smooth scrolling for mobile drawer body */
+#mobileFilterContent > div:nth-child(2) {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile filter sections spacing */
+.mobile-filter-section {
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+/* RESPONSIVE MOBILE DRAWER ADJUSTMENTS
+
+   Ensures proper display and interaction on very small mobile screens.
+   Adjusts drawer height and spacing for optimal usability.
+*/
+
+@media (max-width: 480px) {
+    /* Reduce max height on very small screens to ensure Apply button is visible */
+    #mobileFilterContent {
+        max-height: 70vh;
+    }
+
+    /* Reduce padding on very small screens */
+    #mobileFilterContent .p-4 {
+        padding: 0.75rem;
+    }
+}
+
+/* MOBILE FILTER SEARCH TOGGLE
+
+   Styling for the search toggle buttons within the mobile filter drawer.
+   Provides consistent interaction patterns with desktop filters.
+*/
+
+.mobile-filter-search-toggle {
+    transition: all 0.2s ease;
+}
+
+.mobile-filter-search-toggle:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: 0.25rem;
+}

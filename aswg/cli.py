@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Awesome Self-Hosted Website Generator
 
@@ -10,13 +9,10 @@ import time
 import argparse
 from pathlib import Path
 
-# Add src directory to path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
-
-from src.config import Config
-from src.data_processor import DataProcessor
-from src.site_generator import SiteGenerator
-from src.utils import print_build_stats, timer_decorator
+from .config import Config
+from .data_processor import DataProcessor, Application
+from .site_generator import SiteGenerator
+from .utils import print_build_stats, timer_decorator
 
 
 def create_parser():
@@ -26,8 +22,8 @@ def create_parser():
     )
     
     parser.add_argument('--config', '-c', 
-                       default='config.yml', 
-                       help='Configuration file path (default: config.yml)')
+                       default='config/config.yml', 
+                       help='Configuration file path (default: config/config.yml)')
     parser.add_argument('--verbose', '-v', 
                        action='store_true', 
                        help='Enable verbose output')
@@ -145,7 +141,6 @@ def cmd_build(config, fetch_first=False, verbose=False):
             data = json.load(f)
         
         # Convert back to Application objects
-        from src.data_processor import Application
         applications = [Application(**app_data) for app_data in data['applications']]
         categories = data['categories']
         statistics = data['statistics']
@@ -325,7 +320,7 @@ def cmd_info(config):
         ('Data cache', config.data_cache_dir),
     ]
     
-    from src.utils import get_directory_size, format_bytes
+    from .utils import get_directory_size, format_bytes
     
     for name, path in directories:
         if path.exists():
@@ -372,7 +367,6 @@ def cmd_info(config):
     # Output Directory Analysis
     if config.output_dir.exists():
         print(f"\nOutput Analysis:")
-        from src.utils import print_build_stats
         print_build_stats(config.output_dir)
     
     # Data Source Status
@@ -394,7 +388,7 @@ def cmd_info(config):
         print(f"\nData Source:")
         print(f"   Source directory: {data_dir}")
         print(f"   Status: Not found")
-        print(f"   Run 'python generate.py fetch' to download data")
+        print(f"   Run 'aswg fetch' to download data")
     
     # Performance Configuration
     performance_config = config.get_performance_config()
@@ -415,6 +409,12 @@ def cmd_info(config):
     print(f"   Generate robots.txt: {robots_config.get('generate', True)}")
     print(f"   User agent: {robots_config.get('user_agent', '*')}")
     print(f"   Sitemap URL: {robots_config.get('sitemap_url', '/sitemap.xml')}")
+    
+    # Htaccess Configuration
+    htaccess_config = config._config.get('htaccess', {})
+    print(f"\nHtaccess Configuration:")
+    print(f"   Generate .htaccess: {htaccess_config.get('generate', False)}")
+    print(f"   Remove HTML extension: {htaccess_config.get('remove_html_extension', True)}")
 
 
 def main():
@@ -444,7 +444,3 @@ def main():
     
     elif args.command == 'info':
         cmd_info(config)
-
-
-if __name__ == '__main__':
-    main() 
