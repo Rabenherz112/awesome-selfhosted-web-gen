@@ -473,32 +473,53 @@ class BrowsePage {
     }
 
     setupPaginationEventListeners() {
-        const prevButton = document.getElementById('prevPage');
-        const nextButton = document.getElementById('nextPage');
+        // Pagination is now handled dynamically via updatePaginationControls
+        // Event listeners are attached when buttons are created
+    }
 
-        if (prevButton) {
-            prevButton.addEventListener('click', () => {
-                if (this.currentPage > 1) {
-                    this.currentPage--;
-                    this.renderCurrentPage();
-                    if (this.enablePagination) {
-                        this.updatePaginationControls();
-                    }
-                }
-            });
+    goToPage(page) {
+        if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+            this.currentPage = page;
+            this.renderCurrentPage();
+            if (this.enablePagination) {
+                this.updatePaginationControls();
+            }
         }
+    }
 
-        if (nextButton) {
-            nextButton.addEventListener('click', () => {
-                if (this.currentPage < this.totalPages) {
-                    this.currentPage++;
-                    this.renderCurrentPage();
-                    if (this.enablePagination) {
-                        this.updatePaginationControls();
-                    }
-                }
-            });
+    generatePageRange() {
+        const pages = [];
+        const totalPages = this.totalPages;
+        const currentPage = this.currentPage;
+        
+        if (totalPages <= 7) {
+            // Show all pages if 7 or fewer
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+            
+            if (currentPage <= 3) {
+                // Near the start: 1, 2, 3, 4, ..., last
+                pages.push(2, 3, 4);
+                pages.push('...');
+                pages.push(totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                // Near the end: 1, ..., last-3, last-2, last-1, last
+                pages.push('...');
+                pages.push(totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                // In the middle: 1, ..., current-1, current, current+1, ..., last
+                pages.push('...');
+                pages.push(currentPage - 1, currentPage, currentPage + 1);
+                pages.push('...');
+                pages.push(totalPages);
+            }
         }
+        
+        return pages;
     }
 
     sanitizeId(str) {
@@ -975,8 +996,7 @@ class BrowsePage {
         const paginationContainer = document.getElementById('paginationContainer');
         const currentPageElement = document.getElementById('currentPage');
         const totalPagesElement = document.getElementById('totalPages');
-        const prevButton = document.getElementById('prevPage');
-        const nextButton = document.getElementById('nextPage');
+        const paginationButtons = document.getElementById('paginationButtons');
 
         if (this.totalPages > 1) {
             paginationContainer.classList.remove('hidden');
@@ -984,12 +1004,50 @@ class BrowsePage {
             if (currentPageElement) currentPageElement.textContent = this.currentPage;
             if (totalPagesElement) totalPagesElement.textContent = this.totalPages;
 
-            if (prevButton) {
-                prevButton.disabled = this.currentPage <= 1;
-            }
+            // Generate pagination buttons
+            if (paginationButtons) {
+                paginationButtons.innerHTML = '';
+                
+                const buttonBaseClass = 'px-3 py-2 text-sm font-medium rounded transition-colors';
+                const activeClass = `${buttonBaseClass} bg-primary-600 text-white`;
+                const inactiveClass = `${buttonBaseClass} bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600`;
+                const disabledClass = `${buttonBaseClass} bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed`;
+                const ellipsisClass = 'px-2 py-2 text-sm text-gray-500 dark:text-gray-400';
 
-            if (nextButton) {
+                // Previous button (|<)
+                const prevButton = document.createElement('button');
+                prevButton.innerHTML = '&laquo;';
+                prevButton.title = 'Previous page';
+                prevButton.className = this.currentPage <= 1 ? disabledClass : inactiveClass;
+                prevButton.disabled = this.currentPage <= 1;
+                prevButton.addEventListener('click', () => this.goToPage(this.currentPage - 1));
+                paginationButtons.appendChild(prevButton);
+
+                // Page number buttons
+                const pageRange = this.generatePageRange();
+                pageRange.forEach(page => {
+                    if (page === '...') {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.className = ellipsisClass;
+                        ellipsis.textContent = '…';
+                        paginationButtons.appendChild(ellipsis);
+                    } else {
+                        const pageButton = document.createElement('button');
+                        pageButton.textContent = page;
+                        pageButton.className = page === this.currentPage ? activeClass : inactiveClass;
+                        pageButton.addEventListener('click', () => this.goToPage(page));
+                        paginationButtons.appendChild(pageButton);
+                    }
+                });
+
+                // Next button (>|)
+                const nextButton = document.createElement('button');
+                nextButton.innerHTML = '&raquo;';
+                nextButton.title = 'Next page';
+                nextButton.className = this.currentPage >= this.totalPages ? disabledClass : inactiveClass;
                 nextButton.disabled = this.currentPage >= this.totalPages;
+                nextButton.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+                paginationButtons.appendChild(nextButton);
             }
         } else {
             paginationContainer.classList.add('hidden');
