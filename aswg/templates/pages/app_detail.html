@@ -3,29 +3,29 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumb -->
-    <div class="flex items-center text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 sm:mb-8 overflow-x-auto whitespace-nowrap">
-        <a href="{{ url_for('/') }}" class="hover:text-primary-600 dark:hover:text-primary-400">Home</a>
+    <div class="flex items-center text-xs sm:text-sm text-text-muted mb-4 sm:mb-8 overflow-x-auto whitespace-nowrap">
+        <a href="{{ url_for('/') }}" class="hover:text-link">Home</a>
         <span class="mx-2">/</span>
-        <a href="{{ url_for('/browse.html') }}" class="hover:text-primary-600 dark:hover:text-primary-400">Browse</a>
+        <a href="{{ url_for('/browse.html') }}" class="hover:text-link">Browse</a>
         <span class="mx-2">/</span>
         <span class="truncate">{{ app.name }}</span>
     </div>
 
     <!-- App Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-8 mb-8">
+    <div class="bg-surface rounded-lg shadow-md p-4 sm:p-8 mb-8">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-6">
             <div class="mb-4 sm:mb-0">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h1 class="text-2xl sm:text-3xl font-bold text-text mb-2">
                     {{ app.name }}
                 </h1>
                 {% if app.stars %}
-                <div class="flex items-center text-yellow-500 mb-4">
+                <div class="flex items-center text-star mb-4">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
                     <span class="text-lg font-medium">{{ format_stars(app.stars) }} stars</span>
                     {% if app.forks %}
-                    <span class="ml-4 text-gray-600 dark:text-gray-400">{{ app.forks }} forks</span>
+                    <span class="ml-4 text-text-muted">{{ app.forks }} forks</span>
                     {% endif %}
                 </div>
                 {% endif %}
@@ -35,7 +35,7 @@
             <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 {% if app.demo_url %}
                 <a href="{{ app.demo_url }}"{{ get_link_target_attrs(app.demo_url, false) | safe }}
-                   class="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
+                   class="inline-flex items-center justify-center px-4 py-2 bg-button-success hover:opacity-90 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -46,7 +46,7 @@
 
                 {% if app.related_software_url %}
                 <a href="{{ app.related_software_url }}"{{ get_link_target_attrs(app.related_software_url, false) | safe }}
-                   class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
+                   class="inline-flex items-center justify-center px-4 py-2 bg-button-info hover:opacity-90 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
@@ -56,7 +56,7 @@
 
                 {% if app.url and app.url != app.repo_url and app.url != app.demo_url %}
                 <a href="{{ app.url }}"{{ get_link_target_attrs(app.url, false) | safe }}
-                   class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
+                   class="inline-flex items-center justify-center px-4 py-2 bg-button-info hover:opacity-90 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
@@ -66,7 +66,7 @@
 
                 {% if app.repo_url %}
                 <a href="{{ app.repo_url }}"{{ get_link_target_attrs(app.repo_url, false) | safe }}
-                   class="inline-flex items-center justify-center px-4 py-2 bg-gray-800 hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
+                   class="inline-flex items-center justify-center px-4 py-2 bg-button-dark hover:bg-button-dark-hover text-white font-medium rounded-lg shadow transition-colors text-sm sm:text-base whitespace-nowrap">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"/>
                     </svg>
@@ -78,13 +78,13 @@
 
         <!-- Description -->
         <div class="prose dark:prose-invert max-w-none mb-6">
-            <p class="text-lg text-gray-700 dark:text-gray-300">{{ app.description }}</p>
+            <p class="text-lg text-text-muted">{{ app.description }}</p>
         </div>
 
         <!-- Categories -->
         {% if app.categories %}
         <div class="mb-6">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Categories</h3>
+            <h3 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">Categories</h3>
             <div class="flex flex-wrap gap-2">
                 {{ get_categories_badges_html(app.categories) | safe }}
             </div>
@@ -94,63 +94,63 @@
         <!-- Special Annotations -->
         {% if app.fork_of or app.alternative_to or app.documentation_language or app.depends_3rdparty %}
         <div class="mb-6">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Additional Information</h3>
+            <h3 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">Additional Information</h3>
             <div class="space-y-2">
                 {% if app.depends_3rdparty %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <svg class="w-4 h-4 mr-2 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-text-muted">
+                    <svg class="w-4 h-4 mr-2 text-icon-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                     </svg>
                     <div>
                         <strong>Third-party dependency:</strong> 
-                        <span class="text-gray-700 dark:text-gray-300">This application depends on a proprietary service outside the user's control</span>
+                        <span class="text-text-muted">This application depends on a proprietary service outside the user's control</span>
                     </div>
                 </div>
                 {% endif %}
 
                 {% if app.fork_of %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <svg class="w-4 h-4 mr-2 text-blue-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <div class="flex items-center text-sm text-text-muted">
+                    <svg class="w-4 h-4 mr-2 text-info" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                       <path d="M13.273 7.73a2.51 2.51 0 0 0-3.159-.31 2.5 2.5 0 0 0-.921 1.12 2.23 2.23 0 0 0-.13.44 4.52 4.52 0 0 1-4-4 2.23 2.23 0 0 0 .44-.13 2.5 2.5 0 0 0 1.54-2.31 2.45 2.45 0 0 0-.19-1A2.48 2.48 0 0 0 5.503.19a2.45 2.45 0 0 0-1-.19 2.5 2.5 0 0 0-2.31 1.54 2.52 2.52 0 0 0 .54 2.73c.35.343.79.579 1.27.68v5.1a2.411 2.411 0 0 0-.89.37 2.5 2.5 0 1 0 3.47 3.468 2.5 2.5 0 0 0 .42-1.387 2.45 2.45 0 0 0-.19-1 2.48 2.48 0 0 0-1.81-1.49v-2.4a5.52 5.52 0 0 0 2 1.73 5.65 5.65 0 0 0 2.09.6 2.5 2.5 0 0 0 4.95-.49 2.51 2.51 0 0 0-.77-1.72zm-8.2 3.38c.276.117.512.312.68.56a1.5 1.5 0 0 1-2.08 2.08 1.55 1.55 0 0 1-.56-.68 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08zM4.503 4a1.5 1.5 0 0 1-1.39-.93 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08A1.5 1.5 0 0 1 4.503 4zm8.06 6.56a1.5 1.5 0 0 1-2.45-.49 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08 1.499 1.499 0 0 1 .49 2.45z"/>
                     </svg>
                     <div>
                         <strong>Fork of:</strong> 
                         {% if app.fork_url %}
-                            <a href="{{ app.fork_url }}"{{ get_link_target_attrs(app.fork_url, false) | safe }} class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">{{ app.fork_of }}</a>
+                            <a href="{{ app.fork_url }}"{{ get_link_target_attrs(app.fork_url, false) | safe }} class="text-link hover:text-link-hover">{{ app.fork_of }}</a>
                         {% else %}
-                            <span class="text-gray-700 dark:text-gray-300">{{ app.fork_of }}</span>
+                            <span class="text-text-muted">{{ app.fork_of }}</span>
                         {% endif %}
                     </div>
                 </div>
                 {% endif %}
                 
                 {% if app.alternative_to %}
-                <div class="flex items-start text-sm text-gray-600 dark:text-gray-400">
-                    <svg class="w-4 h-4 mr-2 mt-0.5 text-green-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <div class="flex items-start text-sm text-text-muted">
+                    <svg class="w-4 h-4 mr-2 mt-0.5 text-success" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 1a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zm0 12a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm1.55-8.42a1.84 1.84 0 0 0-.61-.42A2.25 2.25 0 0 0 7.53 4a2.16 2.16 0 0 0-.88.17c-.239.1-.45.254-.62.45a1.89 1.89 0 0 0-.38.62 3 3 0 0 0-.15.72h1.23a.84.84 0 0 1 .506-.741.72.72 0 0 1 .304-.049.86.86 0 0 1 .27 0 .64.64 0 0 1 .22.14.6.6 0 0 1 .16.22.73.73 0 0 1 .06.3c0 .173-.037.343-.11.5a2.4 2.4 0 0 1-.27.46l-.35.42c-.12.13-.24.27-.35.41a2.33 2.33 0 0 0-.27.45 1.18 1.18 0 0 0-.1.5v.66H8v-.49a.94.94 0 0 1 .11-.42 3.09 3.09 0 0 1 .28-.41l.36-.44a4.29 4.29 0 0 0 .36-.48 2.59 2.59 0 0 0 .28-.55 1.91 1.91 0 0 0 .11-.64 2.18 2.18 0 0 0-.1-.67 1.52 1.52 0 0 0-.35-.55zM6.8 9.83h1.17V11H6.8V9.83z"/>
                     </svg>
                     <div>
                         <strong>Alternative to:</strong> 
                         {% for alternative in app.alternative_to %}
-                            <span class="text-gray-700 dark:text-gray-300">{{ alternative }}{% if not loop.last %}, {% endif %}</span>
+                            <span class="text-text-muted">{{ alternative }}{% if not loop.last %}, {% endif %}</span>
                         {% endfor %}
                     </div>
                 </div>
                 {% endif %}
                 
                 {% if app.documentation_language %}
-                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <svg class="w-4 h-4 mr-2 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                <div class="flex items-center text-sm text-text-muted">
+                    <svg class="w-4 h-4 mr-2 text-icon-warning" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
                     </svg>
                     <div>
                         <strong>Documentation only in:</strong> 
                         {% if app.documentation_language is iterable and app.documentation_language is not string %}
                             {% for language in app.documentation_language %}
-                                <span class="text-gray-700 dark:text-gray-300">{{ language }}{% if not loop.last %}, {% endif %}</span>
+                                <span class="text-text-muted">{{ language }}{% if not loop.last %}, {% endif %}</span>
                             {% endfor %}
                         {% else %}
-                            <span class="text-gray-700 dark:text-gray-300">{{ app.documentation_language }}</span>
+                            <span class="text-text-muted">{{ app.documentation_language }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -160,10 +160,10 @@
         {% endif %}
 
         <!-- Metadata -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-6 border-t border-border">
             {% if app.platforms %}
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                <h4 class="text-sm font-semibold text-text mb-2">
                     Platform{% if app.platforms is iterable and app.platforms is not string and app.platforms|length > 1 %}s{% endif %}
                 </h4>
                 <div class="flex flex-wrap gap-1">
@@ -174,14 +174,14 @@
 
             {% if app.license %}
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                <h4 class="text-sm font-semibold text-text mb-2">
                     License{% if app.license is iterable and app.license is not string and app.license|length > 1 %}s{% endif %}
                 </h4>
-                <div class="text-gray-700 dark:text-gray-300">
+                <div class="text-text-muted">
                     {% if app.license is iterable and app.license is not string %}
                         {% for license in app.license %}
                             {% if is_license_nonfree(license) %}
-                                <span class="text-orange-700 dark:text-orange-300">{{ format_license(license) }}</span>
+                                <span class="text-warning">{{ format_license(license) }}</span>
                             {% else %}
                                 {{ format_license(license) }}
                             {% endif %}
@@ -189,7 +189,7 @@
                         {% endfor %}
                     {% else %}
                         {% if is_license_nonfree(app.license) %}
-                            <span class="text-orange-700 dark:text-orange-300">{{ format_license(app.license) }}</span>
+                            <span class="text-warning">{{ format_license(app.license) }}</span>
                         {% else %}
                             {{ format_license(app.license) }}
                         {% endif %}
@@ -200,18 +200,18 @@
 
             {% if app.last_updated %}
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Last Updated</h4>
-                <span class="text-gray-700 dark:text-gray-300">{{ format_date(app.last_updated) }}</span>
+                <h4 class="text-sm font-semibold text-text mb-2">Last Updated</h4>
+                <span class="text-text-muted">{{ format_date(app.last_updated) }}</span>
             </div>
             {% endif %}
 
             {% if app.current_release %}
             <div>
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Current Release</h4>
-                <div class="text-gray-700 dark:text-gray-300">
+                <h4 class="text-sm font-semibold text-text mb-2">Current Release</h4>
+                <div class="text-text-muted">
                     <span class="font-medium">{{ app.current_release.tag }}</span>
                     {% if app.current_release.published_at %}
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <div class="text-sm text-text-muted mt-1">
                         Released {{ format_date(app.current_release.published_at) }}
                     </div>
                     {% endif %}
@@ -224,11 +224,11 @@
 
     <!-- Commit Activity -->
     {% if app.commit_history %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-8 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4">Commit Activity</h2>
+    <div class="bg-surface rounded-lg shadow-md p-4 sm:p-8 mb-8">
+        <h2 class="text-2xl font-bold text-text mb-2 sm:mb-4">Commit Activity</h2>
         <div id="commit-activity-graph" class="w-full min-h-[200px] sm:min-h-[250px]" data-commit-history='{{ (app.commit_history or {}) | tojson }}'>
             <!-- Graph will be rendered by JavaScript -->
-            <div class="flex items-center justify-center h-32 text-gray-500 dark:text-gray-400">
+            <div class="flex items-center justify-center h-32 text-text-muted">
                 <div class="text-center">
                     <svg class="animate-spin h-8 w-8 mx-auto mb-2" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
@@ -243,20 +243,20 @@
 
     <!-- Related Applications -->
     {% if related_apps %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Related Applications</h2>
+    <div class="bg-surface rounded-lg shadow-md p-8">
+        <h2 class="text-2xl font-bold text-text mb-6">Related Applications</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% for related_app in related_apps %}
-            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="border border-border rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
                 <div class="flex items-start justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        <a href="{{ url_for(get_app_url(related_app.id)) }}" class="hover:text-primary-600 dark:hover:text-primary-400">
+                    <h3 class="text-lg font-semibold text-text">
+                        <a href="{{ url_for(get_app_url(related_app.id)) }}" class="hover:text-link">
                             {{ related_app.name }}
                         </a>
                     </h3>
                     {% if related_app.stars %}
-                    <div class="flex items-center text-yellow-500">
+                    <div class="flex items-center text-star">
                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
@@ -265,14 +265,14 @@
                     {% endif %}
                 </div>
                 
-                <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">
+                <p class="text-text-muted text-sm mb-3">
                     {{ truncate_description(related_app.description, ui_config.get('truncation', {}).get('related_apps_description_length', 100)) }}
                 </p>
                 
                 {% if related_app.categories %}
                 <div class="flex flex-wrap gap-1">
                     {% for category in related_app.categories[:2] %}
-                    <span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full">
+                    <span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-1 rounded-full">
                         {{ category }}
                     </span>
                     {% endfor %}
@@ -286,7 +286,7 @@
 
     <!-- Back Navigation -->
     <div class="mt-8 text-center">
-        <a href="{{ url_for('/') }}" class="inline-flex items-center px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+        <a href="{{ url_for('/') }}" class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-hover text-surface font-medium rounded-lg shadow-lg transform transition hover:scale-105">
             <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>

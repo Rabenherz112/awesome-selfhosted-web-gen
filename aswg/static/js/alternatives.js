@@ -230,14 +230,14 @@ class AlternativesPage {
         
         suggestions.slice(0, this.searchMaxResults).forEach((suggestion, index) => {
             const suggestionElement = document.createElement('div');
-            suggestionElement.className = 'px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center justify-between';
+            suggestionElement.className = 'px-4 py-2 hover:bg-surface-alt cursor-pointer flex items-center justify-between';
             suggestionElement.setAttribute('data-index', index);
             
             const alternativesCount = this.alternatives[suggestion] ? this.alternatives[suggestion].length : 0;
             
             suggestionElement.innerHTML = `
-                <span class="text-gray-900 dark:text-white">${this.highlightMatch(suggestion, query)}</span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">${alternativesCount} alternative${alternativesCount !== 1 ? 's' : ''}</span>
+                <span class="text-text">${this.highlightMatch(suggestion, query)}</span>
+                <span class="text-sm text-text-muted">${alternativesCount} alternative${alternativesCount !== 1 ? 's' : ''}</span>
             `;
             
             suggestionElement.addEventListener('click', () => {
@@ -305,7 +305,7 @@ class AlternativesPage {
         if (!suggestionsContainer || suggestionsContainer.classList.contains('hidden')) return;
 
         const suggestions = suggestionsContainer.querySelectorAll('[data-index]');
-        const currentActive = suggestionsContainer.querySelector('.bg-gray-100, .dark\\:bg-gray-700');
+        const currentActive = suggestionsContainer.querySelector('.bg-surface-alt');
         let currentIndex = currentActive ? parseInt(currentActive.getAttribute('data-index')) : -1;
 
         switch (e.key) {
@@ -337,9 +337,9 @@ class AlternativesPage {
         
         suggestions.forEach((suggestion, i) => {
             if (i === index) {
-                suggestion.classList.add('bg-gray-100', 'dark:bg-gray-700');
+                suggestion.classList.add('bg-surface-alt');
             } else {
-                suggestion.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+                suggestion.classList.remove('bg-surface-alt');
             }
         });
     }
@@ -439,18 +439,18 @@ class AlternativesPage {
 
     createSoftwareGroup(softwareName, alternatives) {
         const groupDiv = document.createElement('div');
-        groupDiv.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow duration-300 mb-8 mt-4';
+        groupDiv.className = 'bg-surface rounded-lg shadow-md border border-border p-6 hover:shadow-lg transition-shadow duration-300 mb-8 mt-4';
 
         // Create header
         const headerDiv = document.createElement('div');
         headerDiv.className = 'mb-6';
         
         const title = document.createElement('h2');
-        title.className = 'text-2xl font-bold text-gray-900 dark:text-white mb-2';
+        title.className = 'text-2xl font-bold text-text mb-2';
         title.textContent = softwareName;
         
         const subtitle = document.createElement('p');
-        subtitle.className = 'text-gray-600 dark:text-gray-300';
+        subtitle.className = 'text-text-muted';
         subtitle.textContent = `${alternatives.length} alternative${alternatives.length !== 1 ? 's' : ''}`;
         
         headerDiv.appendChild(title);
@@ -475,7 +475,7 @@ class AlternativesPage {
             
             const remainingCount = alternatives.length - this.alternativesShowMoreThreshold;
             const showMoreButton = document.createElement('button');
-            showMoreButton.className = 'px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors';
+            showMoreButton.className = 'px-4 py-2 bg-primary text-surface rounded hover:bg-primary-hover transition-colors';
             showMoreButton.textContent = `Show ${remainingCount} more alternative${remainingCount !== 1 ? 's' : ''}`;
             
             showMoreButton.addEventListener('click', () => {
@@ -504,7 +504,7 @@ class AlternativesPage {
 
     createApplicationCard(app) {
         const card = document.createElement('div');
-        card.className = 'bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col border border-gray-200 dark:border-gray-700';
+        card.className = 'bg-surface rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col border border-border';
 
         const openExternalInNewTab = document.querySelector('meta[name="open-external-new-tab"]')?.content === 'true' || false;
         const openInternalInNewTab = document.querySelector('meta[name="open-internal-new-tab"]')?.content === 'true' || false;
@@ -529,14 +529,14 @@ class AlternativesPage {
         
         const dependsIcon = app.depends_3rdparty ? `
             <div class="flex-shrink-0" title="Depends on a proprietary service outside the user's control">
-                <svg class="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-4 h-4 text-icon-warning" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
             </div>
         ` : '';
 
         const docLanguageIcon = app.documentation_language && Array.isArray(app.documentation_language) && app.documentation_language.length > 0 ? `
-            <div class="flex items-center text-orange-500 flex-shrink-0" title="Documentation only in ${app.documentation_language.join(', ')}">
+            <div class="flex items-center text-icon-warning flex-shrink-0" title="Documentation only in ${app.documentation_language.join(', ')}">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
                 </svg>
@@ -544,7 +544,7 @@ class AlternativesPage {
         ` : '';
 
         const starsIcon = app.stars ? `
-            <div class="flex items-center text-yellow-500 flex-shrink-0" title="Repository stars">
+            <div class="flex items-center text-star flex-shrink-0" title="Repository stars">
                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
@@ -564,7 +564,7 @@ class AlternativesPage {
 
         const forkIcon = app.fork_of ? `
             <div class="flex-shrink-0" title="Fork of ${app.fork_of}">
-                <svg class="w-4 h-4 text-blue-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                <svg class="w-4 h-4 text-info" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
                   <path d="M13.273 7.73a2.51 2.51 0 0 0-3.159-.31 2.5 2.5 0 0 0-.921 1.12 2.23 2.23 0 0 0-.13.44 4.52 4.52 0 0 1-4-4 2.23 2.23 0 0 0 .44-.13 2.5 2.5 0 0 0 1.54-2.31 2.45 2.45 0 0 0-.19-1A2.48 2.48 0 0 0 5.503.19a2.45 2.45 0 0 0-1-.19 2.5 2.5 0 0 0-2.31 1.54 2.52 2.52 0 0 0 .54 2.73c.35.343.79.579 1.27.68v5.1a2.411 2.411 0 0 0-.89.37 2.5 2.5 0 1 0 3.47 3.468 2.5 2.5 0 0 0 .42-1.387 2.45 2.45 0 0 0-.19-1 2.48 2.48 0 0 0-1.81-1.49v-2.4a5.52 5.52 0 0 0 2 1.73 5.65 5.65 0 0 0 2.09.6 2.5 2.5 0 0 0 4.95-.49 2.51 2.51 0 0 0-.77-1.72zm-8.2 3.38c.276.117.512.312.68.56a1.5 1.5 0 0 1-2.08 2.08 1.55 1.55 0 0 1-.56-.68 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08zM4.503 4a1.5 1.5 0 0 1-1.39-.93 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08A1.5 1.5 0 0 1 4.503 4zm8.06 6.56a1.5 1.5 0 0 1-2.45-.49 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08 1.499 1.499 0 0 1 .49 2.45z"/>
                 </svg>
             </div>
@@ -572,17 +572,17 @@ class AlternativesPage {
 
         // Category badges (show up to configured limit)
         const categoriesHtml = app.categories ? app.categories.slice(0, this.alternativesMaxCategoriesPerCard).map(category => 
-            `<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
-        ).join('') + (app.categories.length > this.alternativesMaxCategoriesPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.categories.length - this.alternativesMaxCategoriesPerCard}</span>` : '') : '';
+            `<span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
+        ).join('') + (app.categories.length > this.alternativesMaxCategoriesPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.categories.length - this.alternativesMaxCategoriesPerCard}</span>` : '') : '';
         
         // Platform badges (show up to configured limit)
         const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.alternativesMaxPlatformsPerCard).map(platform => {
             const color = this.getPlatformColor(platform);
-            return `<span class="inline-flex items-center text-gray-500 dark:text-gray-400 text-xs mr-2 mb-1">
+            return `<span class="inline-flex items-center text-text-muted text-xs mr-2 mb-1">
                 <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></div>
                 ${platform}
             </span>`;
-        }).join('') + (app.platforms.length > this.alternativesMaxPlatformsPerCard ? `<span class="inline-block bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs px-2 py-1 rounded mr-1 mb-1">+${app.platforms.length - this.alternativesMaxPlatformsPerCard}</span>` : '') : '';
+        }).join('') + (app.platforms.length > this.alternativesMaxPlatformsPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-1 rounded mr-1 mb-1">+${app.platforms.length - this.alternativesMaxPlatformsPerCard}</span>` : '') : '';
 
         // License display (first license + count if multiple)
         let licenseBadge = '';
@@ -599,36 +599,36 @@ class AlternativesPage {
             // Check if it's a non-free license
             const isNonFree = this.isNonFreeLicense(app.license);
             if (isNonFree) {
-                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-orange-300 dark:border-orange-600 text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-900/20 rounded';
+                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-warning text-warning bg-warning/10 rounded';
             } else {
-                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded';
+                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-border text-text-muted bg-surface-alt rounded';
             }
             licenseBadge = `<span class="${licenseClass}">${licenseText}</span>`;
         };
 
         // Only show buttons when they have valid URLs
         const demoLink = (app.demo_url && app.demo_url.trim()) ? `
-            <a href="${app.demo_url}"${getLinkAttrs(app.demo_url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+            <a href="${app.demo_url}"${getLinkAttrs(app.demo_url, false)} class="text-link hover:text-link-hover font-medium">
                 Demo
             </a>
         ` : '';
 
         const sourceLink = (app.repo_url && app.repo_url.trim()) ? `
-        <a href="${app.repo_url}"${getLinkAttrs(app.repo_url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+        <a href="${app.repo_url}"${getLinkAttrs(app.repo_url, false)} class="text-link hover:text-link-hover font-medium">
             Source
         </a>
         ` : '';
 
         // Only show website link if it exists and is different from the source code URL
         const websiteLink = (app.url && app.url.trim() && app.url !== app.repo_url && app.url !== app.demo_url) ? `
-        <a href="${app.url}"${getLinkAttrs(app.url, false)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+        <a href="${app.url}"${getLinkAttrs(app.url, false)} class="text-link hover:text-link-hover font-medium">
             Website
         </a>
         ` : '';
 
         // Details link (internal)
         const detailsLink = `
-        <a href="${this.basePath}/apps/${app.id}.html"${getLinkAttrs(`${this.basePath}/apps/${app.id}.html`, true)} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+        <a href="${this.basePath}/apps/${app.id}.html"${getLinkAttrs(`${this.basePath}/apps/${app.id}.html`, true)} class="text-link hover:text-link-hover font-medium">
             Details
         </a>
         `;
@@ -638,8 +638,8 @@ class AlternativesPage {
                 <div class="flex items-start justify-between mb-3">
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                                <a href="${this.basePath}/apps/${app.id}.html" class="hover:text-primary-600 dark:hover:text-primary-400">
+                            <h3 class="text-lg font-semibold text-text truncate">
+                                <a href="${this.basePath}/apps/${app.id}.html" class="hover:text-link">
                                     ${app.name}
                                 </a>
                             </h3>
@@ -655,7 +655,7 @@ class AlternativesPage {
                     </div>
                 </div>
                 
-                <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-grow">
+                <p class="text-sm text-text-muted mb-3 flex-grow">
                     ${this.truncateDescription(app.description)}
                 </p>
                 
@@ -705,10 +705,10 @@ class AlternativesPage {
         };
         
         if (!platform) {
-            return '#6b7280'; // gray-500
+            return 'var(--color-text-muted)';
         }
         
-        return colors[platform.toLowerCase()] || '#6b7280';
+        return colors[platform.toLowerCase()] || 'var(--color-text-muted)';
     }
 
     formatStars(stars) {
@@ -730,10 +730,10 @@ class AlternativesPage {
     }
 
     getUpdateAgeColor(days) {
-        if (days === null || days === undefined) return 'text-gray-500';
-        if (days > 365) return 'text-red-500';
-        if (days > 180) return 'text-yellow-500';
-        return 'text-green-500';
+        if (days === null || days === undefined) return 'text-text-muted';
+        if (days > 365) return 'text-error';
+        if (days > 180) return 'text-warning';
+        return 'text-success';
     }
 
     truncateDescription(description, maxLength = null) {
@@ -793,12 +793,12 @@ class AlternativesPage {
 
         container.innerHTML = `
             <div class="text-center py-12">
-                <div class="text-red-500 dark:text-red-400">
+                <div class="text-error">
                     <svg class="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Error Loading Alternatives</h3>
-                    <p class="text-gray-500 dark:text-gray-400">${message}</p>
+                    <h3 class="text-lg font-medium text-text mb-2">Error Loading Alternatives</h3>
+                    <p class="text-text-muted">${message}</p>
                 </div>
             </div>
         `;
