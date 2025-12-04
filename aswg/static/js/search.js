@@ -112,9 +112,9 @@
         const html = results.map(app => `
             <div class="search-result-item">
                 <a href="${basePath}/apps/${app.id}.html" class="block">
-                    <div class="font-medium text-gray-900 dark:text-white">${highlightMatch(app.name, query)}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-300 truncate">${highlightMatch(app.description.substring(0, 100), query)}...</div>
-                    ${app.stars ? `<div class="text-xs text-yellow-600 mt-1">⭐ ${app.stars}</div>` : ''}
+                    <div class="font-medium text-text">${highlightMatch(app.name, query)}</div>
+                    <div class="text-sm text-text-muted truncate">${highlightMatch(app.description.substring(0, 100), query)}...</div>
+                    ${app.stars ? `<div class="text-xs text-star mt-1">⭐ ${app.stars}</div>` : ''}
                 </a>
             </div>
         `).join('');
@@ -130,7 +130,7 @@
         
         searchResults.innerHTML = `
             <div class="search-result-item text-center">
-                <div class="text-gray-500 dark:text-gray-400">${message}</div>
+                <div class="text-text-muted">${message}</div>
             </div>
         `;
         searchResults.classList.remove('hidden');
@@ -159,7 +159,7 @@
         if (!query) return text;
         
         const regex = new RegExp(`(${query})`, 'gi');
-        return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-900">$1</mark>');
+        return text.replace(regex, '<mark class="bg-star/30">$1</mark>');
     }
     
     // Handle hero search - redirect to browse page with query

@@ -183,7 +183,7 @@ class TemplateHelpers:
         for category in categories:
             if category:
                 html_parts.append(
-                    f'<span class="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-sm px-3 py-1 rounded-full">{category}</span>'
+                    f'<span class="inline-block bg-badge-bg text-badge-text text-sm px-3 py-1 rounded-full">{category}</span>'
                 )
 
         return " ".join(html_parts)

@@ -62,7 +62,7 @@
     <!-- Banner -->
     {% set banner_config = ui_config.get('banner', {}) if ui_config else {} %}
     {% if banner_config.get('enabled', false) %}
-    <div id="site-banner" class="relative isolate flex items-center justify-center gap-x-6 overflow-hidden {% if banner_config.get('style') == 'warning' %}bg-yellow-600{% elif banner_config.get('style') == 'success' %}bg-green-600{% elif banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-blue-600 to-purple-600{% else %}bg-gray-800{% endif %} px-6 py-2.5 sm:px-3.5">
+    <div id="site-banner" class="relative isolate flex items-center justify-center gap-x-6 overflow-hidden {% if banner_config.get('style') == 'warning' %}bg-banner-warning{% elif banner_config.get('style') == 'success' %}bg-banner-success{% elif banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-banner-announcement-from to-banner-announcement-to{% else %}bg-banner-default{% endif %} px-6 py-2.5 sm:px-3.5">
         <!-- Decorative background elements with clip-path -->
         <div aria-hidden="true" class="absolute top-1/2 left-[max(-7rem,calc(50%-52rem))] -z-10 -translate-y-1/2 transform-gpu blur-2xl">
             <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"

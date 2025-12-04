@@ -66,6 +66,13 @@
     --color-button-dark: #1F2937;
     --color-button-dark-hover: #111827;
 
+    /* Banner colors */
+    --color-banner-warning: #CA8A04;
+    --color-banner-success: #16A34A;
+    --color-banner-announcement-from: #2563EB;
+    --color-banner-announcement-to: #7C3AED;
+    --color-banner-default: #1F2937;
+
     /* Scrollbar colors */
     --color-scroll-track: #F1F1F1;
     --color-scroll-thumb: #C1C1C1;
@@ -185,6 +192,13 @@
 
     --color-button-dark: #374151;
     --color-button-dark-hover: #4B5563;
+
+    /* Banner colors - same in dark mode */
+    --color-banner-warning: #CA8A04;
+    --color-banner-success: #16A34A;
+    --color-banner-announcement-from: #2563EB;
+    --color-banner-announcement-to: #7C3AED;
+    --color-banner-default: #1F2937;
 
     /* Scrollbar colors */
     --color-scroll-track: #374151;
