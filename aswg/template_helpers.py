@@ -161,7 +161,7 @@ class TemplateHelpers:
             if platform:
                 color = self.get_platform_color(platform)
                 html_parts.append(
-                    f'<span class="inline-flex items-center text-gray-500 dark:text-gray-400 text-sm mr-2 mb-1">'
+                    f'<span class="inline-flex items-center text-text-muted text-sm mr-2 mb-1">'
                     f'<div class="w-3 h-3 rounded-full mr-2" style="background-color: {color};"></div>'
                     f'{platform}</span>'
                 )
@@ -363,7 +363,7 @@ class TemplateHelpers:
                 or url.startswith("#")
             )
             target_attrs = self.get_link_target_attrs(url, is_internal)
-            return f'<a href="{url}"{target_attrs} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline">{text}</a>'
+            return f'<a href="{url}"{target_attrs} class="text-link hover:text-link-hover underline">{text}</a>'
 
         html = re.sub(
             r"\[([^\]]+)\]\(([^)]+)\)", replace_link, html, flags=re.MULTILINE
@@ -372,13 +372,13 @@ class TemplateHelpers:
         # Convert headers (## and ### only)
         html = re.sub(
             r"^### (.+)$",
-            r'<h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 mt-8 text-center">\1</h3>',
+            r'<h3 class="text-2xl font-bold text-text mb-4 mt-8 text-center">\1</h3>',
             html,
             flags=re.MULTILINE,
         )
         html = re.sub(
             r"^## (.+)$",
-            r'<h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4 text-center">\1</h2>',
+            r'<h2 class="text-3xl font-bold text-text mb-4 text-center">\1</h2>',
             html,
             flags=re.MULTILINE,
         )
@@ -424,7 +424,7 @@ class TemplateHelpers:
                         if line.startswith("- "):
                             item_content = line[2:].strip()
                             list_items.append(
-                                f'<li class="text-gray-700 dark:text-gray-300 mb-2">{item_content}</li>'
+                                f'<li class="text-text-muted mb-2">{item_content}</li>'
                             )
 
                     if list_items:
@@ -444,7 +444,7 @@ class TemplateHelpers:
                         # Join lines with space and wrap in paragraph
                         paragraph_content = " ".join(processed_lines)
                         html_paragraphs.append(
-                            f'<p class="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed text-center">{paragraph_content}</p>'
+                            f'<p class="text-text-muted mb-4 leading-relaxed text-center">{paragraph_content}</p>'
                         )
 
         # Join all paragraphs
@@ -483,7 +483,7 @@ class TemplateHelpers:
                     href, not href.startswith("http")
                 )
 
-                return f'<a href="{href}"{target_attrs} class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline font-medium">{content}</a>'
+                return f'<a href="{href}"{target_attrs} class="text-link hover:text-link-hover underline font-medium">{content}</a>'
 
             return full_tag
 

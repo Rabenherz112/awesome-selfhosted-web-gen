@@ -58,7 +58,7 @@
     
     {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-900">
+<body class="h-full bg-background">
     <!-- Banner -->
     {% set banner_config = ui_config.get('banner', {}) if ui_config else {} %}
     {% if banner_config.get('enabled', false) %}
@@ -104,20 +104,20 @@
     {% endif %}
 
     <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <nav class="bg-surface shadow-sm border-b border-border">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
                     <a href="{{ url_for('/') }}" class="flex items-center space-x-3">
                         <img src="{{ asset_url('static/images/logo.svg') }}" alt="Awesome Self-Hosted" class="h-10 w-10">
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ site_config.title }}</span>
+                        <span class="text-xl font-bold text-text">{{ site_config.title }}</span>
                     </a>
                     
                     <!-- Main Navigation -->
                     <div class="hidden md:ml-10 md:flex md:space-x-8">
                         {% for nav_item in filter_navigation(navigation_config) %}
-                        <a href="{{ url_for(nav_item.url) }}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 text-sm font-medium">
+                        <a href="{{ url_for(nav_item.url) }}" class="text-text-muted hover:text-link px-3 py-2 text-sm font-medium">
                             {{ nav_item.title }}
                         </a>
                         {% endfor %}
@@ -132,21 +132,21 @@
                             <input type="text" 
                                    id="search-input" 
                                    placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" 
-                                   class="w-64 px-4 py-2 pl-10 pr-4 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
+                                   class="w-64 px-4 py-2 pl-10 pr-4 text-sm bg-surface-alt border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text">
                             <div class="absolute left-3 top-2.5">
-                                <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
                         </div>
                         <!-- Search Results Dropdown -->
-                        <div id="search-results" class="absolute mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden z-50">
+                        <div id="search-results" class="absolute mt-1 w-64 bg-surface rounded-lg shadow-lg border border-border hidden z-50">
                             <!-- Search results will be populated by JavaScript -->
                         </div>
                     </div>
                     
                     <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg">
+                    <button id="theme-toggle" class="p-2 text-text-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-primary rounded-lg">
                         <svg id="theme-toggle-dark-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                         </svg>
@@ -156,7 +156,7 @@
                     </button>
                     
                     <!-- Mobile Menu Button -->
-                    <button id="mobile-menu-button" class="md:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <button id="mobile-menu-button" class="md:hidden p-2 text-text-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-primary">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
@@ -167,9 +167,9 @@
         
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="md:hidden hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-surface border-t border-border">
                 {% for nav_item in filter_navigation(navigation_config) %}
-                <a href="{{ url_for(nav_item.url) }}" class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                <a href="{{ url_for(nav_item.url) }}" class="block px-3 py-2 text-base font-medium text-text-muted hover:text-link">
                     {{ nav_item.title }}
                 </a>
                 {% endfor %}
@@ -178,9 +178,9 @@
                     <input type="text" 
                            id="mobile-search-input" 
                            placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" 
-                           class="w-full px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white">
+                           class="w-full px-4 py-2 text-sm bg-surface-alt border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text">
                     <!-- Mobile Search Results Dropdown -->
-                    <div id="mobile-search-results" class="absolute mt-1 w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden z-50 max-h-64 overflow-y-auto">
+                    <div id="mobile-search-results" class="absolute mt-1 w-full bg-surface rounded-lg shadow-lg border border-border hidden z-50 max-h-64 overflow-y-auto">
                         <!-- Search results will be populated by JavaScript -->
                     </div>
                 </div>
@@ -194,25 +194,25 @@
     </main>
     
     <!-- Footer -->
-    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+    <footer class="bg-surface border-t border-border">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center space-x-2 mb-4">
                         <img src="{{ asset_url('static/images/logo.svg') }}" alt="Logo" class="h-8 w-8">
-                        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ render_template_string(footer_config.logo_text) or site_config.title }}</span>
+                        <span class="text-xl font-bold text-text">{{ render_template_string(footer_config.logo_text) or site_config.title }}</span>
                     </div>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    <p class="text-text-muted mb-4">
                         {{ render_template_string(footer_config.tagline) or site_config.description }}
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-500">
+                    <p class="text-sm text-text-muted">
                         {{ render_template_string(footer_config.credit_text) or 'Built with ❤️ for the self-hosting community' }}
                     </p>
                 </div>
                 
                 {% for section_id, section in footer_config.sections.items() %}
                 <div>
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+                    <h3 class="text-sm font-semibold text-text uppercase tracking-wider mb-4">
                         {{ section.title }}
                     </h3>
                     <ul class="space-y-2">
@@ -220,7 +220,7 @@
                         <li>
                             <a href="{{ url_for(link.url) }}" 
                                {{ get_link_target_attrs(url_for(link.url), not link.external) | safe }}
-                               class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+                               class="text-text-muted hover:text-link">
                                 {{ link.title }}
                             </a>
                         </li>
@@ -230,8 +230,8 @@
                 {% endfor %}
             </div>
             
-            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <div class="text-center text-sm text-gray-500 dark:text-gray-500">
+            <div class="mt-8 pt-8 border-t border-border">
+                <div class="text-center text-sm text-text-muted">
                     {{ render_template_string(footer_config.footer_text) | safe }}
                 </div>
             </div>

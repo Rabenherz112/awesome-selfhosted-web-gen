@@ -1,17 +1,254 @@
 @import "tailwindcss";
 
 @theme {
-    /* Primary color scale */
-    --color-primary-50: #eff6ff;
-    --color-primary-100: #dbeafe;
-    --color-primary-200: #bfdbfe;
-    --color-primary-300: #93c5fd;
-    --color-primary-400: #60a5fa;
-    --color-primary-500: #3b82f6;
-    --color-primary-600: #2563eb;
-    --color-primary-700: #1d4ed8;
-    --color-primary-800: #1e40af;
-    --color-primary-900: #1e3a8a;
+    /* Background colors */
+    --color-background: #F5F7FA;
+    --color-surface: #FFFFFF;
+    --color-surface-alt: #F3F6F9;
+
+    /* Primary colors */
+    --color-primary: #4A5568;
+    --color-primary-hover: #3D4556;
+    --color-primary-light: #EDF2F7;
+
+    /* Secondary colors */
+    --color-secondary: #E8ECF2;
+    --color-secondary-text: #4A5568;
+
+    /* Accent colors */
+    --color-accent: #6B7A99;
+    --color-info: #3B82F6;
+    --color-highlight: #6366F1;
+
+    /* CTA (Call to Action) colors - softer indigo */
+    --color-cta: #6366F1;
+    --color-cta-hover: #4F46E5;
+
+    /* Hero description color - darker blue */
+    --color-hero-description: #1E40AF;
+    --color-hero-description-hover: #1D4ED8;
+
+    /* Icon warning color (orange) */
+    --color-icon-warning: #EA580C;
+
+    /* Badge colors */
+    --color-badge-bg: #DBEAFE;
+    --color-badge-text: #1E40AF;
+
+    /* Commit graph fill opacity */
+    --color-commit-graph-fill-opacity: 0.08;
+    --color-commit-graph-grid-opacity: 1;
+
+    /* Text colors */
+    --color-text: #1A202C;
+    --color-text-muted: #5A6578;
+
+    /* Link colors */
+    --color-link: #2563EB;
+    --color-link-hover: #1D4ED8;
+
+    /* Border color */
+    --color-border: #D1D8E4;
+
+    /* Status colors */
+    --color-success: #16A34A;
+    --color-warning: #CA8A04;
+    --color-error: #DC2626;
+
+    /* Button colors for action buttons */
+    --color-button-success: #16A34A;
+    --color-button-info: #2563EB;
+
+    /* Star rating */
+    --color-star: #EAB308;
+
+    /* Dark button */
+    --color-button-dark: #1F2937;
+    --color-button-dark-hover: #111827;
+
+    /* Scrollbar colors */
+    --color-scroll-track: #F1F1F1;
+    --color-scroll-thumb: #C1C1C1;
+    --color-scroll-thumb-hover: #A8A8A8;
+
+    /* Checkbox colors */
+    --color-checkbox-border: #D1D5DB;
+    --color-checkbox-bg: #FFFFFF;
+    --color-checkbox-hover-bg: #F3F4F6;
+    --color-checkbox-checked-bg: #3B82F6;
+    --color-checkbox-checked-border: #3B82F6;
+    --color-checkbox-checkmark: #FFFFFF;
+
+    /* Filter label colors */
+    --color-filter-label-text: #374151;
+    --color-filter-label-hover-bg: #F3F4F6;
+    --color-filter-label-hover-text: #1F2937;
+    --color-filter-label-checked-bg: #EFF6FF;
+    --color-filter-label-checked-text: #1D4ED8;
+
+    /* Sort button colors */
+    --color-sort-button-bg: #FFFFFF;
+    --color-sort-button-text: #6B7280;
+    --color-sort-button-hover-bg: #F3F4F6;
+    --color-sort-button-hover-text: #374151;
+    --color-sort-button-active-bg: #3B82F6;
+    --color-sort-button-active-text: #FFFFFF;
+    --color-sort-button-active-border: #3B82F6;
+
+    /* Toggle colors */
+    --color-toggle-track: #CBD5E0;
+    --color-toggle-knob: #FFFFFF;
+    --color-toggle-active: #3B82F6;
+
+    /* Search input colors */
+    --color-search-input-border: #E5E7EB;
+
+    /* Focus ring */
+    --color-focus-ring: rgba(59, 130, 246, 0.1);
+
+    /* Mobile filter drawer */
+    --color-mobile-filter-drawer-filter-hover: rgba(59, 130, 246, 0.1);
+
+    /* Platform colors - Light mode */
+    --color-platform-python: #3572A5;
+    --color-platform-javascript: #F1E05A;
+    --color-platform-typescript: #2B7489;
+    --color-platform-java: #B07219;
+    --color-platform-go: #00ADD8;
+    --color-platform-rust: #DEA584;
+    --color-platform-php: #4F5D95;
+    --color-platform-c: #555555;
+    --color-platform-cpp: #F34B7D;
+    --color-platform-csharp: #239120;
+    --color-platform-ruby: #701516;
+    --color-platform-shell: #89E051;
+    --color-platform-docker: #384D54;
+    --color-platform-nodejs: #43853D;
+    --color-platform-dart: #00B4AB;
+    --color-platform-kotlin: #F18E33;
+    --color-platform-swift: #FA7343;
+    --color-platform-scala: #C22D40;
+    --color-platform-default: #6B7280;
+}
+
+/* Dark mode overrides */
+.dark {
+    --color-background: #1A202C;
+    --color-surface: #252D3B;
+    --color-surface-alt: #2D3748;
+
+    --color-primary: #90A4C4;
+    --color-primary-hover: #A8B8D4;
+    --color-primary-light: #2D3748;
+
+    --color-secondary: #2D3748;
+    --color-secondary-text: #C4D0E4;
+
+    --color-accent: #7B8FAF;
+    --color-info: #60A5FA;
+    --color-highlight: #818CF8;
+
+    --color-cta: #818CF8;
+    --color-cta-hover: #A5B4FC;
+
+    /* Hero description color - lighter blue for dark mode */
+    --color-hero-description: #93C5FD;
+    --color-hero-description-hover: #93C5FD;
+
+    /* Icon warning color (orange) */
+    --color-icon-warning: #FB923C;
+
+    --color-badge-bg: #1E3A5F;
+    --color-badge-text: #93C5FD;
+
+    /* Commit graph fill opacity - lower for dark mode */
+    --color-commit-graph-fill-opacity: 0.06;
+    --color-commit-graph-grid-opacity: 0.6;
+
+    --color-text: #F0F4F8;
+    --color-text-muted: #A0AEBF;
+
+    --color-link: #60A5FA;
+    --color-link-hover: #93C5FD;
+
+    --color-border: #3D4A5C;
+
+    --color-success: #4ADE80;
+    --color-warning: #FACC15;
+    --color-error: #F87171;
+
+    /* Button colors - toned down for dark mode */
+    --color-button-success: #22C55E;
+    --color-button-info: #3B82F6;
+
+    --color-star: #FACC15;
+
+    --color-button-dark: #374151;
+    --color-button-dark-hover: #4B5563;
+
+    /* Scrollbar colors */
+    --color-scroll-track: #374151;
+    --color-scroll-thumb: #6B7280;
+    --color-scroll-thumb-hover: #9CA3AF;
+
+    /* Checkbox colors */
+    --color-checkbox-border: #6B7280;
+    --color-checkbox-bg: #374151;
+    --color-checkbox-hover-bg: #4B5563;
+    --color-checkbox-checked-bg: #3B82F6;
+    --color-checkbox-checked-border: #3B82F6;
+    --color-checkbox-checkmark: #FFFFFF;
+
+    /* Filter label colors */
+    --color-filter-label-text: #D1D5DB;
+    --color-filter-label-hover-bg: #4B5563;
+    --color-filter-label-hover-text: #F3F4F6;
+    --color-filter-label-checked-bg: #1E3A8A;
+    --color-filter-label-checked-text: #93C5FD;
+
+    /* Sort button colors */
+    --color-sort-button-bg: #374151;
+    --color-sort-button-text: #9CA3AF;
+    --color-sort-button-hover-bg: #4B5563;
+    --color-sort-button-hover-text: #D1D5DB;
+    --color-sort-button-active-bg: #3B82F6;
+    --color-sort-button-active-text: #FFFFFF;
+    --color-sort-button-active-border: #3B82F6;
+
+    /* Toggle colors */
+    --color-toggle-track: #4B5563;
+    --color-toggle-knob: #FFFFFF;
+    --color-toggle-active: #3B82F6;
+
+    /* Search input colors */
+    --color-search-input-border: #374151;
+
+    /* Focus ring */
+    --color-focus-ring: rgba(59, 130, 246, 0.2);
+
+    /* Mobile filter drawer */
+    --color-mobile-filter-drawer-filter-hover: rgba(59, 130, 246, 0.15);
+
+    /* Platform colors - Dark mode (slightly brighter) */
+    --color-platform-python: #5A8EC5;
+    --color-platform-javascript: #F5E97A;
+    --color-platform-typescript: #4A9AAF;
+    --color-platform-java: #D09040;
+    --color-platform-go: #29C5F0;
+    --color-platform-rust: #E8BFA4;
+    --color-platform-php: #7080B5;
+    --color-platform-c: #757575;
+    --color-platform-cpp: #F56E9D;
+    --color-platform-csharp: #45B140;
+    --color-platform-ruby: #A03030;
+    --color-platform-shell: #A9F071;
+    --color-platform-docker: #587484;
+    --color-platform-nodejs: #63A55D;
+    --color-platform-dart: #20D4CB;
+    --color-platform-kotlin: #F1AE53;
+    --color-platform-swift: #FA9363;
+    --color-platform-scala: #E24D60;
+    --color-platform-default: #9CA3AF;
 }
 
 /* Override dark variant to use .dark class instead of prefers-color-scheme */

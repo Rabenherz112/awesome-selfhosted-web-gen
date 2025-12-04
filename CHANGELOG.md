@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
+## [Unreleased]
+
+### Additions
+
+- Added ability to easily customize color scheme via TailwindCSS variables in `tailwind-input.css`
+
+### Other changes
+
+- Refactored how colors are defined, by removing the default TailwindCSS colors
+- Changed default color scheme to more muted pastel colors
+
 ## [2.0.0] - 2025-11-27
 
 ### Additions
@@ -172,7 +183,8 @@ All notable changes to this project will be documented in this file. The format 
 
 Inital release of the project.
 
-[unreleased]: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/compare/v1.5.2...HEAD
+[unreleased]: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/compare/v1.5.2...v2.0.0
 [1.5.2]: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/Rabenherz112/awesome-selfhosted-web-gen/compare/v1.4.0...v1.5.0
