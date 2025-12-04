@@ -49,39 +49,18 @@
 
 /* Scrollbar track (background) - Light theme */
 ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--color-scroll-track);
 }
 
 /* Scrollbar thumb (draggable part) - Light theme */
 ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: var(--color-scroll-thumb);
     border-radius: 4px;
 }
 
 /* Scrollbar thumb hover state - Light theme */
 ::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* DARK MODE SCROLLBAR STYLING
-   
-   Dark theme variants for scrollbar elements. Uses darker colors that work
-   well with the dark background and maintain good contrast.
-*/
-
-/* Scrollbar track - Dark theme */
-.dark ::-webkit-scrollbar-track {
-    background: #374151;
-}
-
-/* Scrollbar thumb - Dark theme */
-.dark ::-webkit-scrollbar-thumb {
-    background: #6b7280;
-}
-
-/* Scrollbar thumb hover - Dark theme */
-.dark ::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
+    background: var(--color-scroll-thumb-hover);
 }
 
 /* ENHANCED FILTER CHECKBOXES
@@ -99,9 +78,9 @@
     appearance: none;
     width: 18px;
     height: 18px;
-    border: 2px solid #d1d5db;
+    border: 2px solid var(--color-checkbox-border);
     border-radius: 4px;
-    background: white;
+    background: var(--color-checkbox-bg);
     cursor: pointer;
     position: relative;
     margin-right: 8px;
@@ -109,16 +88,16 @@
     transition: all 0.2s ease;
 }
 
-/* Hover state - blue border and light background */
+/* Hover state - primary border and light background */
 .filter-checkbox:hover {
-    border-color: #3b82f6;
-    background-color: #f3f4f6;
+    border-color: var(--color-primary);
+    background-color: var(--color-checkbox-hover-bg);
 }
 
-/* Checked state - blue background and border */
+/* Checked state - primary background and border */
 .filter-checkbox:checked {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    background-color: var(--color-checkbox-checked-bg);
+    border-color: var(--color-checkbox-checked-border);
 }
 
 /* Custom checkmark using CSS pseudo-element */
@@ -129,7 +108,7 @@
     top: 2px;
     width: 6px;
     height: 10px;
-    border: solid white;
+    border: solid var(--color-checkbox-checkmark);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
@@ -137,31 +116,7 @@
 /* Focus state for keyboard navigation accessibility */
 .filter-checkbox:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* DARK MODE FILTER CHECKBOXES
-   
-   Dark theme variants for filter checkboxes. Maintains the same functionality
-   while using colors appropriate for dark backgrounds.
-*/
-
-/* Dark mode base styling */
-.dark .filter-checkbox {
-    background: #374151;
-    border-color: #6b7280;
-}
-
-/* Dark mode hover state */
-.dark .filter-checkbox:hover {
-    border-color: #3b82f6;
-    background-color: #4b5563;
-}
-
-/* Dark mode checked state */
-.dark .filter-checkbox:checked {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 /* FILTER LABELS
@@ -184,42 +139,20 @@
     transition: all 0.2s ease;
     font-size: 14px;
     line-height: 1.4;
-    color: #374151;
+    color: var(--color-filter-label-text);
     user-select: none;
 }
 
 /* Hover state - light background and darker text */
 .filter-label:hover {
-    background-color: #f3f4f6;
-    color: #1f2937;
+    background-color: var(--color-filter-label-hover-bg);
+    color: var(--color-filter-label-hover-text);
 }
 
-/* Checked state - blue background and text (using :has() selector) */
+/* Checked state - primary background and text (using :has() selector) */
 .filter-label:has(.filter-checkbox:checked) {
-    background-color: #eff6ff;
-    color: #1d4ed8;
-}
-
-/* DARK MODE FILTER LABELS
-   
-   Dark theme variants for filter labels with appropriate color adjustments.
-*/
-
-/* Dark mode base styling */
-.dark .filter-label {
-    color: #d1d5db;
-}
-
-/* Dark mode hover state */
-.dark .filter-label:hover {
-    background-color: #4b5563;
-    color: #f3f4f6;
-}
-
-/* Dark mode checked state */
-.dark .filter-label:has(.filter-checkbox:checked) {
-    background-color: #1e3a8a;
-    color: #93c5fd;
+    background-color: var(--color-filter-label-checked-bg);
+    color: var(--color-filter-label-checked-text);
 }
 
 /* SORT BUTTONS
@@ -241,47 +174,22 @@
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
-    background: white;
-    color: #6b7280;
+    background: var(--color-sort-button-bg);
+    color: var(--color-sort-button-text);
 }
 
 /* Hover state - light background and darker text */
 .sort-button:hover {
-    background-color: #f3f4f6;
-    color: #374151;
+    background-color: var(--color-sort-button-hover-bg);
+    color: var(--color-sort-button-hover-text);
 }
 
-/* Active state - blue background and white text */
+/* Active state - primary background and white text */
 .sort-button.active {
-    background-color: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
+    background-color: var(--color-sort-button-active-bg);
+    color: var(--color-sort-button-active-text);
+    border-color: var(--color-sort-button-active-border);
     font-weight: 600;
-}
-
-/* DARK MODE SORT BUTTONS
-   
-   Dark theme variants for sort buttons with appropriate color adjustments.
-*/
-
-/* Dark mode base styling */
-.dark .sort-button {
-    background: #374151;
-    color: #9ca3af;
-    border-color: #4b5563;
-}
-
-/* Dark mode hover state */
-.dark .sort-button:hover {
-    background-color: #4b5563;
-    color: #d1d5db;
-}
-
-/* Dark mode active state */
-.dark .sort-button.active {
-    background-color: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
 }
 
 /* ENHANCED TOGGLE SWITCH FOR NON-FREE LICENSE
@@ -318,7 +226,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #cbd5e0;
+    background-color: var(--color-toggle-track);
     transition: all 0.3s ease;
     border-radius: 24px;
 }
@@ -331,35 +239,20 @@
     width: 18px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background-color: var(--color-toggle-knob);
     transition: all 0.3s ease;
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* On state - blue background */
+/* On state - primary background */
 input:checked + .toggle-slider {
-    background-color: #3b82f6;
+    background-color: var(--color-toggle-active);
 }
 
 /* On state - move knob to right side */
 input:checked + .toggle-slider:before {
     transform: translateX(20px);
-}
-
-/* DARK MODE TOGGLE SWITCH
-   
-   Dark theme variants for the toggle switch with appropriate color adjustments.
-*/
-
-/* Dark mode off state */
-.dark .toggle-slider {
-    background-color: #4b5563;
-}
-
-/* Dark mode on state */
-.dark input:checked + .toggle-slider {
-    background-color: #3b82f6;
 }
 
 /* LANGUAGE COLOR DOTS
@@ -395,33 +288,18 @@ input:checked + .toggle-slider:before {
 /* Base search result item styling */
 .search-result-item {
     padding: 12px 16px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--color-search-input-border);
     transition: background-color 0.2s;
 }
 
 /* Hover state - light background */
 .search-result-item:hover {
-    background-color: #f9fafb;
+    background-color: var(--color-surface-alt);
 }
 
 /* Remove border from last item */
 .search-result-item:last-child {
     border-bottom: none;
-}
-
-/* DARK MODE SEARCH RESULTS
-   
-   Dark theme variants for search result items with appropriate color adjustments.
-*/
-
-/* Dark mode border color */
-.dark .search-result-item {
-    border-bottom-color: #374151;
-}
-
-/* Dark mode hover state */
-.dark .search-result-item:hover {
-    background-color: #374151;
 }
 
 /* FOCUS STATES
@@ -436,7 +314,7 @@ input:checked + .toggle-slider:before {
 
 /* Enhanced focus state for better accessibility */
 .focus-visible {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 
@@ -592,21 +470,10 @@ input:checked + .toggle-slider:before {
     letter-spacing: 0.05em;
 }
 
-/* Primary badge variant - Light theme */
+/* Primary badge variant */
 .badge-primary {
-    background-color: #dbeafe;
-    color: #1d4ed8;
-}
-
-/* DARK MODE BADGES
-   
-   Dark theme variants for badges with appropriate color adjustments.
-*/
-
-/* Primary badge variant - Dark theme */
-.dark .badge-primary {
-    background-color: #1e3a8a;
-    color: #93c5fd;
+    background-color: var(--color-badge-bg);
+    color: var(--color-badge-text);
 }
 
 /* BANNER ANIMATIONS AND STYLING
@@ -948,6 +815,6 @@ body.mobile-drawer-open {
 }
 
 .mobile-filter-search-toggle:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--color-mobile-filter-drawer-filter-hover);
     border-radius: 0.25rem;
 }

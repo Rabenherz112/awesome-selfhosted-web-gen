@@ -15,7 +15,7 @@ class AppDetail {
         const commitHistoryData = graphContainer.getAttribute('data-commit-history');
         
         if (!commitHistoryData || commitHistoryData.trim() === '' || commitHistoryData === 'null') {
-            graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">No commit data available</div>';
+            graphContainer.innerHTML = '<div class="text-text-muted text-center py-8">No commit data available</div>';
             return;
         }
 
@@ -24,7 +24,7 @@ class AppDetail {
             
             // Only render if we have at least 3 months of data
             if (!commitHistory || typeof commitHistory !== 'object' || Object.keys(commitHistory).length < 3) {
-                graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">Not enough commit data to display graph (minimum 3 months required)</div>';
+                graphContainer.innerHTML = '<div class="text-text-muted text-center py-8">Not enough commit data to display graph (minimum 3 months required)</div>';
                 return;
             }
             
@@ -32,7 +32,7 @@ class AppDetail {
         } catch (error) {
             console.error('Error parsing commit history data:', error);
             console.error('Raw data was:', commitHistoryData);
-            graphContainer.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center py-8">No commit data available (an error occurred)</div>';
+            graphContainer.innerHTML = '<div class="text-text-muted text-center py-8">No commit data available (an error occurred)</div>';
         }
     }
 
@@ -59,13 +59,13 @@ class AppDetail {
         
         // Add title and stats - responsive text sizes
         const stats = document.createElement('div');
-        stats.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 gap-2';
+        stats.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm text-text-muted mb-4 gap-2';
         stats.innerHTML = `
             <div>
                 <span class="font-medium">${sortedMonths.length}</span> months of activity
             </div>
             <div>
-                Average: <span class="font-medium text-blue-600 dark:text-blue-400">${averageCommits} commits/month</span>
+                Average: <span class="font-medium text-link">${averageCommits} commits/month</span>
             </div>
         `;
         graph.appendChild(stats);
@@ -108,7 +108,8 @@ class AppDetail {
         const areaData = this.createAreaPath(points, padding, chartHeight);
         const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         area.setAttribute('d', areaData);
-        area.setAttribute('fill', 'rgba(34, 197, 94, 0.1)'); // green-500 with opacity
+        area.setAttribute('fill', 'var(--color-success)');
+        area.setAttribute('fill-opacity', 'var(--color-commit-graph-fill-opacity)');
         area.setAttribute('class', 'transition-all duration-200');
         svg.appendChild(area);
         
@@ -119,7 +120,7 @@ class AppDetail {
             circle.setAttribute('cx', point.x);
             circle.setAttribute('cy', point.y);
             circle.setAttribute('r', circleRadius);
-            circle.setAttribute('fill', 'rgb(34, 197, 94)'); // green-500
+            circle.setAttribute('fill', 'var(--color-success)');
             circle.setAttribute('stroke', 'white');
             circle.setAttribute('stroke-width', '2');
             circle.setAttribute('class', 'cursor-pointer hover:r-6 transition-all duration-200');
@@ -142,7 +143,7 @@ class AppDetail {
                 text.setAttribute('x', point.x);
                 text.setAttribute('y', svgHeight - (isMobile ? 5 : 10));
                 text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('class', `${isMobile ? 'text-[10px]' : 'text-xs'} fill-gray-500 dark:fill-gray-400`);
+                text.setAttribute('class', `${isMobile ? 'text-[10px]' : 'text-xs'} fill-text-muted`);
                 text.textContent = this.formatMonth(point.month);
                 svg.appendChild(text);
             }
@@ -158,7 +159,7 @@ class AppDetail {
             text.setAttribute('x', padding.left - (isMobile ? 5 : 10));
             text.setAttribute('y', y + 4);
             text.setAttribute('text-anchor', 'end');
-            text.setAttribute('class', `${isMobile ? 'text-[10px]' : 'text-xs'} fill-gray-500 dark:fill-gray-400`);
+            text.setAttribute('class', `${isMobile ? 'text-[10px]' : 'text-xs'} fill-text-muted`);
             text.textContent = value;
             svg.appendChild(text);
             
@@ -168,7 +169,8 @@ class AppDetail {
             line.setAttribute('y1', y);
             line.setAttribute('x2', padding.left + chartWidth);
             line.setAttribute('y2', y);
-            line.setAttribute('stroke', 'rgba(156, 163, 175, 0.2)'); // gray-400 with opacity
+            line.setAttribute('stroke', 'var(--color-border)');
+            line.setAttribute('stroke-opacity', 'var(--color-commit-graph-grid-opacity)');
             line.setAttribute('stroke-dasharray', '2,2');
             svg.appendChild(line);
         }
@@ -188,7 +190,7 @@ class AppDetail {
         // Add scroll hint for mobile and scroll to right
         if (isMobile && svgWidth > window.innerWidth - 32) {
             const scrollHint = document.createElement('div');
-            scrollHint.className = 'text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2 animate-pulse';
+            scrollHint.className = 'text-[10px] text-text-muted text-center mt-2 animate-pulse';
             scrollHint.innerHTML = '← Scroll to see more →';
             graph.appendChild(scrollHint);
 
@@ -232,7 +234,7 @@ class AppDetail {
             const solidPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             solidPath.setAttribute('d', currentPath);
             solidPath.setAttribute('fill', 'none');
-            solidPath.setAttribute('stroke', 'rgb(34, 197, 94)'); // green-500
+            solidPath.setAttribute('stroke', 'var(--color-success)');
             solidPath.setAttribute('stroke-width', '2');
             solidPath.setAttribute('class', 'transition-all duration-200');
             svg.appendChild(solidPath);
@@ -243,7 +245,7 @@ class AppDetail {
             const dottedPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             dottedPath.setAttribute('d', currentMonthPath);
             dottedPath.setAttribute('fill', 'none');
-            dottedPath.setAttribute('stroke', 'rgb(34, 197, 94)'); // Same green color
+            dottedPath.setAttribute('stroke', 'var(--color-success)');
             dottedPath.setAttribute('stroke-width', '2');
             dottedPath.setAttribute('stroke-dasharray', '5,5'); // Dotted line pattern
             dottedPath.setAttribute('class', 'transition-all duration-200');
