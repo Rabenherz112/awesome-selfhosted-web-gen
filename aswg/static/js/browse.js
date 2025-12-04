@@ -1009,10 +1009,10 @@ class BrowsePage {
                 paginationButtons.innerHTML = '';
                 
                 const buttonBaseClass = 'px-3 py-2 text-sm font-medium rounded transition-colors';
-                const activeClass = `${buttonBaseClass} bg-primary-600 text-white`;
-                const inactiveClass = `${buttonBaseClass} bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600`;
-                const disabledClass = `${buttonBaseClass} bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed`;
-                const ellipsisClass = 'px-2 py-2 text-sm text-gray-500 dark:text-gray-400';
+                const activeClass = `${buttonBaseClass} bg-primary text-surface`;
+                const inactiveClass = `${buttonBaseClass} bg-surface-alt text-text hover:bg-secondary`;
+                const disabledClass = `${buttonBaseClass} bg-surface-alt text-text-muted cursor-not-allowed`;
+                const ellipsisClass = 'px-2 py-2 text-sm text-text-muted';
 
                 // Previous button (|<)
                 const prevButton = document.createElement('button');
