@@ -37,7 +37,7 @@
 
     /* Commit graph fill opacity */
     --color-commit-graph-fill-opacity: 0.08;
-    --color-commit-graph-grid-opacity: 1;
+    --color-commit-graph-grid-opacity: 0.8;
 
     /* Text colors */
     --color-text: #1A202C;

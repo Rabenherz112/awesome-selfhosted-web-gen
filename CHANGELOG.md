@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. The format 
 ### Additions
 
 - Added ability to easily customize color scheme via TailwindCSS variables in `tailwind-input.css`
+- Added in pagination control, page number buttons
 
 ### Other changes
 
