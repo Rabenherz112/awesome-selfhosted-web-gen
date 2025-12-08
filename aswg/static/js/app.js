@@ -31,7 +31,7 @@
         // Create scroll to top button
         const scrollButton = document.createElement('button');
         scrollButton.innerHTML = '↑';
-        scrollButton.className = 'fixed bottom-6 right-6 bg-primary-600 text-white p-3 rounded-full shadow-lg hover:bg-primary-700 transition-all duration-300 transform translate-y-16 opacity-0 z-50';
+        scrollButton.className = 'fixed bottom-6 right-6 bg-primary text-surface p-3 rounded-full shadow-lg hover:bg-primary transition-all duration-300 transform translate-y-16 opacity-0 z-50';
         scrollButton.setAttribute('aria-label', 'Scroll to top');
         document.body.appendChild(scrollButton);
         

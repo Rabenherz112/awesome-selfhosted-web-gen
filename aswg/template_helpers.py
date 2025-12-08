@@ -193,37 +193,33 @@ class TemplateHelpers:
         return sorted(apps, key=lambda x: x.stars or 0, reverse=reverse)
 
     def get_platform_color(self, platform: str) -> str:
-        """Get color for platform/technology."""
-        # Common platform colors (GitHub-style)
-        colors = {
-            "python": "#3572A5",
-            "javascript": "#f1e05a",
-            "typescript": "#2b7489",
-            "java": "#b07219",
-            "go": "#00ADD8",
-            "rust": "#dea584",
-            "php": "#4F5D95",
-            "c": "#555555",
-            "c++": "#f34b7d",
-            "c#": "#239120",
-            "ruby": "#701516",
-            "shell": "#89e051",
-            "docker": "#384d54",
-            "html": "#e34c26",
-            "css": "#563d7c",
-            "vue": "#4FC08D",
-            "react": "#61DAFB",
-            "nodejs": "#43853d",
-            "dart": "#00B4AB",
-            "kotlin": "#F18E33",
-            "swift": "#FA7343",
-            "scala": "#c22d40",
+        """Get color for platform/technology using CSS variables for light/dark mode support."""
+        # Common platform colors using CSS variables
+        platform_vars = {
+            "python": "var(--color-platform-python)",
+            "javascript": "var(--color-platform-javascript)",
+            "typescript": "var(--color-platform-typescript)",
+            "java": "var(--color-platform-java)",
+            "go": "var(--color-platform-go)",
+            "rust": "var(--color-platform-rust)",
+            "php": "var(--color-platform-php)",
+            "c": "var(--color-platform-c)",
+            "c++": "var(--color-platform-cpp)",
+            "c#": "var(--color-platform-csharp)",
+            "ruby": "var(--color-platform-ruby)",
+            "shell": "var(--color-platform-shell)",
+            "docker": "var(--color-platform-docker)",
+            "nodejs": "var(--color-platform-nodejs)",
+            "dart": "var(--color-platform-dart)",
+            "kotlin": "var(--color-platform-kotlin)",
+            "swift": "var(--color-platform-swift)",
+            "scala": "var(--color-platform-scala)",
         }
 
         if not platform:
-            return "#6b7280"  # gray-500
+            return "var(--color-platform-default)"
 
-        return colors.get(platform.lower(), "#6b7280")
+        return platform_vars.get(platform.lower(), "var(--color-platform-default)")
 
     def render_template_string(self, template_str: str, context: dict = None) -> str:
         """Render a template string with given context."""
