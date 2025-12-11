@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file. The format 
 - Added ability to easily customize color scheme via TailwindCSS variables in `tailwind-input.css`
 - Added in pagination control, page number buttons
 
+### Bug Fixes
+
+- Fixed Last Updated date calculation to show correct number of days since update
+
 ### Other changes
 
 - Refactored how colors are defined, by removing the default TailwindCSS colors
