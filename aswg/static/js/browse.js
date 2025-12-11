@@ -928,8 +928,13 @@ class BrowsePage {
         
         const updateDate = new Date(lastUpdated);
         const today = new Date();
-        const diffTime = Math.abs(today - updateDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Normalize both dates to midnight (start of day) to calculate calendar days
+        const updateMidnight = new Date(updateDate.getFullYear(), updateDate.getMonth(), updateDate.getDate());
+        const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        
+        const diffTime = Math.abs(todayMidnight - updateMidnight);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         
         return diffDays;
     }
