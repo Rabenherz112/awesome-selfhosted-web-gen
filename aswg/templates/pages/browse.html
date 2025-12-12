@@ -161,6 +161,62 @@
                         <!-- License checkboxes will be populated by JavaScript -->
                     </div>
                 </div>
+
+                <!-- Star Count Filter (Mobile) -->
+                <div class="bg-surface-alt rounded-lg p-4">
+                    <div class="range-filter-header">
+                        <h3 class="text-sm font-semibold text-text">
+                            Star Count
+                        </h3>
+                        <button id="mobileResetStarsFilter" class="range-filter-reset hidden">
+                            Reset
+                        </button>
+                    </div>
+                    <div id="mobileStarsRangeSlider" class="range-slider-container">
+                        <div class="range-slider-track">
+                            <div id="mobileStarsRangeHighlight" class="range-slider-range"></div>
+                        </div>
+                        <input type="range" id="mobileStarsMinSlider" class="range-slider-input" min="0" max="100000" value="0">
+                        <input type="range" id="mobileStarsMaxSlider" class="range-slider-input" min="0" max="100000" value="100000">
+                    </div>
+                    <div class="range-slider-labels">
+                        <input type="text" id="mobileStarsMinValue" class="range-value-input" value="0" title="Click to edit minimum stars">
+                        <span class="range-slider-separator">to</span>
+                        <input type="text" id="mobileStarsMaxValue" class="range-value-input" value="100k+" title="Click to edit maximum stars">
+                    </div>
+                </div>
+
+                <!-- Last Updated Filter (Mobile) -->
+                <div class="bg-surface-alt rounded-lg p-4">
+                    <div class="range-filter-header">
+                        <h3 class="text-sm font-semibold text-text">
+                            Last Updated
+                        </h3>
+                        <button id="mobileResetUpdatedFilter" class="range-filter-reset hidden">
+                            Reset
+                        </button>
+                    </div>
+                    <div id="mobileUpdatedRangeSlider" class="range-slider-container">
+                        <div class="range-slider-track">
+                            <div id="mobileUpdatedRangeHighlight" class="range-slider-range"></div>
+                        </div>
+                        <input type="range" id="mobileUpdatedMinSlider" class="range-slider-input" min="0" max="365" value="0">
+                        <input type="range" id="mobileUpdatedMaxSlider" class="range-slider-input" min="0" max="365" value="365">
+                    </div>
+                    <div class="range-slider-labels">
+                        <input type="text" id="mobileUpdatedMinValue" class="range-value-input days-input" value="0" title="Click to edit (e.g., 7d, 2w, 3mo, 1y)">
+                        <span class="range-slider-separator">to</span>
+                        <input type="text" id="mobileUpdatedMaxValue" class="range-value-input days-input" value="5y" title="Click to edit (e.g., 7d, 2w, 3mo, 1y)">
+                        <span class="text-xs text-text-muted ml-1">ago</span>
+                    </div>
+                    <div class="flex items-center space-x-3 mt-3 pt-3 border-t border-border">
+                        <label class="custom-toggle">
+                            <input type="checkbox" id="mobileIncludeNoUpdateDate" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="text-sm text-text-muted">Include unknown (no update date)</span>
+                    </div>
+                </div>
             </div>
 
             <!-- Drawer Footer -->
@@ -238,6 +294,62 @@
                 </div>
                 <div class="space-y-2 max-h-64 overflow-y-auto" id="licenseFilters">
                     <!-- License checkboxes will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Star Count Filter -->
+            <div class="bg-surface rounded-lg shadow-md p-6">
+                <div class="range-filter-header">
+                    <h3 class="text-lg font-semibold text-text">
+                        Star Count
+                    </h3>
+                    <button id="resetStarsFilter" class="range-filter-reset hidden">
+                        Reset
+                    </button>
+                </div>
+                <div id="starsRangeSlider" class="range-slider-container">
+                    <div class="range-slider-track">
+                        <div id="starsRangeHighlight" class="range-slider-range"></div>
+                    </div>
+                    <input type="range" id="starsMinSlider" class="range-slider-input" min="0" max="100000" value="0">
+                    <input type="range" id="starsMaxSlider" class="range-slider-input" min="0" max="100000" value="100000">
+                </div>
+                <div class="range-slider-labels">
+                    <input type="text" id="starsMinValue" class="range-value-input" value="0" title="Click to edit minimum stars">
+                    <span class="range-slider-separator">to</span>
+                    <input type="text" id="starsMaxValue" class="range-value-input" value="100k+" title="Click to edit maximum stars">
+                </div>
+            </div>
+
+            <!-- Last Updated Filter -->
+            <div class="bg-surface rounded-lg shadow-md p-6">
+                <div class="range-filter-header">
+                    <h3 class="text-lg font-semibold text-text">
+                        Last Updated
+                    </h3>
+                    <button id="resetUpdatedFilter" class="range-filter-reset hidden">
+                        Reset
+                    </button>
+                </div>
+                <div id="updatedRangeSlider" class="range-slider-container">
+                    <div class="range-slider-track">
+                        <div id="updatedRangeHighlight" class="range-slider-range"></div>
+                    </div>
+                    <input type="range" id="updatedMinSlider" class="range-slider-input" min="0" max="365" value="0">
+                    <input type="range" id="updatedMaxSlider" class="range-slider-input" min="0" max="365" value="365">
+                </div>
+                <div class="range-slider-labels">
+                    <input type="text" id="updatedMinValue" class="range-value-input days-input" value="0" title="Click to edit (e.g., 7d, 2w, 3mo, 1y)">
+                    <span class="range-slider-separator">to</span>
+                    <input type="text" id="updatedMaxValue" class="range-value-input days-input" value="5y" title="Click to edit (e.g., 7d, 2w, 3mo, 1y)">
+                    <span class="text-xs text-text-muted ml-1">ago</span>
+                </div>
+                <div class="flex items-center space-x-3 mt-3 pt-3 border-t border-border">
+                    <label class="custom-toggle">
+                        <input type="checkbox" id="includeNoUpdateDate" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="text-sm text-text-muted">Include unknown (no update date)</span>
                 </div>
             </div>
         </div>
