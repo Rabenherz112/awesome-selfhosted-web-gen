@@ -135,6 +135,25 @@
     --color-platform-kotlin: #F18E33;
     --color-platform-swift: #FA7343;
     --color-platform-scala: #C22D40;
+    --color-platform-deb: #D70751;
+    --color-platform-k8s: #326CE5;
+    --color-platform-perl: #0298C3;
+    --color-platform-elixir: #6E4A7E;
+    --color-platform-dotnet: #9400FF;
+    --color-platform-lua: #000080;
+    --color-platform-django: #092E20;
+    --color-platform-haskell: #5E5086;
+    --color-platform-ansible: #EE0000;
+    --color-platform-deno: #00D9FF;
+    --color-platform-erlang: #B83998;
+    --color-platform-ocaml: #EF7A08;
+    --color-platform-commonlisp: #3FB68B;
+    --color-platform-nix: #7E7EFF;
+    --color-platform-crystal: #000100;
+    --color-platform-plpgsql: #336790;
+    --color-platform-assembly: #6E4C13;
+    --color-platform-objectivec: #438EFF;
+    --color-platform-haxe: #DF7900;
     --color-platform-default: #6B7280;
 }
 
@@ -262,6 +281,25 @@
     --color-platform-kotlin: #F1AE53;
     --color-platform-swift: #FA9363;
     --color-platform-scala: #E24D60;
+    --color-platform-deb: #E73771;
+    --color-platform-k8s: #6A9CFF;
+    --color-platform-perl: #2AB8E3;
+    --color-platform-elixir: #8E6A9E;
+    --color-platform-dotnet: #B440FF;
+    --color-platform-lua: #3A3AC0;
+    --color-platform-django: #0D5E40;
+    --color-platform-haskell: #8D7FB5;
+    --color-platform-ansible: #FF4040;
+    --color-platform-deno: #30FFFF;
+    --color-platform-erlang: #D959B8;
+    --color-platform-ocaml: #FF9A28;
+    --color-platform-commonlisp: #6FE6BB;
+    --color-platform-nix: #9E9EFF;
+    --color-platform-crystal: #3A3A3A;
+    --color-platform-plpgsql: #63A7C1;
+    --color-platform-assembly: #9E7C43;
+    --color-platform-objectivec: #73BEFF;
+    --color-platform-haxe: #FF9930;
     --color-platform-default: #9CA3AF;
 }
 
