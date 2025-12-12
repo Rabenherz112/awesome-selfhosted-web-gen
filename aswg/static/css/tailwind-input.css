@@ -116,7 +116,7 @@
     /* Mobile filter drawer */
     --color-mobile-filter-drawer-filter-hover: rgba(59, 130, 246, 0.1);
 
-    /* Platform colors - Light mode (slightly brighter than default) */ 
+    /* Platform colors - Light mode (slightly brighter than default) */
     --color-platform-python: #5A8EC5;
     --color-platform-javascript: #F5E97A;
     --color-platform-typescript: #4A9AAF;
