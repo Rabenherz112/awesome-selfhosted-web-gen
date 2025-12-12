@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file. The format 
 
 - Added ability to easily customize color scheme via TailwindCSS variables in `tailwind-input.css`
 - Added in pagination control, page number buttons
+- Added support for all plattforms colors used in awesome-selfhosted
 
 ### Bug Fixes
 
