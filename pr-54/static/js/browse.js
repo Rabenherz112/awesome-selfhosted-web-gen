@@ -2198,8 +2198,10 @@ class BrowsePage {
         // Set initial display values
         if (minValue) minValue.value = this.formatStarsValue(this.starsMin);
         if (maxValue) {
-            const isAtMax = this.starsMax === this.starsDataMax;
-            maxValue.value = this.formatStarsValue(this.starsMax) + (isAtMax ? '+' : '');
+            // If starsMax is Infinity, use the last step value for display
+            const isAtMax = this.starsMax === Infinity || this.starsMax >= steps[maxPos];
+            const displayMax = this.starsMax === Infinity ? steps[maxPos] : this.starsMax;
+            maxValue.value = this.formatStarsValue(displayMax) + (isAtMax ? '+' : '');
         }
 
         // Update highlight
