@@ -2344,7 +2344,12 @@ class BrowsePage {
 
         // Set initial display values
         if (minValue) minValue.value = this.formatDaysValue(this.updatedMin);
-        if (maxValue) maxValue.value = this.formatDaysValue(this.updatedMax);
+        if (maxValue) {
+            // If updatedMax is Infinity, use the last step value for display
+            const displayMax = this.updatedMax === Infinity ? steps[maxPos] : this.updatedMax;
+            const isAtMax = this.updatedMax === Infinity || this.updatedMax >= steps[maxPos];
+            maxValue.value = this.formatDaysValue(displayMax) + (isAtMax ? '+' : '');
+        }
 
         // Update highlight
         this.updateRangeHighlight(minSlider, maxSlider, highlight);
