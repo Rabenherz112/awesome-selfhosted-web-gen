@@ -75,7 +75,7 @@
     --color-link-hover: #1D4ED8;
     --color-border: #D1D8E4;
     --color-success: #16A34A;
-    --color-warning: #CA8A04;
+    --color-warning: #C2730A;
     --color-error: #DC2626;
     --color-button-success: #16A34A;
     --color-button-info: #2563EB;
@@ -932,13 +932,13 @@
     background-color: var(--color-surface-alt);
   }
   .bg-warning\/10 {
-    background-color: color-mix(in srgb, #CA8A04 10%, transparent);
+    background-color: color-mix(in srgb, #C2730A 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-warning) 10%, transparent);
     }
   }
   .bg-warning\/20 {
-    background-color: color-mix(in srgb, #CA8A04 20%, transparent);
+    background-color: color-mix(in srgb, #C2730A 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-warning) 20%, transparent);
     }
@@ -1759,7 +1759,7 @@
   --color-link-hover: #93C5FD;
   --color-border: #3D4A5C;
   --color-success: #4ADE80;
-  --color-warning: #FACC15;
+  --color-warning: #FCA861;
   --color-error: #F87171;
   --color-button-success: #22C55E;
   --color-button-info: #3B82F6;

@@ -52,7 +52,7 @@
 
     /* Status colors */
     --color-success: #16A34A;
-    --color-warning: #CA8A04;
+    --color-warning: #C2730A;
     --color-error: #DC2626;
 
     /* Button colors for action buttons */
@@ -200,7 +200,7 @@
     --color-border: #3D4A5C;
 
     --color-success: #4ADE80;
-    --color-warning: #FACC15;
+    --color-warning: #FCA861;
     --color-error: #F87171;
 
     /* Button colors - toned down for dark mode */
