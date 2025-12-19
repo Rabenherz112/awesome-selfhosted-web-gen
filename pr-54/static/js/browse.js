@@ -383,18 +383,26 @@ class BrowsePage {
         str = str.trim().toLowerCase();
         
         if (str.endsWith('y')) {
-            return Math.round(parseFloat(str) * 365);
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return Math.round(num * 365);
         }
         if (str.endsWith('mo')) {
-            return Math.round(parseFloat(str) * 30);
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return Math.round(num * 30);
         }
         if (str.endsWith('w')) {
-            return Math.round(parseFloat(str) * 7);
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return Math.round(num * 7);
         }
         if (str.endsWith('d')) {
-            return parseInt(str);
+            const num = parseInt(str);
+            return isNaN(num) ? 0 : num;
         }
-        return parseInt(str) || 0;
+        const num = parseInt(str);
+        return isNaN(num) ? 0 : num;
     }
 
     setupRangeFilters() {
@@ -500,7 +508,7 @@ class BrowsePage {
             this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
             this.currentPage = 1;
             this.filterSortAndRender();
-            this.syncStarsSlider('mobile', minVal, maxVal);
+            this.syncStarsSlider('mobile', minVal, isAtMax ? Infinity : maxVal);
         });
 
         // Editable min value - allows custom values (not just steps)
@@ -569,7 +577,7 @@ class BrowsePage {
         }
     }
 
-    setupUpdatedRangeFilter(minSliderId, maxSliderId, minValueId, maxValueId, highlightId, resetId) {
+    setupUpdatedRangeFilter(minSliderId, maxSliderId, minValueId, maxValueId, highlightId, resetId, syncTarget = 'mobile', initializeFromState = false) {
         const minSlider = document.getElementById(minSliderId);
         const maxSlider = document.getElementById(maxSliderId);
         const minValue = document.getElementById(minValueId);
@@ -585,16 +593,33 @@ class BrowsePage {
         // Set slider bounds (position-based, not value-based)
         minSlider.min = 0;
         minSlider.max = maxPos;
-        minSlider.value = 0;
         minSlider.step = 1;
         maxSlider.min = 0;
         maxSlider.max = maxPos;
-        maxSlider.value = maxPos;
         maxSlider.step = 1;
 
+        // Set initial slider values
+        if (initializeFromState) {
+            minSlider.value = this.valueToSliderPos(this.updatedMin, steps);
+            maxSlider.value = this.valueToSliderPos(this.updatedMax, steps);
+        } else {
+            minSlider.value = 0;
+            maxSlider.value = maxPos;
+        }
+
         // Set initial display values
-        if (minValue) minValue.value = this.formatDaysValue(steps[0]);
-        if (maxValue) maxValue.value = this.formatDaysValue(steps[maxPos]);
+        if (initializeFromState) {
+            if (minValue) minValue.value = this.formatDaysValue(this.updatedMin);
+            if (maxValue) {
+                // If updatedMax is Infinity, use the last step value for display
+                const displayMax = this.updatedMax === Infinity ? steps[maxPos] : this.updatedMax;
+                const isAtMax = this.updatedMax === Infinity || this.updatedMax >= steps[maxPos];
+                maxValue.value = this.formatDaysValue(displayMax) + (isAtMax ? '+' : '');
+            }
+        } else {
+            if (minValue) minValue.value = this.formatDaysValue(steps[0]);
+            if (maxValue) maxValue.value = this.formatDaysValue(steps[maxPos]);
+        }
 
         // Update highlight
         this.updateRangeHighlight(minSlider, maxSlider, highlight);
@@ -619,7 +644,7 @@ class BrowsePage {
             this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
             this.currentPage = 1;
             this.filterSortAndRender();
-            this.syncUpdatedSlider('mobile', minVal, maxVal);
+            this.syncUpdatedSlider(syncTarget, minVal, maxVal);
         });
 
         // Max slider event
@@ -643,7 +668,7 @@ class BrowsePage {
             this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
             this.currentPage = 1;
             this.filterSortAndRender();
-            this.syncUpdatedSlider('mobile', minVal, maxVal);
+            this.syncUpdatedSlider(syncTarget, minVal, maxPos === steps.length - 1 ? Infinity : maxVal);
         });
 
         // Editable min value - allows custom values (not just steps)
@@ -659,7 +684,7 @@ class BrowsePage {
                 this.updateResetButton(resetId, val !== steps[0] || this.updatedMax !== steps[steps.length - 1]);
                 this.currentPage = 1;
                 this.filterSortAndRender();
-                this.syncUpdatedSlider('mobile', val, this.updatedMax);
+                this.syncUpdatedSlider(syncTarget, val, this.updatedMax);
             });
 
             minValue.addEventListener('keydown', (e) => {
@@ -684,7 +709,7 @@ class BrowsePage {
                 this.updateResetButton(resetId, this.updatedMin !== steps[0] || !isAtMax);
                 this.currentPage = 1;
                 this.filterSortAndRender();
-                this.syncUpdatedSlider('mobile', this.updatedMin, isAtMax ? Infinity : val);
+                this.syncUpdatedSlider(syncTarget, this.updatedMin, isAtMax ? Infinity : val);
             });
 
             maxValue.addEventListener('keydown', (e) => {
@@ -707,7 +732,7 @@ class BrowsePage {
                 this.updateResetButton(resetId, false);
                 this.currentPage = 1;
                 this.filterSortAndRender();
-                this.syncUpdatedSlider('mobile', steps[0], Infinity);
+                this.syncUpdatedSlider(syncTarget, steps[0], Infinity);
             });
         }
     }
@@ -753,12 +778,17 @@ class BrowsePage {
         str = str.replace(/[+,]/g, '').trim().toLowerCase();
         
         if (str.endsWith('m')) {
-            return parseFloat(str) * 1000000;
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return num * 1000000;
         }
         if (str.endsWith('k')) {
-            return parseFloat(str) * 1000;
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return num * 1000;
         }
-        return parseInt(str) || 0;
+        const num = parseInt(str);
+        return isNaN(num) ? 0 : num;
     }
 
     syncStarsSlider(target, minVal, maxVal) {
@@ -2322,151 +2352,17 @@ class BrowsePage {
     }
 
     setupMobileUpdatedRangeFilter() {
-        const minSlider = document.getElementById('mobileUpdatedMinSlider');
-        const maxSlider = document.getElementById('mobileUpdatedMaxSlider');
-        const minValue = document.getElementById('mobileUpdatedMinValue');
-        const maxValue = document.getElementById('mobileUpdatedMaxValue');
-        const highlight = document.getElementById('mobileUpdatedRangeHighlight');
-        const resetBtn = document.getElementById('mobileResetUpdatedFilter');
-
-        if (!minSlider || !maxSlider) return;
-
-        const steps = this.daysSteps;
-        const maxPos = steps.length - 1;
-
-        // Set slider bounds (position-based)
-        minSlider.min = 0;
-        minSlider.max = maxPos;
-        minSlider.value = this.valueToSliderPos(this.updatedMin, steps);
-        minSlider.step = 1;
-        maxSlider.min = 0;
-        maxSlider.max = maxPos;
-        maxSlider.value = this.valueToSliderPos(this.updatedMax, steps);
-        maxSlider.step = 1;
-
-        // Set initial display values
-        if (minValue) minValue.value = this.formatDaysValue(this.updatedMin);
-        if (maxValue) {
-            // If updatedMax is Infinity, use the last step value for display
-            const displayMax = this.updatedMax === Infinity ? steps[maxPos] : this.updatedMax;
-            const isAtMax = this.updatedMax === Infinity || this.updatedMax >= steps[maxPos];
-            maxValue.value = this.formatDaysValue(displayMax) + (isAtMax ? '+' : '');
-        }
-
-        // Update highlight
-        this.updateRangeHighlight(minSlider, maxSlider, highlight);
-
-        // Min slider event
-        minSlider.addEventListener('input', () => {
-            let minPos = parseInt(minSlider.value);
-            let maxPos = parseInt(maxSlider.value);
-
-            // Prevent min slider from reaching or exceeding max slider position
-            // Allow same position only if there's only one step available
-            if (minPos >= maxPos && maxPos > 0) {
-                minPos = Math.max(0, maxPos - 1);
-                minSlider.value = minPos;
-            }
-
-            const minVal = steps[minPos];
-            const maxVal = steps[maxPos];
-            this.updatedMin = minVal;
-            if (minValue) minValue.value = this.formatDaysValue(minVal);
-            this.updateRangeHighlight(minSlider, maxSlider, highlight);
-            this.updateResetButton('mobileResetUpdatedFilter', minPos !== 0 || maxPos !== steps.length - 1);
-            this.currentPage = 1;
-            this.filterSortAndRender();
-            this.syncUpdatedSlider('desktop', minVal, maxVal);
-        });
-
-        // Max slider event
-        maxSlider.addEventListener('input', () => {
-            let minPos = parseInt(minSlider.value);
-            let maxPos = parseInt(maxSlider.value);
-
-            // Prevent max slider from reaching or going below min slider position
-            // Allow same position only if there's only one step available
-            if (maxPos <= minPos && minPos < steps.length - 1) {
-                maxPos = Math.min(steps.length - 1, minPos + 1);
-                maxSlider.value = maxPos;
-            }
-
-            const minVal = steps[minPos];
-            const maxVal = steps[maxPos];
-            // If slider is at max position, set filter to Infinity to show all apps
-            this.updatedMax = maxPos === steps.length - 1 ? Infinity : maxVal;
-            if (maxValue) maxValue.value = this.formatDaysValue(maxVal) + (maxPos === steps.length - 1 ? '+' : '');
-            this.updateRangeHighlight(minSlider, maxSlider, highlight);
-            this.updateResetButton('mobileResetUpdatedFilter', minPos !== 0 || maxPos !== steps.length - 1);
-            this.currentPage = 1;
-            this.filterSortAndRender();
-            this.syncUpdatedSlider('desktop', minVal, maxPos === steps.length - 1 ? Infinity : maxVal);
-        });
-
-        // Editable min value - allows custom values (not just steps)
-        if (minValue) {
-            minValue.addEventListener('change', () => {
-                let val = this.parseDaysValue(minValue.value);
-                val = Math.max(0, Math.min(val, this.updatedMax));
-                this.updatedMin = val; // Store exact value for filtering
-                const pos = this.valueToSliderPos(val, steps);
-                minSlider.value = pos; // Slider snaps to nearest step visually
-                minValue.value = this.formatDaysValue(val); // Display exact value
-                this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton('mobileResetUpdatedFilter', val !== steps[0] || this.updatedMax !== steps[steps.length - 1]);
-                this.currentPage = 1;
-                this.filterSortAndRender();
-                this.syncUpdatedSlider('desktop', val, this.updatedMax);
-            });
-
-            minValue.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    minValue.blur();
-                }
-            });
-        }
-
-        // Editable max value - allows custom values (not just steps)
-        if (maxValue) {
-            maxValue.addEventListener('change', () => {
-                let val = this.parseDaysValue(maxValue.value);
-                val = Math.max(this.updatedMin, val);
-                // If value is at or above the last step, set filter to Infinity
-                const isAtMax = val >= steps[steps.length - 1];
-                this.updatedMax = isAtMax ? Infinity : val; // Store exact value for filtering
-                const pos = this.valueToSliderPos(val, steps);
-                maxSlider.value = pos; // Slider snaps to nearest step visually
-                maxValue.value = this.formatDaysValue(val) + (isAtMax ? '+' : ''); // Display exact value
-                this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton('mobileResetUpdatedFilter', this.updatedMin !== steps[0] || !isAtMax);
-                this.currentPage = 1;
-                this.filterSortAndRender();
-                this.syncUpdatedSlider('desktop', this.updatedMin, isAtMax ? Infinity : val);
-            });
-
-            maxValue.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    maxValue.blur();
-                }
-            });
-        }
-
-        // Reset button
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                this.updatedMin = steps[0];
-                this.updatedMax = Infinity; // Reset to show all apps
-                minSlider.value = 0;
-                maxSlider.value = steps.length - 1;
-                if (minValue) minValue.value = this.formatDaysValue(steps[0]);
-                if (maxValue) maxValue.value = this.formatDaysValue(steps[steps.length - 1]) + '+';
-                this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton('mobileResetUpdatedFilter', false);
-                this.currentPage = 1;
-                this.filterSortAndRender();
-                this.syncUpdatedSlider('desktop', steps[0], Infinity);
-            });
-        }
+        // Use the unified setupUpdatedRangeFilter function with mobile IDs and desktop sync target
+        this.setupUpdatedRangeFilter(
+            'mobileUpdatedMinSlider',
+            'mobileUpdatedMaxSlider',
+            'mobileUpdatedMinValue',
+            'mobileUpdatedMaxValue',
+            'mobileUpdatedRangeHighlight',
+            'mobileResetUpdatedFilter',
+            'desktop', // Sync to desktop when mobile slider changes
+            true // Initialize from current state to sync with desktop
+        );
     }
 }
 
