@@ -433,7 +433,7 @@ class BrowsePage {
         }
     }
 
-    setupStarsRangeFilter(minSliderId, maxSliderId, minValueId, maxValueId, highlightId, resetId) {
+    setupStarsRangeFilter(minSliderId, maxSliderId, minValueId, maxValueId, highlightId, resetId, syncTarget = 'mobile', initializeFromState = false) {
         const minSlider = document.getElementById(minSliderId);
         const maxSlider = document.getElementById(maxSliderId);
         const minValue = document.getElementById(minValueId);
@@ -449,16 +449,33 @@ class BrowsePage {
         // Set slider bounds (position-based, not value-based)
         minSlider.min = 0;
         minSlider.max = maxPos;
-        minSlider.value = 0;
         minSlider.step = 1;
         maxSlider.min = 0;
         maxSlider.max = maxPos;
-        maxSlider.value = maxPos;
         maxSlider.step = 1;
 
+        // Set initial slider values
+        if (initializeFromState) {
+            minSlider.value = this.valueToSliderPos(this.starsMin, steps);
+            maxSlider.value = this.valueToSliderPos(this.starsMax, steps);
+        } else {
+            minSlider.value = 0;
+            maxSlider.value = maxPos;
+        }
+
         // Set initial display values
-        if (minValue) minValue.value = this.formatStarsValue(steps[0]);
-        if (maxValue) maxValue.value = this.formatStarsValue(steps[maxPos]) + '+';
+        if (initializeFromState) {
+            if (minValue) minValue.value = this.formatStarsValue(this.starsMin);
+            if (maxValue) {
+                // If starsMax is Infinity, use the last step value for display
+                const isAtMax = this.starsMax === Infinity || this.starsMax >= steps[maxPos];
+                const displayMax = this.starsMax === Infinity ? steps[maxPos] : this.starsMax;
+                maxValue.value = this.formatStarsValue(displayMax) + (isAtMax ? '+' : '');
+            }
+        } else {
+            if (minValue) minValue.value = this.formatStarsValue(steps[0]);
+            if (maxValue) maxValue.value = this.formatStarsValue(steps[maxPos]) + '+';
+        }
 
         // Update highlight
         this.updateRangeHighlight(minSlider, maxSlider, highlight);
@@ -478,12 +495,14 @@ class BrowsePage {
             const minVal = steps[minPos];
             const maxVal = steps[maxPos];
             this.starsMin = minVal;
+            this.starsMax = maxPos === steps.length - 1 ? Infinity : maxVal;
             if (minValue) minValue.value = this.formatStarsValue(minVal);
             this.updateRangeHighlight(minSlider, maxSlider, highlight);
             this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
             this.currentPage = 1;
             this.filterSortAndRender();
-            this.syncStarsSlider('mobile', minVal, maxVal);
+            // Use this.starsMax to ensure sync matches stored state (may be Infinity when at max)
+            this.syncStarsSlider(syncTarget, minVal, this.starsMax);
         });
 
         // Max slider event
@@ -508,7 +527,7 @@ class BrowsePage {
             this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
             this.currentPage = 1;
             this.filterSortAndRender();
-            this.syncStarsSlider('mobile', minVal, isAtMax ? Infinity : maxVal);
+            this.syncStarsSlider(syncTarget, minVal, isAtMax ? Infinity : maxVal);
         });
 
         // Editable min value - allows custom values (not just steps)
@@ -521,10 +540,10 @@ class BrowsePage {
                 minSlider.value = pos; // Slider snaps to nearest step visually
                 minValue.value = this.formatStarsValue(val); // Display exact value
                 this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton(resetId, val !== steps[0] || this.starsMax !== steps[steps.length - 1]);
+                this.updateResetButton(resetId, val !== steps[0] || this.starsMax !== Infinity);
                 this.currentPage = 1;
                 this.filterSortAndRender();
-                this.syncStarsSlider('mobile', val, this.starsMax);
+                this.syncStarsSlider(syncTarget, val, this.starsMax);
             });
 
             minValue.addEventListener('keydown', (e) => {
@@ -549,7 +568,7 @@ class BrowsePage {
                 this.updateResetButton(resetId, this.starsMin !== steps[0] || !isAtMax);
                 this.currentPage = 1;
                 this.filterSortAndRender();
-                this.syncStarsSlider('mobile', this.starsMin, isAtMax ? Infinity : val);
+                this.syncStarsSlider(syncTarget, this.starsMin, isAtMax ? Infinity : val);
             });
 
             maxValue.addEventListener('keydown', (e) => {
@@ -572,7 +591,7 @@ class BrowsePage {
                 this.updateResetButton(resetId, false);
                 this.currentPage = 1;
                 this.filterSortAndRender();
-                this.syncStarsSlider('mobile', steps[0], Infinity);
+                this.syncStarsSlider(syncTarget, steps[0], Infinity);
             });
         }
     }
@@ -618,7 +637,7 @@ class BrowsePage {
             }
         } else {
             if (minValue) minValue.value = this.formatDaysValue(steps[0]);
-            if (maxValue) maxValue.value = this.formatDaysValue(steps[maxPos]);
+            if (maxValue) maxValue.value = this.formatDaysValue(steps[maxPos]) + '+';
         }
 
         // Update highlight
@@ -639,12 +658,14 @@ class BrowsePage {
             const minVal = steps[minPos];
             const maxVal = steps[maxPos];
             this.updatedMin = minVal;
+            this.updatedMax = maxPos === steps.length - 1 ? Infinity : maxVal;
             if (minValue) minValue.value = this.formatDaysValue(minVal);
             this.updateRangeHighlight(minSlider, maxSlider, highlight);
             this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
             this.currentPage = 1;
             this.filterSortAndRender();
-            this.syncUpdatedSlider(syncTarget, minVal, maxVal);
+            // Use this.updatedMax to ensure sync matches stored state (may be Infinity when at max)
+            this.syncUpdatedSlider(syncTarget, minVal, this.updatedMax);
         });
 
         // Max slider event
@@ -681,7 +702,7 @@ class BrowsePage {
                 minSlider.value = pos; // Slider snaps to nearest step visually
                 minValue.value = this.formatDaysValue(val); // Display exact value
                 this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton(resetId, val !== steps[0] || this.updatedMax !== steps[steps.length - 1]);
+                this.updateResetButton(resetId, val !== steps[0] || this.updatedMax !== Infinity);
                 this.currentPage = 1;
                 this.filterSortAndRender();
                 this.syncUpdatedSlider(syncTarget, val, this.updatedMax);
@@ -2203,152 +2224,17 @@ class BrowsePage {
     }
 
     setupMobileStarsRangeFilter() {
-        const minSlider = document.getElementById('mobileStarsMinSlider');
-        const maxSlider = document.getElementById('mobileStarsMaxSlider');
-        const minValue = document.getElementById('mobileStarsMinValue');
-        const maxValue = document.getElementById('mobileStarsMaxValue');
-        const highlight = document.getElementById('mobileStarsRangeHighlight');
-        const resetBtn = document.getElementById('mobileResetStarsFilter');
-
-        if (!minSlider || !maxSlider) return;
-
-        const steps = this.starsSteps;
-        const maxPos = steps.length - 1;
-
-        // Set slider bounds (position-based)
-        minSlider.min = 0;
-        minSlider.max = maxPos;
-        minSlider.value = this.valueToSliderPos(this.starsMin, steps);
-        minSlider.step = 1;
-        maxSlider.min = 0;
-        maxSlider.max = maxPos;
-        maxSlider.value = this.valueToSliderPos(this.starsMax, steps);
-        maxSlider.step = 1;
-
-        // Set initial display values
-        if (minValue) minValue.value = this.formatStarsValue(this.starsMin);
-        if (maxValue) {
-            // If starsMax is Infinity, use the last step value for display
-            const isAtMax = this.starsMax === Infinity || this.starsMax >= steps[maxPos];
-            const displayMax = this.starsMax === Infinity ? steps[maxPos] : this.starsMax;
-            maxValue.value = this.formatStarsValue(displayMax) + (isAtMax ? '+' : '');
-        }
-
-        // Update highlight
-        this.updateRangeHighlight(minSlider, maxSlider, highlight);
-
-        // Min slider event
-        minSlider.addEventListener('input', () => {
-            let minPos = parseInt(minSlider.value);
-            let maxPos = parseInt(maxSlider.value);
-
-            // Prevent min slider from reaching or exceeding max slider position
-            // Allow same position only if there's only one step available
-            if (minPos >= maxPos && maxPos > 0) {
-                minPos = Math.max(0, maxPos - 1);
-                minSlider.value = minPos;
-            }
-
-            const minVal = steps[minPos];
-            const maxVal = steps[maxPos];
-            this.starsMin = minVal;
-            if (minValue) minValue.value = this.formatStarsValue(minVal);
-            this.updateRangeHighlight(minSlider, maxSlider, highlight);
-            this.updateResetButton('mobileResetStarsFilter', minPos !== 0 || maxPos !== steps.length - 1);
-            this.currentPage = 1;
-            this.filterSortAndRender();
-            this.syncStarsSlider('desktop', minVal, maxVal);
-        });
-
-        // Max slider event
-        maxSlider.addEventListener('input', () => {
-            let minPos = parseInt(minSlider.value);
-            let maxPos = parseInt(maxSlider.value);
-
-            // Prevent max slider from reaching or going below min slider position
-            // Allow same position only if there's only one step available
-            if (maxPos <= minPos && minPos < steps.length - 1) {
-                maxPos = Math.min(steps.length - 1, minPos + 1);
-                maxSlider.value = maxPos;
-            }
-
-            const minVal = steps[minPos];
-            const maxVal = steps[maxPos];
-            // If slider is at max position, set filter to Infinity to show all apps
-            this.starsMax = maxPos === steps.length - 1 ? Infinity : maxVal;
-            const isAtMax = maxPos === steps.length - 1;
-            if (maxValue) maxValue.value = this.formatStarsValue(maxVal) + (isAtMax ? '+' : '');
-            this.updateRangeHighlight(minSlider, maxSlider, highlight);
-            this.updateResetButton('mobileResetStarsFilter', minPos !== 0 || maxPos !== steps.length - 1);
-            this.currentPage = 1;
-            this.filterSortAndRender();
-            this.syncStarsSlider('desktop', minVal, maxPos === steps.length - 1 ? Infinity : maxVal);
-        });
-
-        // Editable min value - allows custom values (not just steps)
-        if (minValue) {
-            minValue.addEventListener('change', () => {
-                let val = this.parseStarsValue(minValue.value);
-                val = Math.max(0, Math.min(val, this.starsMax));
-                this.starsMin = val; // Store exact value for filtering
-                const pos = this.valueToSliderPos(val, steps);
-                minSlider.value = pos; // Slider snaps to nearest step visually
-                minValue.value = this.formatStarsValue(val); // Display exact value
-                this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton('mobileResetStarsFilter', val !== steps[0] || this.starsMax !== steps[steps.length - 1]);
-                this.currentPage = 1;
-                this.filterSortAndRender();
-                this.syncStarsSlider('desktop', val, this.starsMax);
-            });
-
-            minValue.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    minValue.blur();
-                }
-            });
-        }
-
-        // Editable max value - allows custom values (not just steps)
-        if (maxValue) {
-            maxValue.addEventListener('change', () => {
-                let val = this.parseStarsValue(maxValue.value);
-                val = Math.max(this.starsMin, val);
-                // If value is at or above the last step, set filter to Infinity
-                const isAtMax = val >= steps[steps.length - 1];
-                this.starsMax = isAtMax ? Infinity : val; // Store exact value for filtering
-                const pos = this.valueToSliderPos(val, steps);
-                maxSlider.value = pos; // Slider snaps to nearest step visually
-                maxValue.value = this.formatStarsValue(val) + (isAtMax ? '+' : ''); // Display exact value
-                this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton('mobileResetStarsFilter', this.starsMin !== steps[0] || !isAtMax);
-                this.currentPage = 1;
-                this.filterSortAndRender();
-                this.syncStarsSlider('desktop', this.starsMin, isAtMax ? Infinity : val);
-            });
-
-            maxValue.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    maxValue.blur();
-                }
-            });
-        }
-
-        // Reset button
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                this.starsMin = steps[0];
-                this.starsMax = Infinity; // Reset to show all apps
-                minSlider.value = 0;
-                maxSlider.value = steps.length - 1;
-                if (minValue) minValue.value = this.formatStarsValue(steps[0]);
-                if (maxValue) maxValue.value = this.formatStarsValue(steps[steps.length - 1]) + '+';
-                this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton('mobileResetStarsFilter', false);
-                this.currentPage = 1;
-                this.filterSortAndRender();
-                this.syncStarsSlider('desktop', steps[0], Infinity);
-            });
-        }
+        // Use the unified setupStarsRangeFilter function with mobile IDs and desktop sync target
+        this.setupStarsRangeFilter(
+            'mobileStarsMinSlider',
+            'mobileStarsMaxSlider',
+            'mobileStarsMinValue',
+            'mobileStarsMaxValue',
+            'mobileStarsRangeHighlight',
+            'mobileResetStarsFilter',
+            'desktop', // Sync to desktop when mobile slider changes
+            true // Initialize from current state to sync with desktop
+        );
     }
 
     setupMobileUpdatedRangeFilter() {
