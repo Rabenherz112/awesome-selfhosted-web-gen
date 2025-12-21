@@ -591,7 +591,8 @@ class BrowsePage {
                 maxSlider.value = pos; // Slider snaps to nearest step visually
                 maxValue.value = this.formatStarsValue(val) + (isAtMax ? '+' : ''); // Display exact value
                 this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton(resetId, this.starsMin !== steps[0] || !isAtMax);
+                // Show reset button if either min or max is not at default (min=steps[0], max=Infinity)
+                this.updateResetButton(resetId, this.starsMin !== steps[0] || this.starsMax !== Infinity);
                 this.currentPage = 1;
                 this.filterSortAndRender();
                 this.syncStarsSlider(syncTarget, this.starsMin, isAtMax ? Infinity : val);
@@ -753,7 +754,7 @@ class BrowsePage {
                 maxSlider.value = pos; // Slider snaps to nearest step visually
                 maxValue.value = this.formatDaysValue(val) + (isAtMax ? '+' : ''); // Display exact value
                 this.updateRangeHighlight(minSlider, maxSlider, highlight);
-                this.updateResetButton(resetId, this.updatedMin !== steps[0] || !isAtMax);
+                this.updateResetButton(resetId, this.updatedMin !== steps[0] || this.updatedMax !== Infinity);
                 this.currentPage = 1;
                 this.filterSortAndRender();
                 this.syncUpdatedSlider(syncTarget, this.updatedMin, isAtMax ? Infinity : val);
@@ -870,7 +871,7 @@ class BrowsePage {
             this.updateRangeHighlight(minSlider, maxSlider, highlight);
         }
         // Check against actual values, not positions
-        this.updateResetButton(resetId, minVal !== steps[0] || (maxVal !== Infinity && maxVal !== steps[steps.length - 1]));
+        this.updateResetButton(resetId, minVal !== steps[0] || maxVal !== Infinity);
     }
 
     syncUpdatedSlider(target, minVal, maxVal) {
@@ -905,7 +906,7 @@ class BrowsePage {
             this.updateRangeHighlight(minSlider, maxSlider, highlight);
         }
         // Check against actual values, not positions
-        this.updateResetButton(resetId, minVal !== steps[0] || (maxVal !== Infinity && maxVal !== steps[steps.length - 1]));
+        this.updateResetButton(resetId, minVal !== steps[0] || maxVal !== Infinity);
     }
 
     setupEventListeners() {
