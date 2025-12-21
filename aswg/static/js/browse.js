@@ -313,6 +313,19 @@ class BrowsePage {
         const maxStarsIndex = this.starsSteps.findIndex(s => s >= maxStars);
         if (maxStarsIndex >= 0) {
             this.starsSteps = this.starsSteps.slice(0, maxStarsIndex + 1);
+        } else {
+            // maxStars exceeds all predefined steps - add a step at or above maxStars
+            // Round up to a nice number following the progression pattern
+            // After 1M, use increments of 500k, then 1M for larger values
+            let nextStep;
+            if (maxStars <= 1500000) {
+                nextStep = Math.ceil(maxStars / 250000) * 250000; // Round to nearest 250k
+            } else if (maxStars <= 5000000) {
+                nextStep = Math.ceil(maxStars / 500000) * 500000; // Round to nearest 500k
+            } else {
+                nextStep = Math.ceil(maxStars / 1000000) * 1000000; // Round to nearest 1M
+            }
+            this.starsSteps.push(nextStep);
         }
         // Ensure we have at least a reasonable range
         if (this.starsSteps.length < 2) {
@@ -333,6 +346,19 @@ class BrowsePage {
         if (maxDaysIndex >= 0) {
             // Include the step that's >= maxDays to ensure all apps are visible
             this.daysSteps = this.daysSteps.slice(0, maxDaysIndex + 1);
+        } else {
+            // maxDays exceeds all predefined steps - add a step at or above maxDays
+            // Round up to a nice number following the progression pattern
+            // After 7300 days (20 years), use increments of 1 year, then 5 years for larger values
+            let nextStep;
+            if (maxDays <= 10950) { // ~30 years
+                nextStep = Math.ceil(maxDays / 365) * 365; // Round to nearest year
+            } else if (maxDays <= 18250) { // ~50 years
+                nextStep = Math.ceil(maxDays / 1825) * 1825; // Round to nearest 5 years
+            } else {
+                nextStep = Math.ceil(maxDays / 3650) * 3650; // Round to nearest 10 years
+            }
+            this.daysSteps.push(nextStep);
         }
         // Ensure we have at least a reasonable range
         if (this.daysSteps.length < 2) {
