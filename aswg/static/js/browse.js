@@ -31,6 +31,18 @@ class BrowsePage {
         // Mobile detection
         this.isMobile = window.innerWidth < 640;
 
+        // Star count range filter
+        this.starsMin = 0;
+        this.starsMax = Infinity;
+        this.starsDataMin = 0;
+        this.starsDataMax = 100000;
+
+        // Last updated range filter (in days)
+        this.updatedMin = 0;
+        this.updatedMax = Infinity;
+        this.updatedDataMax = 365; // Will be calculated from dataset
+        this.includeNoUpdateDate = true; // Include apps without update date by default
+
         this.init();
     }
 
@@ -41,12 +53,14 @@ class BrowsePage {
         this.extractPlatforms();
         this.extractLicenses();
         this.extractCategories();
+        this.calculateRangeFilterBounds();
         this.parseUrlParameters();
         this.setupEventListeners();
         this.setupPlatformFilters();
         this.setupLicenseFilters();
         this.setupCategoryFilters();
         this.setupFilterSearch();
+        this.setupRangeFilters();
         if (this.enablePagination) {
             this.setupPaginationEventListeners();
         }
@@ -58,6 +72,7 @@ class BrowsePage {
         this.setupMobileFilterDrawer();
         this.setupMobileFilters();
         this.setupMobileFilterSearch();
+        this.setupMobileRangeFilters();
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -271,6 +286,641 @@ class BrowsePage {
                 });
             }
         });
+    }
+
+    calculateRangeFilterBounds() {
+        // Calculate star count bounds
+        let maxStars = 0;
+        let maxDays = 0;
+
+        this.applications.forEach(app => {
+            // Stars
+            if (app.stars && app.stars > maxStars) {
+                maxStars = app.stars;
+            }
+
+            // Last updated
+            const days = this.getDaysSinceUpdate(app.last_updated);
+            if (days !== null && days > maxDays) {
+                maxDays = days;
+            }
+        });
+
+        // Define discrete step values for stars slider (logarithmic-like progression)
+        this.starsSteps = [0, 10, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 7500, 10000, 15000, 20000, 25000, 50000, 75000, 100000, 150000, 200000, 250000, 500000, 750000, 1000000];
+        
+        // Filter steps to only include values up to and including the next step above maxStars
+        const maxStarsIndex = this.starsSteps.findIndex(s => s >= maxStars);
+        if (maxStarsIndex >= 0) {
+            this.starsSteps = this.starsSteps.slice(0, maxStarsIndex + 1);
+        } else {
+            // maxStars exceeds all predefined steps - add a step at or above maxStars
+            // Round up to a nice number following the progression pattern
+            // After 1M, use increments of 500k, then 1M for larger values
+            let nextStep;
+            if (maxStars <= 1500000) {
+                nextStep = Math.ceil(maxStars / 250000) * 250000; // Round to nearest 250k
+            } else if (maxStars <= 5000000) {
+                nextStep = Math.ceil(maxStars / 500000) * 500000; // Round to nearest 500k
+            } else {
+                nextStep = Math.ceil(maxStars / 1000000) * 1000000; // Round to nearest 1M
+            }
+            this.starsSteps.push(nextStep);
+        }
+        // Ensure we have at least a reasonable range
+        if (this.starsSteps.length < 2) {
+            this.starsSteps = [0, 100];
+        }
+        
+        this.starsDataMin = 0;
+        this.starsDataMax = this.starsSteps[this.starsSteps.length - 1];
+        // Keep starsMax at Infinity to show all apps by default (user can filter if needed)
+        // this.starsMax remains Infinity from constructor
+
+        // Define discrete step values for days slider (meaningful time periods)
+        // Include steps beyond 5 years to allow filtering of older apps
+        this.daysSteps = [0, 1, 3, 7, 14, 21, 30, 60, 90, 120, 180, 365, 730, 1095, 1825, 2555, 3285, 3650, 5475, 7300];
+        
+        // Filter steps to only include values up to and including the next step above maxDays
+        const maxDaysIndex = this.daysSteps.findIndex(d => d >= maxDays);
+        if (maxDaysIndex >= 0) {
+            // Include the step that's >= maxDays to ensure all apps are visible
+            this.daysSteps = this.daysSteps.slice(0, maxDaysIndex + 1);
+        } else {
+            // maxDays exceeds all predefined steps - add a step at or above maxDays
+            // Round up to a nice number following the progression pattern
+            // After 7300 days (20 years), use increments of 1 year, then 5 years for larger values
+            let nextStep;
+            if (maxDays <= 10950) { // ~30 years
+                nextStep = Math.ceil(maxDays / 365) * 365; // Round to nearest year
+            } else if (maxDays <= 18250) { // ~50 years
+                nextStep = Math.ceil(maxDays / 1825) * 1825; // Round to nearest 5 years
+            } else {
+                nextStep = Math.ceil(maxDays / 3650) * 3650; // Round to nearest 10 years
+            }
+            this.daysSteps.push(nextStep);
+        }
+        // Ensure we have at least a reasonable range
+        if (this.daysSteps.length < 2) {
+            this.daysSteps = [0, 30];
+        }
+        
+        this.updatedDataMax = this.daysSteps[this.daysSteps.length - 1];
+        // Keep updatedMax at Infinity to show all apps by default (user can filter if needed)
+        // this.updatedMax remains Infinity from constructor
+    }
+
+    // Convert slider position (0 to steps.length-1) to actual value
+    sliderPosToValue(pos, steps) {
+        const index = Math.round(pos);
+        return steps[Math.min(Math.max(0, index), steps.length - 1)];
+    }
+
+    // Convert actual value to slider position
+    valueToSliderPos(value, steps) {
+        // If value is Infinity, return the last step position
+        if (value === Infinity) {
+            return steps.length - 1;
+        }
+        // Find the closest step
+        let closestIndex = 0;
+        let closestDiff = Math.abs(steps[0] - value);
+        for (let i = 1; i < steps.length; i++) {
+            const diff = Math.abs(steps[i] - value);
+            if (diff < closestDiff) {
+                closestDiff = diff;
+                closestIndex = i;
+            }
+        }
+        return closestIndex;
+    }
+
+    // Format days as human-readable string
+    formatDaysValue(days) {
+        if (days === 0) return '0';
+        if (days < 14) return days + 'd';
+        if (days < 60) return Math.round(days / 7) + 'w';
+        if (days < 365) return Math.round(days / 30) + 'mo';
+        return (days / 365).toFixed(days % 365 === 0 ? 0 : 1) + 'y';
+    }
+
+    // Parse days from human-readable string
+    parseDaysValue(str) {
+        str = str.trim().toLowerCase();
+        
+        if (str.endsWith('y')) {
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return Math.round(num * 365);
+        }
+        if (str.endsWith('mo')) {
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return Math.round(num * 30);
+        }
+        if (str.endsWith('w')) {
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return Math.round(num * 7);
+        }
+        if (str.endsWith('d')) {
+            const num = parseInt(str);
+            return isNaN(num) ? 0 : num;
+        }
+        const num = parseInt(str);
+        return isNaN(num) ? 0 : num;
+    }
+
+    setupRangeFilters() {
+        // Setup star count range filter
+        this.setupStarsRangeFilter('starsMinSlider', 'starsMaxSlider', 'starsMinValue', 'starsMaxValue', 'starsRangeHighlight', 'resetStarsFilter');
+
+        // Setup last updated range filter
+        this.setupUpdatedRangeFilter('updatedMinSlider', 'updatedMaxSlider', 'updatedMinValue', 'updatedMaxValue', 'updatedRangeHighlight', 'resetUpdatedFilter');
+
+        // Setup "include no update date" checkbox
+        this.setupIncludeNoUpdateDateCheckbox();
+    }
+
+    setupIncludeNoUpdateDateCheckbox() {
+        const checkbox = document.getElementById('includeNoUpdateDate');
+        if (checkbox) {
+            checkbox.checked = this.includeNoUpdateDate;
+            checkbox.addEventListener('change', (e) => {
+                this.includeNoUpdateDate = e.target.checked;
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                // Sync with mobile
+                const mobileCheckbox = document.getElementById('mobileIncludeNoUpdateDate');
+                if (mobileCheckbox) {
+                    mobileCheckbox.checked = e.target.checked;
+                }
+            });
+        }
+    }
+
+    setupStarsRangeFilter(minSliderId, maxSliderId, minValueId, maxValueId, highlightId, resetId, syncTarget = 'mobile', initializeFromState = false) {
+        const minSlider = document.getElementById(minSliderId);
+        const maxSlider = document.getElementById(maxSliderId);
+        const minValue = document.getElementById(minValueId);
+        const maxValue = document.getElementById(maxValueId);
+        const highlight = document.getElementById(highlightId);
+        const resetBtn = document.getElementById(resetId);
+
+        if (!minSlider || !maxSlider) return;
+
+        const steps = this.starsSteps;
+        const maxPos = steps.length - 1;
+
+        // Set slider bounds (position-based, not value-based)
+        minSlider.min = 0;
+        minSlider.max = maxPos;
+        minSlider.step = 1;
+        maxSlider.min = 0;
+        maxSlider.max = maxPos;
+        maxSlider.step = 1;
+
+        // Set initial slider values
+        if (initializeFromState) {
+            minSlider.value = this.valueToSliderPos(this.starsMin, steps);
+            maxSlider.value = this.valueToSliderPos(this.starsMax, steps);
+        } else {
+            minSlider.value = 0;
+            maxSlider.value = maxPos;
+        }
+
+        // Set initial display values
+        if (initializeFromState) {
+            if (minValue) minValue.value = this.formatStarsValue(this.starsMin);
+            if (maxValue) {
+                // If starsMax is Infinity, use the last step value for display
+                const isAtMax = this.starsMax === Infinity || this.starsMax >= steps[maxPos];
+                const displayMax = this.starsMax === Infinity ? steps[maxPos] : this.starsMax;
+                maxValue.value = this.formatStarsValue(displayMax) + (isAtMax ? '+' : '');
+            }
+        } else {
+            if (minValue) minValue.value = this.formatStarsValue(steps[0]);
+            if (maxValue) maxValue.value = this.formatStarsValue(steps[maxPos]) + '+';
+        }
+
+        // Update highlight
+        this.updateRangeHighlight(minSlider, maxSlider, highlight);
+
+        // Min slider event
+        minSlider.addEventListener('input', () => {
+            let minPos = parseInt(minSlider.value);
+            let maxPos = parseInt(maxSlider.value);
+
+            // Prevent min slider from reaching or exceeding max slider position
+            // Allow same position only if there's only one step available
+            if (minPos >= maxPos && maxPos > 0) {
+                minPos = Math.max(0, maxPos - 1);
+                minSlider.value = minPos;
+            }
+
+            const minVal = steps[minPos];
+            const maxVal = steps[maxPos];
+            this.starsMin = minVal;
+            this.starsMax = maxPos === steps.length - 1 ? Infinity : maxVal;
+            if (minValue) minValue.value = this.formatStarsValue(minVal);
+            this.updateRangeHighlight(minSlider, maxSlider, highlight);
+            this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
+            this.currentPage = 1;
+            this.filterSortAndRender();
+            // Use this.starsMax to ensure sync matches stored state (may be Infinity when at max)
+            this.syncStarsSlider(syncTarget, minVal, this.starsMax);
+        });
+
+        // Max slider event
+        maxSlider.addEventListener('input', () => {
+            let minPos = parseInt(minSlider.value);
+            let maxPos = parseInt(maxSlider.value);
+
+            // Prevent max slider from reaching or going below min slider position
+            // Allow same position only if there's only one step available
+            if (maxPos <= minPos && minPos < steps.length - 1) {
+                maxPos = Math.min(steps.length - 1, minPos + 1);
+                maxSlider.value = maxPos;
+            }
+
+            const minVal = steps[minPos];
+            const maxVal = steps[maxPos];
+            // If slider is at max position, set filter to Infinity to show all apps
+            this.starsMax = maxPos === steps.length - 1 ? Infinity : maxVal;
+            const isAtMax = maxPos === steps.length - 1;
+            if (maxValue) maxValue.value = this.formatStarsValue(maxVal) + (isAtMax ? '+' : '');
+            this.updateRangeHighlight(minSlider, maxSlider, highlight);
+            this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
+            this.currentPage = 1;
+            this.filterSortAndRender();
+            this.syncStarsSlider(syncTarget, minVal, isAtMax ? Infinity : maxVal);
+        });
+
+        // Editable min value - allows custom values (not just steps)
+        if (minValue) {
+            minValue.addEventListener('change', () => {
+                let val = this.parseStarsValue(minValue.value);
+                val = Math.max(0, Math.min(val, this.starsMax));
+                this.starsMin = val; // Store exact value for filtering
+                let pos = this.valueToSliderPos(val, steps);
+                
+                // Ensure min slider doesn't reach or exceed max slider position
+                const maxPos = parseInt(maxSlider.value);
+                if (pos >= maxPos && maxPos > 0) {
+                    pos = Math.max(0, maxPos - 1);
+                }
+                
+                minSlider.value = pos; // Slider snaps to nearest step visually
+                minValue.value = this.formatStarsValue(val); // Display exact value
+                this.updateRangeHighlight(minSlider, maxSlider, highlight);
+                this.updateResetButton(resetId, val !== steps[0] || this.starsMax !== Infinity);
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncStarsSlider(syncTarget, val, this.starsMax);
+            });
+
+            minValue.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    minValue.blur();
+                }
+            });
+        }
+
+        // Editable max value - allows custom values (not just steps)
+        if (maxValue) {
+            maxValue.addEventListener('change', () => {
+                let val = this.parseStarsValue(maxValue.value);
+                val = Math.max(this.starsMin, val);
+                // If value is at or above the last step, set filter to Infinity
+                const isAtMax = val >= steps[steps.length - 1];
+                this.starsMax = isAtMax ? Infinity : val; // Store exact value for filtering
+                const pos = this.valueToSliderPos(val, steps);
+                maxSlider.value = pos; // Slider snaps to nearest step visually
+                maxValue.value = this.formatStarsValue(val) + (isAtMax ? '+' : ''); // Display exact value
+                this.updateRangeHighlight(minSlider, maxSlider, highlight);
+                // Show reset button if either min or max is not at default (min=steps[0], max=Infinity)
+                this.updateResetButton(resetId, this.starsMin !== steps[0] || this.starsMax !== Infinity);
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncStarsSlider(syncTarget, this.starsMin, isAtMax ? Infinity : val);
+            });
+
+            maxValue.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    maxValue.blur();
+                }
+            });
+        }
+
+        // Reset button
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.starsMin = steps[0];
+                this.starsMax = Infinity; // Reset to show all apps
+                minSlider.value = 0;
+                maxSlider.value = steps.length - 1;
+                if (minValue) minValue.value = this.formatStarsValue(steps[0]);
+                if (maxValue) maxValue.value = this.formatStarsValue(steps[steps.length - 1]) + '+';
+                this.updateRangeHighlight(minSlider, maxSlider, highlight);
+                this.updateResetButton(resetId, false);
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncStarsSlider(syncTarget, steps[0], Infinity);
+            });
+        }
+    }
+
+    setupUpdatedRangeFilter(minSliderId, maxSliderId, minValueId, maxValueId, highlightId, resetId, syncTarget = 'mobile', initializeFromState = false) {
+        const minSlider = document.getElementById(minSliderId);
+        const maxSlider = document.getElementById(maxSliderId);
+        const minValue = document.getElementById(minValueId);
+        const maxValue = document.getElementById(maxValueId);
+        const highlight = document.getElementById(highlightId);
+        const resetBtn = document.getElementById(resetId);
+
+        if (!minSlider || !maxSlider) return;
+
+        const steps = this.daysSteps;
+        const maxPos = steps.length - 1;
+
+        // Set slider bounds (position-based, not value-based)
+        minSlider.min = 0;
+        minSlider.max = maxPos;
+        minSlider.step = 1;
+        maxSlider.min = 0;
+        maxSlider.max = maxPos;
+        maxSlider.step = 1;
+
+        // Set initial slider values
+        if (initializeFromState) {
+            minSlider.value = this.valueToSliderPos(this.updatedMin, steps);
+            maxSlider.value = this.valueToSliderPos(this.updatedMax, steps);
+        } else {
+            minSlider.value = 0;
+            maxSlider.value = maxPos;
+        }
+
+        // Set initial display values
+        if (initializeFromState) {
+            if (minValue) minValue.value = this.formatDaysValue(this.updatedMin);
+            if (maxValue) {
+                // If updatedMax is Infinity, use the last step value for display
+                const displayMax = this.updatedMax === Infinity ? steps[maxPos] : this.updatedMax;
+                const isAtMax = this.updatedMax === Infinity || this.updatedMax >= steps[maxPos];
+                maxValue.value = this.formatDaysValue(displayMax) + (isAtMax ? '+' : '');
+            }
+        } else {
+            if (minValue) minValue.value = this.formatDaysValue(steps[0]);
+            if (maxValue) maxValue.value = this.formatDaysValue(steps[maxPos]) + '+';
+        }
+
+        // Update highlight
+        this.updateRangeHighlight(minSlider, maxSlider, highlight);
+
+        // Min slider event
+        minSlider.addEventListener('input', () => {
+            let minPos = parseInt(minSlider.value);
+            let maxPos = parseInt(maxSlider.value);
+
+            // Prevent min slider from reaching or exceeding max slider position
+            // Allow same position only if there's only one step available
+            if (minPos >= maxPos && maxPos > 0) {
+                minPos = Math.max(0, maxPos - 1);
+                minSlider.value = minPos;
+            }
+
+            const minVal = steps[minPos];
+            const maxVal = steps[maxPos];
+            this.updatedMin = minVal;
+            this.updatedMax = maxPos === steps.length - 1 ? Infinity : maxVal;
+            if (minValue) minValue.value = this.formatDaysValue(minVal);
+            this.updateRangeHighlight(minSlider, maxSlider, highlight);
+            this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
+            this.currentPage = 1;
+            this.filterSortAndRender();
+            // Use this.updatedMax to ensure sync matches stored state (may be Infinity when at max)
+            this.syncUpdatedSlider(syncTarget, minVal, this.updatedMax);
+        });
+
+        // Max slider event
+        maxSlider.addEventListener('input', () => {
+            let minPos = parseInt(minSlider.value);
+            let maxPos = parseInt(maxSlider.value);
+
+            // Prevent max slider from reaching or going below min slider position
+            // Allow same position only if there's only one step available
+            if (maxPos <= minPos && minPos < steps.length - 1) {
+                maxPos = Math.min(steps.length - 1, minPos + 1);
+                maxSlider.value = maxPos;
+            }
+
+            const minVal = steps[minPos];
+            const maxVal = steps[maxPos];
+            // If slider is at max position, set filter to Infinity to show all apps
+            this.updatedMax = maxPos === steps.length - 1 ? Infinity : maxVal;
+            if (maxValue) maxValue.value = this.formatDaysValue(maxVal) + (maxPos === steps.length - 1 ? '+' : '');
+            this.updateRangeHighlight(minSlider, maxSlider, highlight);
+            this.updateResetButton(resetId, minPos !== 0 || maxPos !== steps.length - 1);
+            this.currentPage = 1;
+            this.filterSortAndRender();
+            this.syncUpdatedSlider(syncTarget, minVal, maxPos === steps.length - 1 ? Infinity : maxVal);
+        });
+
+        // Editable min value - allows custom values (not just steps)
+        if (minValue) {
+            minValue.addEventListener('change', () => {
+                let val = this.parseDaysValue(minValue.value);
+                val = Math.max(0, Math.min(val, this.updatedMax));
+                this.updatedMin = val; // Store exact value for filtering
+                let pos = this.valueToSliderPos(val, steps);
+                
+                // Ensure min slider doesn't reach or exceed max slider position
+                const maxPos = parseInt(maxSlider.value);
+                if (pos >= maxPos && maxPos > 0) {
+                    pos = Math.max(0, maxPos - 1);
+                }
+                
+                minSlider.value = pos; // Slider snaps to nearest step visually
+                minValue.value = this.formatDaysValue(val); // Display exact value
+                this.updateRangeHighlight(minSlider, maxSlider, highlight);
+                this.updateResetButton(resetId, val !== steps[0] || this.updatedMax !== Infinity);
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncUpdatedSlider(syncTarget, val, this.updatedMax);
+            });
+
+            minValue.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    minValue.blur();
+                }
+            });
+        }
+
+        // Editable max value - allows custom values (not just steps)
+        if (maxValue) {
+            maxValue.addEventListener('change', () => {
+                let val = this.parseDaysValue(maxValue.value);
+                val = Math.max(this.updatedMin, val);
+                // If value is at or above the last step, set filter to Infinity
+                const isAtMax = val >= steps[steps.length - 1];
+                this.updatedMax = isAtMax ? Infinity : val; // Store exact value for filtering
+                const pos = this.valueToSliderPos(val, steps);
+                maxSlider.value = pos; // Slider snaps to nearest step visually
+                maxValue.value = this.formatDaysValue(val) + (isAtMax ? '+' : ''); // Display exact value
+                this.updateRangeHighlight(minSlider, maxSlider, highlight);
+                this.updateResetButton(resetId, this.updatedMin !== steps[0] || this.updatedMax !== Infinity);
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncUpdatedSlider(syncTarget, this.updatedMin, isAtMax ? Infinity : val);
+            });
+
+            maxValue.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    maxValue.blur();
+                }
+            });
+        }
+
+        // Reset button
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.updatedMin = steps[0];
+                this.updatedMax = Infinity; // Reset to show all apps
+                minSlider.value = 0;
+                maxSlider.value = steps.length - 1;
+                if (minValue) minValue.value = this.formatDaysValue(steps[0]);
+                if (maxValue) maxValue.value = this.formatDaysValue(steps[steps.length - 1]) + '+';
+                this.updateRangeHighlight(minSlider, maxSlider, highlight);
+                this.updateResetButton(resetId, false);
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                this.syncUpdatedSlider(syncTarget, steps[0], Infinity);
+            });
+        }
+    }
+
+    updateRangeHighlight(minSlider, maxSlider, highlight) {
+        if (!highlight) return;
+        
+        const min = parseInt(minSlider.min);
+        const max = parseInt(minSlider.max);
+        const minVal = parseInt(minSlider.value);
+        const maxVal = parseInt(maxSlider.value);
+        
+        const range = max - min;
+        const left = ((minVal - min) / range) * 100;
+        const width = ((maxVal - minVal) / range) * 100;
+        
+        highlight.style.left = left + '%';
+        highlight.style.width = width + '%';
+    }
+
+    updateResetButton(resetId, show) {
+        const resetBtn = document.getElementById(resetId);
+        if (resetBtn) {
+            if (show) {
+                resetBtn.classList.remove('hidden');
+            } else {
+                resetBtn.classList.add('hidden');
+            }
+        }
+    }
+
+    formatStarsValue(value) {
+        if (value >= 1000000) {
+            return (value / 1000000).toFixed(value % 1000000 === 0 ? 0 : 1) + 'M';
+        }
+        if (value >= 1000) {
+            return (value / 1000).toFixed(value % 1000 === 0 ? 0 : 1) + 'k';
+        }
+        return value.toString();
+    }
+
+    parseStarsValue(str) {
+        str = str.replace(/[+,]/g, '').trim().toLowerCase();
+        
+        if (str.endsWith('m')) {
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return num * 1000000;
+        }
+        if (str.endsWith('k')) {
+            const num = parseFloat(str);
+            if (isNaN(num)) return 0;
+            return num * 1000;
+        }
+        const num = parseInt(str);
+        return isNaN(num) ? 0 : num;
+    }
+
+    syncStarsSlider(target, minVal, maxVal) {
+        const isMobile = target === 'mobile';
+        const minSliderId = isMobile ? 'mobileStarsMinSlider' : 'starsMinSlider';
+        const maxSliderId = isMobile ? 'mobileStarsMaxSlider' : 'starsMaxSlider';
+        const minValueId = isMobile ? 'mobileStarsMinValue' : 'starsMinValue';
+        const maxValueId = isMobile ? 'mobileStarsMaxValue' : 'starsMaxValue';
+        const highlightId = isMobile ? 'mobileStarsRangeHighlight' : 'starsRangeHighlight';
+        const resetId = isMobile ? 'mobileResetStarsFilter' : 'resetStarsFilter';
+
+        const minSlider = document.getElementById(minSliderId);
+        const maxSlider = document.getElementById(maxSliderId);
+        const minValue = document.getElementById(minValueId);
+        const maxValue = document.getElementById(maxValueId);
+        const highlight = document.getElementById(highlightId);
+
+        const steps = this.starsSteps;
+        const minPos = this.valueToSliderPos(minVal, steps);
+        // If maxVal is Infinity, use the last step position
+        const maxPos = maxVal === Infinity ? steps.length - 1 : this.valueToSliderPos(maxVal, steps);
+
+        if (minSlider) minSlider.value = minPos;
+        if (maxSlider) maxSlider.value = maxPos;
+        if (minValue) minValue.value = this.formatStarsValue(minVal); // Display exact value
+        if (maxValue) {
+            const isAtMax = maxVal === Infinity || maxVal >= steps[steps.length - 1];
+            const displayVal = maxVal === Infinity ? steps[steps.length - 1] : maxVal;
+            maxValue.value = this.formatStarsValue(displayVal) + (isAtMax ? '+' : ''); // Display exact value
+        }
+        if (minSlider && maxSlider && highlight) {
+            this.updateRangeHighlight(minSlider, maxSlider, highlight);
+        }
+        // Check against actual values, not positions
+        this.updateResetButton(resetId, minVal !== steps[0] || maxVal !== Infinity);
+    }
+
+    syncUpdatedSlider(target, minVal, maxVal) {
+        const isMobile = target === 'mobile';
+        const minSliderId = isMobile ? 'mobileUpdatedMinSlider' : 'updatedMinSlider';
+        const maxSliderId = isMobile ? 'mobileUpdatedMaxSlider' : 'updatedMaxSlider';
+        const minValueId = isMobile ? 'mobileUpdatedMinValue' : 'updatedMinValue';
+        const maxValueId = isMobile ? 'mobileUpdatedMaxValue' : 'updatedMaxValue';
+        const highlightId = isMobile ? 'mobileUpdatedRangeHighlight' : 'updatedRangeHighlight';
+        const resetId = isMobile ? 'mobileResetUpdatedFilter' : 'resetUpdatedFilter';
+
+        const minSlider = document.getElementById(minSliderId);
+        const maxSlider = document.getElementById(maxSliderId);
+        const minValue = document.getElementById(minValueId);
+        const maxValue = document.getElementById(maxValueId);
+        const highlight = document.getElementById(highlightId);
+
+        const steps = this.daysSteps;
+        const minPos = this.valueToSliderPos(minVal, steps);
+        // If maxVal is Infinity, use the last step position
+        const maxPos = maxVal === Infinity ? steps.length - 1 : this.valueToSliderPos(maxVal, steps);
+
+        if (minSlider) minSlider.value = minPos;
+        if (maxSlider) maxSlider.value = maxPos;
+        if (minValue) minValue.value = this.formatDaysValue(minVal); // Display exact value
+        if (maxValue) {
+            const isAtMax = maxVal === Infinity || maxVal >= steps[steps.length - 1];
+            const displayVal = maxVal === Infinity ? steps[steps.length - 1] : maxVal;
+            maxValue.value = this.formatDaysValue(displayVal) + (isAtMax ? '+' : ''); // Display exact value
+        }
+        if (minSlider && maxSlider && highlight) {
+            this.updateRangeHighlight(minSlider, maxSlider, highlight);
+        }
+        // Check against actual values, not positions
+        this.updateResetButton(resetId, minVal !== steps[0] || maxVal !== Infinity);
     }
 
     setupEventListeners() {
@@ -594,6 +1244,25 @@ class BrowsePage {
             } else {
                 // When toggle is OFF: hide non-free software (show only free software)
                 if (this.isNonFreeLicense(app.license)) return false;
+            }
+
+            // Star count filter
+            const appStars = app.stars || 0;
+            if (appStars < this.starsMin || appStars > this.starsMax) {
+                return false;
+            }
+
+            // Last updated filter (in days)
+            const daysSinceUpdate = this.getDaysSinceUpdate(app.last_updated);
+            if (daysSinceUpdate !== null) {
+                if (daysSinceUpdate < this.updatedMin || daysSinceUpdate > this.updatedMax) {
+                    return false;
+                }
+            } else {
+                // App has no last_updated date - check if we should include it
+                if (!this.includeNoUpdateDate) {
+                    return false;
+                }
             }
 
             return true;
@@ -1565,6 +2234,62 @@ class BrowsePage {
         if (mobileCheckbox) {
             mobileCheckbox.checked = checked;
         }
+    }
+
+    setupMobileRangeFilters() {
+        // Setup mobile star count range filter
+        this.setupMobileStarsRangeFilter();
+
+        // Setup mobile last updated range filter
+        this.setupMobileUpdatedRangeFilter();
+
+        // Setup mobile "include no update date" checkbox
+        this.setupMobileIncludeNoUpdateDateCheckbox();
+    }
+
+    setupMobileIncludeNoUpdateDateCheckbox() {
+        const checkbox = document.getElementById('mobileIncludeNoUpdateDate');
+        if (checkbox) {
+            checkbox.checked = this.includeNoUpdateDate;
+            checkbox.addEventListener('change', (e) => {
+                this.includeNoUpdateDate = e.target.checked;
+                this.currentPage = 1;
+                this.filterSortAndRender();
+                // Sync with desktop
+                const desktopCheckbox = document.getElementById('includeNoUpdateDate');
+                if (desktopCheckbox) {
+                    desktopCheckbox.checked = e.target.checked;
+                }
+            });
+        }
+    }
+
+    setupMobileStarsRangeFilter() {
+        // Use the unified setupStarsRangeFilter function with mobile IDs and desktop sync target
+        this.setupStarsRangeFilter(
+            'mobileStarsMinSlider',
+            'mobileStarsMaxSlider',
+            'mobileStarsMinValue',
+            'mobileStarsMaxValue',
+            'mobileStarsRangeHighlight',
+            'mobileResetStarsFilter',
+            'desktop', // Sync to desktop when mobile slider changes
+            true // Initialize from current state to sync with desktop
+        );
+    }
+
+    setupMobileUpdatedRangeFilter() {
+        // Use the unified setupUpdatedRangeFilter function with mobile IDs and desktop sync target
+        this.setupUpdatedRangeFilter(
+            'mobileUpdatedMinSlider',
+            'mobileUpdatedMaxSlider',
+            'mobileUpdatedMinValue',
+            'mobileUpdatedMaxValue',
+            'mobileUpdatedRangeHighlight',
+            'mobileResetUpdatedFilter',
+            'desktop', // Sync to desktop when mobile slider changes
+            true // Initialize from current state to sync with desktop
+        );
     }
 }
 
