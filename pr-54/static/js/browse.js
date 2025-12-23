@@ -562,7 +562,17 @@ class BrowsePage {
                 let val = this.parseStarsValue(minValue.value);
                 val = Math.max(0, Math.min(val, this.starsMax));
                 this.starsMin = val; // Store exact value for filtering
-                const pos = this.valueToSliderPos(val, steps);
+                let pos = this.valueToSliderPos(val, steps);
+                
+                // Ensure min slider doesn't reach or exceed max slider position
+                const maxPos = parseInt(maxSlider.value);
+                if (pos >= maxPos && maxPos > 0) {
+                    pos = Math.max(0, maxPos - 1);
+                    // Update the actual value to match the adjusted position
+                    val = steps[pos];
+                    this.starsMin = val;
+                }
+                
                 minSlider.value = pos; // Slider snaps to nearest step visually
                 minValue.value = this.formatStarsValue(val); // Display exact value
                 this.updateRangeHighlight(minSlider, maxSlider, highlight);
@@ -725,7 +735,17 @@ class BrowsePage {
                 let val = this.parseDaysValue(minValue.value);
                 val = Math.max(0, Math.min(val, this.updatedMax));
                 this.updatedMin = val; // Store exact value for filtering
-                const pos = this.valueToSliderPos(val, steps);
+                let pos = this.valueToSliderPos(val, steps);
+                
+                // Ensure min slider doesn't reach or exceed max slider position
+                const maxPos = parseInt(maxSlider.value);
+                if (pos >= maxPos && maxPos > 0) {
+                    pos = Math.max(0, maxPos - 1);
+                    // Update the actual value to match the adjusted position
+                    val = steps[pos];
+                    this.updatedMin = val;
+                }
+                
                 minSlider.value = pos; // Slider snaps to nearest step visually
                 minValue.value = this.formatDaysValue(val); // Display exact value
                 this.updateRangeHighlight(minSlider, maxSlider, highlight);
