@@ -568,9 +568,6 @@ class BrowsePage {
                 const maxPos = parseInt(maxSlider.value);
                 if (pos >= maxPos && maxPos > 0) {
                     pos = Math.max(0, maxPos - 1);
-                    // Update the actual value to match the adjusted position
-                    val = steps[pos];
-                    this.starsMin = val;
                 }
                 
                 minSlider.value = pos; // Slider snaps to nearest step visually
@@ -741,9 +738,6 @@ class BrowsePage {
                 const maxPos = parseInt(maxSlider.value);
                 if (pos >= maxPos && maxPos > 0) {
                     pos = Math.max(0, maxPos - 1);
-                    // Update the actual value to match the adjusted position
-                    val = steps[pos];
-                    this.updatedMin = val;
                 }
                 
                 minSlider.value = pos; // Slider snaps to nearest step visually
