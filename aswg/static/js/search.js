@@ -3,6 +3,7 @@
     let searchData = null;
     let searchIndex = null;
     let searchConfig = null;
+    let hideTimeouts = {};
     
     // Initialize search when page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -120,6 +121,7 @@
         `).join('');
         
         searchResults.innerHTML = html;
+        clearHideTimeout(resultsId);
         searchResults.classList.remove('hidden');
     }
     
@@ -133,24 +135,36 @@
                 <div class="text-text-muted">${message}</div>
             </div>
         `;
+        clearHideTimeout(resultsId);
         searchResults.classList.remove('hidden');
     }
-    
+
+    // Clear any pending hide timeout for a results container
+    function clearHideTimeout(resultsId) {
+        if (hideTimeouts[resultsId]) {
+            clearTimeout(hideTimeouts[resultsId]);
+            hideTimeouts[resultsId] = null;
+        }
+    }
+
     // Show search results
     function showSearchResults(resultsId = 'search-results') {
+        clearHideTimeout(resultsId);
         const searchResults = document.getElementById(resultsId);
         if (searchResults && searchResults.innerHTML.trim()) {
             searchResults.classList.remove('hidden');
         }
     }
-    
+
     // Hide search results
     function hideSearchResults(resultsId = 'search-results') {
-        setTimeout(() => {
+        clearHideTimeout(resultsId);
+        hideTimeouts[resultsId] = setTimeout(() => {
             const searchResults = document.getElementById(resultsId);
             if (searchResults) {
                 searchResults.classList.add('hidden');
             }
+            hideTimeouts[resultsId] = null;
         }, 150);
     }
     
