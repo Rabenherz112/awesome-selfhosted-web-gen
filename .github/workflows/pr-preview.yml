@@ -7,6 +7,11 @@ on:
   pull_request_target:
     types: [closed]
 
+# Cancel any in-progress preview builds for the same PR when a new commit is pushed
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
 jobs:
   build-preview:
     if: github.event.action != 'closed'
@@ -20,15 +25,30 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Record build start time
+        id: build_timer
+        run: |
+          echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+          echo "start_human=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_OUTPUT"
+
       - name: Initialize build log
         run: |
-          echo "Build log for PR #${{ github.event.number }} — $(date -Iseconds)" > build.log
+          echo "Build log for PR #${{ github.event.number }} -- $(date -Iseconds)" > build.log
 
       - name: Clone awesome-selfhosted-data
         shell: bash
@@ -40,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          pip install .
+          pip install . 2>&1 | tee -a build.log
 
       - name: Generate website
         shell: bash
@@ -54,6 +74,115 @@ jobs:
           aswg --config ./config/config-pr-preview-temp.yml build 2>&1 | tee -a build.log
           # Clean up temporary config file
           rm -f ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
+
+      - name: Collect build statistics
+        if: ${{ success() }}
+        id: build_stats
+        shell: bash
+        run: |
+          set -o pipefail
+          OUTPUT_DIR="output"
+
+          # Calculate build duration
+          BUILD_END=$(date +%s)
+          BUILD_START=${{ steps.build_timer.outputs.start }}
+          DURATION_SECS=$((BUILD_END - BUILD_START))
+          DURATION_MIN=$((DURATION_SECS / 60))
+          DURATION_REM=$((DURATION_SECS % 60))
+          if [ "$DURATION_MIN" -gt 0 ]; then
+            DURATION_STR="${DURATION_MIN}m ${DURATION_REM}s"
+          else
+            DURATION_STR="${DURATION_SECS}s"
+          fi
+
+          # Count files by type
+          TOTAL_FILES=$(find "$OUTPUT_DIR" -type f | wc -l)
+          HTML_FILES=$(find "$OUTPUT_DIR" -name '*.html' -type f | wc -l)
+          CSS_FILES=$(find "$OUTPUT_DIR" -name '*.css' -type f | wc -l)
+          JS_FILES=$(find "$OUTPUT_DIR" -name '*.js' -type f | wc -l)
+          JSON_FILES=$(find "$OUTPUT_DIR" -name '*.json' -type f | wc -l)
+          IMAGE_FILES=$(find "$OUTPUT_DIR" \( -name '*.png' -o -name '*.jpg' -o -name '*.svg' -o -name '*.ico' -o -name '*.webp' \) -type f | wc -l)
+
+          # Count app detail pages
+          APP_PAGES=0
+          if [ -d "$OUTPUT_DIR/apps" ]; then
+            APP_PAGES=$(find "$OUTPUT_DIR/apps" -name '*.html' -type f | wc -l)
+          fi
+
+          # Total deployment size (human readable)
+          TOTAL_SIZE=$(du -sh "$OUTPUT_DIR" | cut -f1)
+          TOTAL_SIZE_BYTES=$(du -sb "$OUTPUT_DIR" | cut -f1)
+
+          # Check which pages exist
+          HAS_BROWSE="false"
+          HAS_STATS="false"
+          HAS_ALTERNATIVES="false"
+          HAS_SITEMAP="false"
+          [ -f "$OUTPUT_DIR/browse.html" ] && HAS_BROWSE="true"
+          [ -f "$OUTPUT_DIR/statistics.html" ] && HAS_STATS="true"
+          [ -f "$OUTPUT_DIR/alternatives.html" ] && HAS_ALTERNATIVES="true"
+          [ -f "$OUTPUT_DIR/sitemap.xml" ] && HAS_SITEMAP="true"
+
+          # Export all stats as step outputs
+          {
+            echo "duration=${DURATION_STR}"
+            echo "duration_secs=${DURATION_SECS}"
+            echo "total_files=${TOTAL_FILES}"
+            echo "html_files=${HTML_FILES}"
+            echo "css_files=${CSS_FILES}"
+            echo "js_files=${JS_FILES}"
+            echo "json_files=${JSON_FILES}"
+            echo "image_files=${IMAGE_FILES}"
+            echo "app_pages=${APP_PAGES}"
+            echo "total_size=${TOTAL_SIZE}"
+            echo "total_size_bytes=${TOTAL_SIZE_BYTES}"
+            echo "has_browse=${HAS_BROWSE}"
+            echo "has_stats=${HAS_STATS}"
+            echo "has_alternatives=${HAS_ALTERNATIVES}"
+            echo "has_sitemap=${HAS_SITEMAP}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Gather PR changed files summary
+        if: ${{ success() }}
+        id: pr_changes
+        shell: bash
+        run: |
+          set -o pipefail
+          # Get the list of changed files in this PR
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || echo "")
+          FILE_COUNT=$(echo "$CHANGED_FILES" | grep -c '.' || echo "0")
+
+          # Categorize changed files
+          TEMPLATE_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.html$' || echo "0")
+          PYTHON_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.py$' || echo "0")
+          STYLE_CHANGES=$(echo "$CHANGED_FILES" | grep -cE '\.(css|scss|less)$' || echo "0")
+          JS_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.js$' || echo "0")
+          CONFIG_CHANGES=$(echo "$CHANGED_FILES" | grep -cE '\.(yml|yaml|toml|cfg|ini)$' || echo "0")
+          DOC_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.md$' || echo "0")
+
+          # Build a brief summary string
+          SUMMARY_PARTS=""
+          [ "$PYTHON_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${PYTHON_CHANGES} Python, "
+          [ "$TEMPLATE_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${TEMPLATE_CHANGES} Template, "
+          [ "$STYLE_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${STYLE_CHANGES} Style, "
+          [ "$JS_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${JS_CHANGES} JS, "
+          [ "$CONFIG_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${CONFIG_CHANGES} Config, "
+          [ "$DOC_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${DOC_CHANGES} Docs, "
+          # Trim trailing comma+space
+          SUMMARY_PARTS=$(echo "$SUMMARY_PARTS" | sed 's/, $//')
+          [ -z "$SUMMARY_PARTS" ] && SUMMARY_PARTS="${FILE_COUNT} files"
+
+          {
+            echo "file_count=${FILE_COUNT}"
+            echo "summary=${SUMMARY_PARTS}"
+          } >> "$GITHUB_OUTPUT"
+
+          # Save full list for the comment (truncated if very large)
+          echo "$CHANGED_FILES" | head -30 > changed_files.txt
+          REMAINING=$((FILE_COUNT - 30))
+          if [ "$REMAINING" -gt 0 ]; then
+            echo "... and ${REMAINING} more files" >> changed_files.txt
+          fi
 
       # Deploy only if everything above succeeded
       - name: Deploy to GitHub Pages branch
@@ -88,40 +217,79 @@ jobs:
           cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/ 
 
           # Update or create active PRs JSON file
-          cat > active-prs.json << 'EOF'
-          []
-          EOF
+          if [ ! -f active-prs.json ]; then
+            echo "[]" > active-prs.json
+          fi
 
-          # Add/refresh this PR entry
+          # Add/refresh this PR entry with rich metadata
           python3 << 'PYTHON_SCRIPT'
           import json, os
+
           pr_number = int(os.environ.get('PR_NUMBER', '0'))
+          pr_title = os.environ.get('PR_TITLE', f'PR #{pr_number}')
+          pr_author = os.environ.get('PR_AUTHOR', 'unknown')
+          pr_branch = os.environ.get('PR_BRANCH', '')
+          pr_commit = os.environ.get('PR_COMMIT', '')
+          build_size = os.environ.get('BUILD_SIZE', 'N/A')
+          build_files = os.environ.get('BUILD_FILES', 'N/A')
+          build_html = os.environ.get('BUILD_HTML', 'N/A')
+          build_apps = os.environ.get('BUILD_APPS', 'N/A')
+          build_duration = os.environ.get('BUILD_DURATION', 'N/A')
+          repo_url = os.environ.get('REPO_URL', '')
+
           try:
               with open('active-prs.json', 'r') as f:
                   active_prs = json.load(f)
           except Exception:
               active_prs = []
+
+          # Remove existing entry for this PR
           active_prs = [pr for pr in active_prs if pr.get('number') != pr_number]
+
+          # Add updated entry with full metadata
           active_prs.append({
               'number': pr_number,
-              'title': f'PR #{pr_number}',
+              'title': pr_title,
+              'author': pr_author,
+              'branch': pr_branch,
+              'commit': pr_commit[:7] if len(pr_commit) > 7 else pr_commit,
+              'commit_full': pr_commit,
               'url': f'pr-{pr_number}/',
-              'updated': os.popen('date -Iseconds').read().strip()
+              'pr_url': f'{repo_url}/pull/{pr_number}',
+              'updated': os.popen('date -Iseconds').read().strip(),
+              'build': {
+                  'size': build_size,
+                  'total_files': build_files,
+                  'html_pages': build_html,
+                  'app_pages': build_apps,
+                  'duration': build_duration,
+              }
           })
+
           active_prs.sort(key=lambda x: x['number'], reverse=True)
           with open('active-prs.json', 'w') as f:
               json.dump(active_prs, f, indent=2)
           PYTHON_SCRIPT
         env:
           PR_NUMBER: ${{ github.event.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_COMMIT: ${{ github.event.pull_request.head.sha }}
+          BUILD_SIZE: ${{ steps.build_stats.outputs.total_size }}
+          BUILD_FILES: ${{ steps.build_stats.outputs.total_files }}
+          BUILD_HTML: ${{ steps.build_stats.outputs.html_files }}
+          BUILD_APPS: ${{ steps.build_stats.outputs.app_pages }}
+          BUILD_DURATION: ${{ steps.build_stats.outputs.duration }}
+          REPO_URL: https://github.com/${{ github.repository }}
 
       - name: Commit & push preview
         if: ${{ success() }}
         shell: bash
         run: |
           set -o pipefail
-          # Write/refresh index.html
-          cat > index.html << 'EOF'
+          # Write/refresh index.html with a rich dashboard
+          cat > index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -129,55 +297,474 @@ jobs:
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>PR Previews - Awesome Self-Hosted Web Generator</title>
               <style>
-                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 40px; background: #f7fafc; }
-                  .container { max-width: 800px; margin: 0 auto; }
-                  .header { text-align: center; margin-bottom: 40px; }
-                  .preview-list { list-style: none; padding: 0; }
-                  .preview-item { margin: 10px 0; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-                  .preview-item a { text-decoration: none; color: #3182ce; font-weight: 500; font-size: 1.1em; }
-                  .preview-item a:hover { text-decoration: underline; }
-                  .pr-meta { font-size: 0.9em; color: #718096; margin-top: 5px; }
-                  .badge { display: inline-block; padding: 2px 8px; background: #edf2f7; color: #4a5568; border-radius: 4px; font-size: 0.8em; margin-left: 8px; }
+                  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+                  :root {
+                      --bg-primary: #f8fafc;
+                      --bg-card: #ffffff;
+                      --bg-code: #f1f5f9;
+                      --bg-badge: #eff6ff;
+                      --border: #e2e8f0;
+                      --border-hover: #cbd5e1;
+                      --text-primary: #0f172a;
+                      --text-secondary: #475569;
+                      --text-muted: #94a3b8;
+                      --text-link: #2563eb;
+                      --text-link-hover: #1d4ed8;
+                      --accent: #2563eb;
+                      --accent-light: #dbeafe;
+                      --green: #16a34a;
+                      --green-bg: #f0fdf4;
+                      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+                      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+                      --radius: 10px;
+                  }
+
+                  @media (prefers-color-scheme: dark) {
+                      :root {
+                          --bg-primary: #0f172a;
+                          --bg-card: #1e293b;
+                          --bg-code: #334155;
+                          --bg-badge: #1e3a5f;
+                          --border: #334155;
+                          --border-hover: #475569;
+                          --text-primary: #f1f5f9;
+                          --text-secondary: #cbd5e1;
+                          --text-muted: #64748b;
+                          --text-link: #60a5fa;
+                          --text-link-hover: #93bbfd;
+                          --accent: #3b82f6;
+                          --accent-light: #1e3a5f;
+                          --green: #4ade80;
+                          --green-bg: #0a2e1a;
+                          --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+                          --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+                      }
+                  }
+
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+                      background: var(--bg-primary);
+                      color: var(--text-primary);
+                      line-height: 1.6;
+                      min-height: 100vh;
+                  }
+
+                  .page-wrapper {
+                      max-width: 960px;
+                      margin: 0 auto;
+                      padding: 40px 24px 60px;
+                  }
+
+                  /* --- Header --- */
+                  .page-header {
+                      text-align: center;
+                      margin-bottom: 32px;
+                      padding-bottom: 24px;
+                      border-bottom: 1px solid var(--border);
+                  }
+                  .page-header h1 {
+                      font-size: 1.75rem;
+                      font-weight: 700;
+                      letter-spacing: -0.025em;
+                      margin-bottom: 6px;
+                  }
+                  .page-header p {
+                      color: var(--text-secondary);
+                      font-size: 0.95rem;
+                  }
+                  .repo-link {
+                      display: inline-block;
+                      margin-top: 12px;
+                      font-size: 0.85rem;
+                      color: var(--text-link);
+                      text-decoration: none;
+                  }
+                  .repo-link:hover { text-decoration: underline; color: var(--text-link-hover); }
+
+                  /* --- Summary bar --- */
+                  .summary-bar {
+                      display: flex;
+                      gap: 16px;
+                      flex-wrap: wrap;
+                      justify-content: center;
+                      margin-bottom: 28px;
+                  }
+                  .summary-chip {
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                      padding: 6px 14px;
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: 20px;
+                      font-size: 0.85rem;
+                      color: var(--text-secondary);
+                      box-shadow: var(--shadow-sm);
+                  }
+                  .summary-chip .num {
+                      font-weight: 700;
+                      color: var(--text-primary);
+                  }
+
+                  /* --- Search --- */
+                  .search-box {
+                      margin-bottom: 24px;
+                  }
+                  .search-box input {
+                      width: 100%;
+                      padding: 10px 16px;
+                      font-size: 0.95rem;
+                      border: 1px solid var(--border);
+                      border-radius: var(--radius);
+                      background: var(--bg-card);
+                      color: var(--text-primary);
+                      outline: none;
+                      transition: border-color 0.15s;
+                  }
+                  .search-box input:focus { border-color: var(--accent); }
+                  .search-box input::placeholder { color: var(--text-muted); }
+
+                  /* --- Cards --- */
+                  .card-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+
+                  .card {
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: var(--radius);
+                      box-shadow: var(--shadow-sm);
+                      transition: box-shadow 0.15s, border-color 0.15s;
+                      overflow: hidden;
+                  }
+                  .card:hover { box-shadow: var(--shadow-md); border-color: var(--border-hover); }
+
+                  .card-top {
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+                      padding: 16px 20px 0;
+                      flex-wrap: wrap;
+                  }
+                  .card-title {
+                      font-weight: 600;
+                      font-size: 1.05rem;
+                  }
+                  .card-title a {
+                      color: var(--text-link);
+                      text-decoration: none;
+                  }
+                  .card-title a:hover { text-decoration: underline; color: var(--text-link-hover); }
+
+                  .badge {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 4px;
+                      padding: 2px 10px;
+                      border-radius: 12px;
+                      font-size: 0.75rem;
+                      font-weight: 600;
+                      line-height: 1.6;
+                  }
+                  .badge-active { background: var(--green-bg); color: var(--green); }
+                  .badge-branch { background: var(--bg-badge); color: var(--accent); }
+
+                  .card-subtitle {
+                      padding: 4px 20px 0;
+                      font-size: 0.88rem;
+                      color: var(--text-secondary);
+                  }
+
+                  .card-meta {
+                      display: flex;
+                      flex-wrap: wrap;
+                      gap: 8px 20px;
+                      padding: 12px 20px;
+                      font-size: 0.82rem;
+                      color: var(--text-muted);
+                  }
+                  .meta-item { display: flex; align-items: center; gap: 4px; }
+                  .meta-item code {
+                      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+                      font-size: 0.8rem;
+                      padding: 1px 5px;
+                      background: var(--bg-code);
+                      border-radius: 4px;
+                  }
+
+                  .card-stats {
+                      display: flex;
+                      gap: 1px;
+                      background: var(--border);
+                      border-top: 1px solid var(--border);
+                  }
+                  .stat-cell {
+                      flex: 1;
+                      text-align: center;
+                      padding: 10px 8px;
+                      background: var(--bg-card);
+                  }
+                  .stat-cell .stat-val {
+                      font-weight: 700;
+                      font-size: 0.95rem;
+                      color: var(--text-primary);
+                  }
+                  .stat-cell .stat-label {
+                      font-size: 0.7rem;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.04em;
+                  }
+
+                  .card-actions {
+                      display: flex;
+                      gap: 10px;
+                      padding: 0 20px 14px;
+                      flex-wrap: wrap;
+                  }
+                  .btn {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 5px;
+                      padding: 6px 14px;
+                      font-size: 0.82rem;
+                      font-weight: 500;
+                      border-radius: 6px;
+                      text-decoration: none;
+                      transition: background 0.15s, color 0.15s;
+                  }
+                  .btn-primary {
+                      background: var(--accent);
+                      color: #fff;
+                  }
+                  .btn-primary:hover { background: var(--text-link-hover); }
+                  .btn-outline {
+                      background: transparent;
+                      color: var(--text-secondary);
+                      border: 1px solid var(--border);
+                  }
+                  .btn-outline:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+                  /* --- Empty state --- */
+                  .empty-state {
+                      text-align: center;
+                      padding: 48px 24px;
+                      color: var(--text-muted);
+                  }
+                  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+                  .empty-state p { font-size: 0.95rem; }
+
+                  /* --- Footer --- */
+                  .page-footer {
+                      text-align: center;
+                      margin-top: 40px;
+                      padding-top: 20px;
+                      border-top: 1px solid var(--border);
+                      font-size: 0.8rem;
+                      color: var(--text-muted);
+                  }
+                  .page-footer a { color: var(--text-link); text-decoration: none; }
+                  .page-footer a:hover { text-decoration: underline; }
+
+                  /* --- Auto-refresh indicator --- */
+                  .refresh-bar {
+                      display: flex;
+                      align-items: center;
+                      justify-content: flex-end;
+                      gap: 8px;
+                      margin-bottom: 10px;
+                      font-size: 0.78rem;
+                      color: var(--text-muted);
+                  }
+                  .dot-pulse {
+                      width: 6px; height: 6px;
+                      border-radius: 50%;
+                      background: var(--green);
+                      animation: pulse 2s infinite;
+                  }
+                  @keyframes pulse {
+                      0%, 100% { opacity: 1; }
+                      50% { opacity: 0.3; }
+                  }
+
+                  /* --- Loading skeleton --- */
+                  .skeleton-card {
+                      background: var(--bg-card);
+                      border: 1px solid var(--border);
+                      border-radius: var(--radius);
+                      padding: 20px;
+                      margin-bottom: 14px;
+                  }
+                  .skeleton-line {
+                      height: 14px;
+                      background: var(--bg-code);
+                      border-radius: 4px;
+                      margin-bottom: 10px;
+                      animation: shimmer 1.5s infinite;
+                  }
+                  .skeleton-line:nth-child(1) { width: 45%; height: 18px; }
+                  .skeleton-line:nth-child(2) { width: 70%; }
+                  .skeleton-line:nth-child(3) { width: 55%; }
+                  @keyframes shimmer {
+                      0%, 100% { opacity: 0.5; }
+                      50% { opacity: 1; }
+                  }
+
+                  @media (max-width: 600px) {
+                      .page-wrapper { padding: 24px 16px 40px; }
+                      .card-stats { flex-wrap: wrap; }
+                      .stat-cell { min-width: 33.33%; }
+                  }
               </style>
           </head>
           <body>
-              <div class="container">
-                  <div class="header">
-                      <h1>🔍 PR Previews</h1>
-                      <p>Available preview deployments for pull requests</p>
+              <div class="page-wrapper">
+                  <header class="page-header">
+                      <h1>PR Preview Dashboard</h1>
+                      <p>Live preview deployments for open pull requests</p>
+                      <a class="repo-link" href="https://github.com/rabenherz112/awesome-selfhosted-web-gen" target="_blank" rel="noopener">
+                          rabenherz112/awesome-selfhosted-web-gen
+                      </a>
+                  </header>
+
+                  <div class="summary-bar" id="summaryBar"></div>
+
+                  <div class="search-box" id="searchWrapper" style="display:none;">
+                      <input type="text" id="searchInput" placeholder="Filter by PR number, title, author, or branch...">
                   </div>
-                  <ul class="preview-list" id="previewList">
-                      <li>Loading...</li>
+
+                  <div class="refresh-bar">
+                      <span class="dot-pulse"></span>
+                      <span id="refreshLabel">Auto-refreshes every 60s</span>
+                  </div>
+
+                  <ul class="card-list" id="previewList">
+                      <li class="skeleton-card"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></li>
+                      <li class="skeleton-card"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></li>
                   </ul>
+
+                  <footer class="page-footer">
+                      <p>Powered by <a href="https://github.com/rabenherz112/awesome-selfhosted-web-gen" target="_blank" rel="noopener">awesome-selfhosted-web-gen</a> &middot; Previews are automatically cleaned up when PRs close</p>
+                  </footer>
               </div>
+
               <script>
-                  async function loadPreviews() {
-                      try {
-                          const response = await fetch('./active-prs.json');
-                          if (!response.ok) throw new Error('Failed to load active PRs');
-                          const activePrs = await response.json();
-                          const previewList = document.getElementById('previewList');
-                          if (activePrs.length === 0) {
-                              previewList.innerHTML = '<li>No PR previews available</li>';
-                          } else {
-                              previewList.innerHTML = activePrs.map(pr => {
-                                  return `<li class="preview-item">
-                                      <a href="${pr.url}">PR #${pr.number} Preview</a>
-                                      <span class="badge">Active</span>
-                                      <div class="pr-meta">Preview for Pull Request #${pr.number}</div>
-                                  </li>`;
-                              }).join('');
-                          }
-                      } catch (error) {
-                          console.error('Error loading previews:', error);
-                          document.getElementById('previewList').innerHTML = '<li>Error loading preview list. No active PRs found.</li>';
-                      }
+                  /** Compute a human-readable relative time string. */
+                  function timeAgo(dateStr) {
+                      if (!dateStr) return '';
+                      var diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+                      if (diff < 60)   return 'just now';
+                      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+                      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+                      return Math.floor(diff / 86400) + 'd ago';
                   }
+
+                  /** Safely escape HTML to prevent XSS from JSON data. */
+                  function esc(s) {
+                      var d = document.createElement('div');
+                      d.appendChild(document.createTextNode(s || ''));
+                      return d.innerHTML;
+                  }
+
+                  /** Render the full PR list from the given data array. */
+                  function render(prs) {
+                      var list = document.getElementById('previewList');
+                      var bar  = document.getElementById('summaryBar');
+                      var searchWrap = document.getElementById('searchWrapper');
+
+                      if (!prs || prs.length === 0) {
+                          bar.innerHTML = '';
+                          searchWrap.style.display = 'none';
+                          list.innerHTML = '<li class="empty-state">' +
+                              '<div class="empty-icon">--</div>' +
+                              '<p>No active PR previews at the moment.<br>Open a pull request to generate one automatically.</p>' +
+                              '</li>';
+                          return;
+                      }
+
+                      // Summary chips
+                      bar.innerHTML =
+                          '<span class="summary-chip"><span class="num">' + prs.length + '</span> Active Preview' + (prs.length > 1 ? 's' : '') + '</span>';
+
+                      // Show search if 2+ PRs
+                      searchWrap.style.display = prs.length >= 2 ? '' : 'none';
+
+                      list.innerHTML = prs.map(function(pr) {
+                          var b = pr.build || {};
+                          var ago = timeAgo(pr.updated);
+                          var prUrl = pr.pr_url || '#';
+                          var commitUrl = pr.commit_full
+                              ? 'https://github.com/rabenherz112/awesome-selfhosted-web-gen/commit/' + esc(pr.commit_full)
+                              : '#';
+
+                          var html = '<li class="card" data-search="' + esc(String(pr.number) + ' ' + pr.title + ' ' + pr.author + ' ' + pr.branch).toLowerCase() + '">';
+
+                          // Top row: title + badges
+                          html += '<div class="card-top">';
+                          html += '<span class="card-title"><a href="' + esc(pr.url) + '">#' + esc(String(pr.number)) + ' ' + esc(pr.title) + '</a></span>';
+                          html += '<span class="badge badge-active">Active</span>';
+                          if (pr.branch) html += '<span class="badge badge-branch">' + esc(pr.branch) + '</span>';
+                          html += '</div>';
+
+                          // Subtitle / author
+                          html += '<div class="card-subtitle">by <strong>' + esc(pr.author || 'unknown') + '</strong>';
+                          if (ago) html += ' &middot; updated ' + ago;
+                          html += '</div>';
+
+                          // Meta row
+                          html += '<div class="card-meta">';
+                          if (pr.commit) html += '<span class="meta-item">Commit <code><a href="' + commitUrl + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">' + esc(pr.commit) + '</a></code></span>';
+                          if (b.duration && b.duration !== 'N/A') html += '<span class="meta-item">Built in ' + esc(b.duration) + '</span>';
+                          html += '</div>';
+
+                          // Stats bar
+                          html += '<div class="card-stats">';
+                          if (b.size && b.size !== 'N/A')        html += '<div class="stat-cell"><div class="stat-val">' + esc(b.size)        + '</div><div class="stat-label">Size</div></div>';
+                          if (b.total_files && b.total_files !== 'N/A') html += '<div class="stat-cell"><div class="stat-val">' + esc(b.total_files) + '</div><div class="stat-label">Files</div></div>';
+                          if (b.html_pages && b.html_pages !== 'N/A')  html += '<div class="stat-cell"><div class="stat-val">' + esc(b.html_pages)  + '</div><div class="stat-label">Pages</div></div>';
+                          if (b.app_pages && b.app_pages !== 'N/A')   html += '<div class="stat-cell"><div class="stat-val">' + esc(b.app_pages)   + '</div><div class="stat-label">Apps</div></div>';
+                          html += '</div>';
+
+                          // Action buttons
+                          html += '<div class="card-actions" style="margin-top:12px;">';
+                          html += '<a class="btn btn-primary" href="' + esc(pr.url) + '">Open Preview</a>';
+                          html += '<a class="btn btn-outline" href="' + esc(prUrl) + '" target="_blank" rel="noopener">View PR</a>';
+                          html += '</div>';
+
+                          html += '</li>';
+                          return html;
+                      }).join('');
+                  }
+
+                  /** Fetch the JSON and render. Returns the data array. */
+                  function loadPreviews() {
+                      return fetch('./active-prs.json?_=' + Date.now())
+                          .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                          .then(function(data) { window._prData = data; render(data); return data; })
+                          .catch(function() { render([]); });
+                  }
+
+                  // Initial load
                   loadPreviews();
+
+                  // Auto-refresh every 60 seconds
+                  setInterval(function() {
+                      loadPreviews().then(function() {
+                          document.getElementById('refreshLabel').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+                      });
+                  }, 60000);
+
+                  // Client-side search/filter
+                  document.getElementById('searchInput').addEventListener('input', function() {
+                      var q = this.value.toLowerCase().trim();
+                      var cards = document.querySelectorAll('.card[data-search]');
+                      for (var i = 0; i < cards.length; i++) {
+                          cards[i].style.display = (!q || cards[i].getAttribute('data-search').indexOf(q) !== -1) ? '' : 'none';
+                      }
+                  });
               </script>
           </body>
           </html>
-          EOF
+          HTMLEOF
 
           git add pr-${{ github.event.number }}/ index.html active-prs.json 
           [ -f README.md ] && git add README.md 
@@ -193,7 +780,7 @@ jobs:
         if: ${{ success() }}
         run: echo "ok" > .build_succeeded
 
-      # Unified comment: update/create a single "🔍 PR Preview" comment on success or failure
+      # Unified comment: update/create a single PR Preview comment on success or failure
       - name: Comment on PR (update or create, success or failure)
         if: ${{ always() }}
         uses: actions/github-script@v7
@@ -204,73 +791,138 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
-            const headShaShort = context.payload.pull_request.head.sha.substring(0, 7);
+            const headSha = context.payload.pull_request.head.sha;
+            const headShaShort = headSha.substring(0, 7);
+            const prTitle = context.payload.pull_request.title;
+            const prAuthor = context.payload.pull_request.user.login;
+            const headBranch = context.payload.pull_request.head.ref;
+            const runId = context.runId;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+            const compareUrl = `https://github.com/${owner}/${repo}/pull/${prNumber}/files`;
 
             // Success marker written only when deploy succeeded
             let isSuccess = false;
             try { isSuccess = fs.existsSync('.build_succeeded'); } catch (e) {}
 
-            // Load existing "🔍 PR Preview" comment if present
+            // Load existing PR Preview comment if present
             const { data: comments } = await github.rest.issues.listComments({
               owner, repo, issue_number: prNumber,
             });
 
-            const PREVIEW_ANCHOR = '## 🔍 PR Preview';
+            const PREVIEW_ANCHOR = '## PR Preview';
             let existing = comments.find(c => c.user.type === 'Bot' && c.body.includes(PREVIEW_ANCHOR));
 
             // Reuse existing Preview URL if present (so failures keep the same link)
             let existingPreviewUrl = undefined;
             if (existing) {
-              const m = existing.body.match(/\*\*📱 Preview URL:\*\*\s*(\S+)/);
+              const m = existing.body.match(/\*\*Preview URL:\*\*\s*(\S+)/);
               if (m) existingPreviewUrl = m[1];
+            }
+
+            // Track deployment count from existing comment
+            let deployCount = 1;
+            if (existing) {
+              const dm = existing.body.match(/Deployment #(\d+)/);
+              if (dm) deployCount = parseInt(dm[1]) + 1;
             }
 
             // Compute preview URL for success case
             const computedPreviewUrl = `https://${owner}.github.io/${repo}/pr-${prNumber}/`;
-            const effectivePreviewUrl = isSuccess ? (existingPreviewUrl ?? computedPreviewUrl) : existingPreviewUrl;
+            const effectivePreviewUrl = isSuccess ? computedPreviewUrl : existingPreviewUrl;
 
             // Read build log (if exists) and truncate for safety
             let logText = '';
             try { logText = fs.readFileSync('build.log', 'utf8'); } catch (e) {}
             const MAX = 60000;
             if (logText.length > MAX) {
-              logText = '... (truncated) ...\\n' + logText.slice(-MAX);
+              logText = '... (truncated) ...\n' + logText.slice(-MAX);
             }
             const shownChars = Math.min(logText.length, MAX);
 
-            // Common header
-            let body = `## 🔍 PR Preview
+            // Read build stats (from step outputs via env)
+            const duration = process.env.BUILD_DURATION || 'N/A';
+            const totalFiles = process.env.BUILD_TOTAL_FILES || 'N/A';
+            const htmlFiles = process.env.BUILD_HTML_FILES || 'N/A';
+            const appPages = process.env.BUILD_APP_PAGES || 'N/A';
+            const totalSize = process.env.BUILD_TOTAL_SIZE || 'N/A';
+            const cssFiles = process.env.BUILD_CSS_FILES || '0';
+            const jsFiles = process.env.BUILD_JS_FILES || '0';
+            const jsonFiles = process.env.BUILD_JSON_FILES || '0';
+            const imageFiles = process.env.BUILD_IMAGE_FILES || '0';
+            const hasBrowse = process.env.BUILD_HAS_BROWSE === 'true';
+            const hasStats = process.env.BUILD_HAS_STATS === 'true';
+            const hasAlternatives = process.env.BUILD_HAS_ALTERNATIVES === 'true';
+            const hasSitemap = process.env.BUILD_HAS_SITEMAP === 'true';
 
-            ${effectivePreviewUrl ? `**📱 Preview URL:** ${effectivePreviewUrl}\n` : ''}
+            // PR change summary
+            const changesSummary = process.env.PR_CHANGES_SUMMARY || '';
+            const changesFileCount = process.env.PR_CHANGES_FILE_COUNT || '0';
 
-            This preview was generated from commit \`${headShaShort}\` and will be updated when you push new changes.
-            `;
+            // Read changed files list
+            let changedFilesList = '';
+            try { changedFilesList = fs.readFileSync('changed_files.txt', 'utf8').trim(); } catch (e) {}
 
-            // Build Status section (icon toggles)
+            // Build the comment body
+            let body = `## PR Preview\n\n`;
+
             if (isSuccess) {
-              body += `
-            ### ✅ Build Status
-            - Generator executed successfully
-            - Website built without errors
-            - Static files deployed to GitHub Pages
+              // --- SUCCESS COMMENT ---
+              body += `| | |\n|---|---|\n`;
+              body += `| **Preview URL** | ${effectivePreviewUrl} |\n`;
+              body += `| **Branch** | \`${headBranch}\` |\n`;
+              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
+              body += `| **Author** | @${prAuthor} |\n`;
+              body += `| **Build Duration** | ${duration} |\n`;
+              body += `| **Deployment** | #${deployCount} |\n\n`;
 
-            ---
-            *This comment will be automatically updated when you push new commits.*`;
+              // Quick page links
+              body += `### Preview Pages\n\n`;
+              body += `| Page | Link |\n|---|---|\n`;
+              body += `| Home | [index.html](${effectivePreviewUrl}) |\n`;
+              if (hasBrowse) body += `| Browse | [browse.html](${effectivePreviewUrl}browse.html) |\n`;
+              if (hasStats) body += `| Statistics | [statistics.html](${effectivePreviewUrl}statistics.html) |\n`;
+              if (hasAlternatives) body += `| Alternatives | [alternatives.html](${effectivePreviewUrl}alternatives.html) |\n`;
+              if (hasSitemap) body += `| Sitemap | [sitemap.xml](${effectivePreviewUrl}sitemap.xml) |\n`;
+              body += `\n`;
+
+              // Build output breakdown
+              body += `### Build Output\n\n`;
+              body += `| Metric | Value |\n|---|---|\n`;
+              body += `| Total Size | ${totalSize} |\n`;
+              body += `| Total Files | ${totalFiles} |\n`;
+              body += `| HTML Pages | ${htmlFiles} |\n`;
+              body += `| App Detail Pages | ${appPages} |\n`;
+              body += `| CSS Files | ${cssFiles} |\n`;
+              body += `| JS Files | ${jsFiles} |\n`;
+              body += `| JSON Files | ${jsonFiles} |\n`;
+              body += `| Images | ${imageFiles} |\n\n`;
+
+              // PR changes section
+              if (changedFilesList) {
+                body += `### PR Changes (${changesFileCount} files: ${changesSummary})\n\n`;
+                body += `<details>\n<summary>Changed files</summary>\n\n\`\`\`\n${changedFilesList}\n\`\`\`\n</details>\n\n`;
+              }
+
+              body += `---\n`;
+              body += `[View workflow run](${runUrl}) | [View PR diff](${compareUrl})\n\n`;
+              body += `*This comment updates automatically on each push. Preview is removed when the PR is closed.*`;
+
             } else {
-              body += `
-            ### ❌ Build Status
-            - Build failed — preview not deployed
+              // --- FAILURE COMMENT ---
+              body += `### Build Failed\n\n`;
+              body += `| | |\n|---|---|\n`;
+              if (effectivePreviewUrl) body += `| **Last Working Preview** | ${effectivePreviewUrl} |\n`;
+              body += `| **Branch** | \`${headBranch}\` |\n`;
+              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
+              body += `| **Author** | @${prAuthor} |\n\n`;
 
-            <details>
-            <summary>Build log (last ${shownChars} characters)</summary>
+              body += `The build failed and the preview was not deployed. Check the build log below for details.\n\n`;
 
-            \`\`\`
-            ${logText || 'No build log available.'}
-            \`\`\`
-            </details>
+              body += `<details>\n<summary>Build log (last ${shownChars} characters)</summary>\n\n\`\`\`\n${logText || 'No build log available.'}\n\`\`\`\n</details>\n\n`;
 
-            ---
-            *This comment will be automatically updated when you push new commits.*`;
+              body += `---\n`;
+              body += `[View workflow run](${runUrl}) | [View PR diff](${compareUrl})\n\n`;
+              body += `*This comment updates automatically on each push. Fix the errors and push again to deploy.*`;
             }
 
             // Update or create the single comment
@@ -283,6 +935,54 @@ jobs:
                 owner, repo, issue_number: prNumber, body
               });
             }
+        env:
+          BUILD_DURATION: ${{ steps.build_stats.outputs.duration }}
+          BUILD_TOTAL_FILES: ${{ steps.build_stats.outputs.total_files }}
+          BUILD_HTML_FILES: ${{ steps.build_stats.outputs.html_files }}
+          BUILD_CSS_FILES: ${{ steps.build_stats.outputs.css_files }}
+          BUILD_JS_FILES: ${{ steps.build_stats.outputs.js_files }}
+          BUILD_JSON_FILES: ${{ steps.build_stats.outputs.json_files }}
+          BUILD_IMAGE_FILES: ${{ steps.build_stats.outputs.image_files }}
+          BUILD_APP_PAGES: ${{ steps.build_stats.outputs.app_pages }}
+          BUILD_TOTAL_SIZE: ${{ steps.build_stats.outputs.total_size }}
+          BUILD_HAS_BROWSE: ${{ steps.build_stats.outputs.has_browse }}
+          BUILD_HAS_STATS: ${{ steps.build_stats.outputs.has_stats }}
+          BUILD_HAS_ALTERNATIVES: ${{ steps.build_stats.outputs.has_alternatives }}
+          BUILD_HAS_SITEMAP: ${{ steps.build_stats.outputs.has_sitemap }}
+          PR_CHANGES_SUMMARY: ${{ steps.pr_changes.outputs.summary }}
+          PR_CHANGES_FILE_COUNT: ${{ steps.pr_changes.outputs.file_count }}
+
+      # Add or update a label on the PR to indicate preview status
+      - name: Add preview label
+        if: ${{ success() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const labelName = 'preview-deployed';
+
+            // Ensure the label exists (create if missing)
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: labelName });
+            } catch (e) {
+              if (e.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner, repo,
+                  name: labelName,
+                  color: '1d76db',
+                  description: 'A live preview is deployed for this PR'
+                });
+              }
+            }
+
+            // Add the label to the PR
+            await github.rest.issues.addLabels({
+              owner, repo,
+              issue_number: prNumber,
+              labels: [labelName]
+            });
 
   cleanup-preview:
     if: github.event.action == 'closed'
@@ -342,36 +1042,58 @@ jobs:
             echo "gh-pages branch does not exist"
           fi
 
-      - name: Comment on closed PR
+      - name: Update comment and remove label on closed PR
         uses: actions/github-script@v7
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const isMerged = context.payload.pull_request.merged;
+            const mergedBy = isMerged ? (context.payload.pull_request.merged_by?.login || 'unknown') : null;
+            const prAuthor = context.payload.pull_request.user.login;
+            const headBranch = context.payload.pull_request.head.ref;
+            const baseBranch = context.payload.pull_request.base.ref;
+            const prTitle = context.payload.pull_request.title;
 
             const comments = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
+              owner, repo, issue_number: prNumber,
             });
 
             const botComment = comments.data.find(c =>
-              c.user.type === 'Bot' && c.body.includes('🔍 PR Preview')
+              c.user.type === 'Bot' && c.body.includes('## PR Preview')
             );
 
             if (botComment) {
-              const body = `## 🔍 PR Preview *(Closed)*
+              let body = `## PR Preview *(${isMerged ? 'Merged' : 'Closed'})*\n\n`;
+              body += `| | |\n|---|---|\n`;
+              body += `| **PR** | #${prNumber} - ${prTitle} |\n`;
+              body += `| **Author** | @${prAuthor} |\n`;
+              body += `| **Branch** | \`${headBranch}\` -> \`${baseBranch}\` |\n`;
+              body += `| **Status** | ${isMerged ? `Merged by @${mergedBy}` : 'Closed without merging'} |\n\n`;
 
-              This PR has been ${context.payload.pull_request.merged ? 'merged' : 'closed'}.
+              body += `The preview deployment has been cleaned up.\n\n`;
 
-              The preview deployment has been removed to save space.
+              if (isMerged) {
+                body += `Changes from this PR are now part of \`${baseBranch}\`. `;
+                body += `The production site will update on the next deployment.\n\n`;
+              }
 
-              ---
-              *Preview was available at: \`pr-${prNumber}/\`*`;
+              body += `---\n`;
+              body += `*Preview was previously available at \`pr-${prNumber}/\`*`;
 
               await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body
+                owner, repo, comment_id: botComment.id, body
               });
+            }
+
+            // Remove the preview-deployed label
+            try {
+              await github.rest.issues.removeLabel({
+                owner, repo,
+                issue_number: prNumber,
+                name: 'preview-deployed'
+              });
+            } catch (e) {
+              // Label may not exist, that's fine
             }
