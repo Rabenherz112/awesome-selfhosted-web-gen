@@ -952,38 +952,6 @@ jobs:
           PR_CHANGES_SUMMARY: ${{ steps.pr_changes.outputs.summary }}
           PR_CHANGES_FILE_COUNT: ${{ steps.pr_changes.outputs.file_count }}
 
-      # Add or update a label on the PR to indicate preview status
-      - name: Add preview label
-        if: ${{ success() }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const prNumber = context.payload.pull_request.number;
-            const labelName = 'preview-deployed';
-
-            // Ensure the label exists (create if missing)
-            try {
-              await github.rest.issues.getLabel({ owner, repo, name: labelName });
-            } catch (e) {
-              if (e.status === 404) {
-                await github.rest.issues.createLabel({
-                  owner, repo,
-                  name: labelName,
-                  color: '1d76db',
-                  description: 'A live preview is deployed for this PR'
-                });
-              }
-            }
-
-            // Add the label to the PR
-            await github.rest.issues.addLabels({
-              owner, repo,
-              issue_number: prNumber,
-              labels: [labelName]
-            });
-
   cleanup-preview:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
@@ -1085,15 +1053,4 @@ jobs:
               await github.rest.issues.updateComment({
                 owner, repo, comment_id: botComment.id, body
               });
-            }
-
-            // Remove the preview-deployed label
-            try {
-              await github.rest.issues.removeLabel({
-                owner, repo,
-                issue_number: prNumber,
-                name: 'preview-deployed'
-              });
-            } catch (e) {
-              // Label may not exist, that's fine
             }
