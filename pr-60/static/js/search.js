@@ -3,7 +3,7 @@
     let searchData = null;
     let searchIndex = null;
     let searchConfig = null;
-    let hideTimeouts = {};
+    let hideTimeout = null;
     
     // Initialize search when page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -121,50 +121,41 @@
         `).join('');
         
         searchResults.innerHTML = html;
-        clearHideTimeout(resultsId);
+        clearTimeout(hideTimeout);
         searchResults.classList.remove('hidden');
     }
-    
+
     // Show search message
     function showSearchMessage(message, resultsId = 'search-results') {
         const searchResults = document.getElementById(resultsId);
         if (!searchResults) return;
-        
+
         searchResults.innerHTML = `
             <div class="search-result-item text-center">
                 <div class="text-text-muted">${message}</div>
             </div>
         `;
-        clearHideTimeout(resultsId);
+        clearTimeout(hideTimeout);
         searchResults.classList.remove('hidden');
-    }
-
-    // Clear any pending hide timeout for a results container
-    function clearHideTimeout(resultsId) {
-        if (hideTimeouts[resultsId]) {
-            clearTimeout(hideTimeouts[resultsId]);
-            hideTimeouts[resultsId] = null;
-        }
     }
 
     // Show search results
     function showSearchResults(resultsId = 'search-results') {
-        clearHideTimeout(resultsId);
+        clearTimeout(hideTimeout);
         const searchResults = document.getElementById(resultsId);
         if (searchResults && searchResults.innerHTML.trim()) {
             searchResults.classList.remove('hidden');
         }
     }
 
-    // Hide search results
+    // Hide search results (with delay to allow clicking on results)
     function hideSearchResults(resultsId = 'search-results') {
-        clearHideTimeout(resultsId);
-        hideTimeouts[resultsId] = setTimeout(() => {
+        clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(() => {
             const searchResults = document.getElementById(resultsId);
             if (searchResults) {
                 searchResults.classList.add('hidden');
             }
-            hideTimeouts[resultsId] = null;
         }, 150);
     }
     
