@@ -44,7 +44,6 @@ jobs:
         id: build_timer
         run: |
           echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
-          echo "start_human=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> "$GITHUB_OUTPUT"
 
       - name: Initialize build log
         run: |
@@ -98,10 +97,6 @@ jobs:
           # Count files by type
           TOTAL_FILES=$(find "$OUTPUT_DIR" -type f | wc -l)
           HTML_FILES=$(find "$OUTPUT_DIR" -name '*.html' -type f | wc -l)
-          CSS_FILES=$(find "$OUTPUT_DIR" -name '*.css' -type f | wc -l)
-          JS_FILES=$(find "$OUTPUT_DIR" -name '*.js' -type f | wc -l)
-          JSON_FILES=$(find "$OUTPUT_DIR" -name '*.json' -type f | wc -l)
-          IMAGE_FILES=$(find "$OUTPUT_DIR" \( -name '*.png' -o -name '*.jpg' -o -name '*.svg' -o -name '*.ico' -o -name '*.webp' \) -type f | wc -l)
 
           # Count app detail pages
           APP_PAGES=0
@@ -111,35 +106,14 @@ jobs:
 
           # Total deployment size (human readable)
           TOTAL_SIZE=$(du -sh "$OUTPUT_DIR" | cut -f1)
-          TOTAL_SIZE_BYTES=$(du -sb "$OUTPUT_DIR" | cut -f1)
-
-          # Check which pages exist
-          HAS_BROWSE="false"
-          HAS_STATS="false"
-          HAS_ALTERNATIVES="false"
-          HAS_SITEMAP="false"
-          [ -f "$OUTPUT_DIR/browse.html" ] && HAS_BROWSE="true"
-          [ -f "$OUTPUT_DIR/statistics.html" ] && HAS_STATS="true"
-          [ -f "$OUTPUT_DIR/alternatives.html" ] && HAS_ALTERNATIVES="true"
-          [ -f "$OUTPUT_DIR/sitemap.xml" ] && HAS_SITEMAP="true"
 
           # Export all stats as step outputs
           {
             echo "duration=${DURATION_STR}"
-            echo "duration_secs=${DURATION_SECS}"
             echo "total_files=${TOTAL_FILES}"
             echo "html_files=${HTML_FILES}"
-            echo "css_files=${CSS_FILES}"
-            echo "js_files=${JS_FILES}"
-            echo "json_files=${JSON_FILES}"
-            echo "image_files=${IMAGE_FILES}"
             echo "app_pages=${APP_PAGES}"
             echo "total_size=${TOTAL_SIZE}"
-            echo "total_size_bytes=${TOTAL_SIZE_BYTES}"
-            echo "has_browse=${HAS_BROWSE}"
-            echo "has_stats=${HAS_STATS}"
-            echo "has_alternatives=${HAS_ALTERNATIVES}"
-            echo "has_sitemap=${HAS_SITEMAP}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Gather PR changed files summary
@@ -470,6 +444,9 @@ jobs:
             // Read build stats (from step outputs via env)
             const duration = process.env.BUILD_DURATION || 'N/A';
             const totalSize = process.env.BUILD_TOTAL_SIZE || 'N/A';
+            const totalFiles = process.env.BUILD_TOTAL_FILES || 'N/A';
+            const htmlPages = process.env.BUILD_HTML_PAGES || 'N/A';
+            const appPages = process.env.BUILD_APP_PAGES || 'N/A';
 
             // PR change summary
             const changesSummary = process.env.PR_CHANGES_SUMMARY || '';
@@ -489,7 +466,8 @@ jobs:
               body += `| | |\n|---|---|\n`;
               body += `| **Preview URL** | ${effectivePreviewUrl} |\n`;
               body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
-              body += `| **Build** | ${duration} -- ${totalSize} |\n\n`;
+              body += `| **Build** | ${duration} -- ${totalSize} |\n`;
+              body += `| **Pages** | ${htmlPages} HTML (${appPages} apps) -- ${totalFiles} total files |\n\n`;
 
               // Warning: template changes without style changes
               if (templateChanges > 0 && styleChanges === 0) {
@@ -537,6 +515,9 @@ jobs:
         env:
           BUILD_DURATION: ${{ steps.build_stats.outputs.duration }}
           BUILD_TOTAL_SIZE: ${{ steps.build_stats.outputs.total_size }}
+          BUILD_TOTAL_FILES: ${{ steps.build_stats.outputs.total_files }}
+          BUILD_HTML_PAGES: ${{ steps.build_stats.outputs.html_files }}
+          BUILD_APP_PAGES: ${{ steps.build_stats.outputs.app_pages }}
           PR_CHANGES_SUMMARY: ${{ steps.pr_changes.outputs.summary }}
           PR_CHANGES_FILE_COUNT: ${{ steps.pr_changes.outputs.file_count }}
           PR_TEMPLATE_CHANGES: ${{ steps.pr_changes.outputs.template_changes }}
@@ -609,10 +590,8 @@ jobs:
             const repo = context.repo.repo;
             const isMerged = context.payload.pull_request.merged;
             const mergedBy = isMerged ? (context.payload.pull_request.merged_by?.login || 'unknown') : null;
-            const prAuthor = context.payload.pull_request.user.login;
             const headBranch = context.payload.pull_request.head.ref;
             const baseBranch = context.payload.pull_request.base.ref;
-            const prTitle = context.payload.pull_request.title;
 
             const comments = await github.rest.issues.listComments({
               owner, repo, issue_number: prNumber,
@@ -625,8 +604,6 @@ jobs:
             if (botComment) {
               let body = `## PR Preview *(${isMerged ? 'Merged' : 'Closed'})*\n\n`;
               body += `| | |\n|---|---|\n`;
-              body += `| **PR** | #${prNumber} - ${prTitle} |\n`;
-              body += `| **Author** | @${prAuthor} |\n`;
               body += `| **Branch** | \`${headBranch}\` -> \`${baseBranch}\` |\n`;
               body += `| **Status** | ${isMerged ? `Merged by @${mergedBy}` : 'Closed without merging'} |\n\n`;
 
