@@ -175,6 +175,8 @@ jobs:
           {
             echo "file_count=${FILE_COUNT}"
             echo "summary=${SUMMARY_PARTS}"
+            echo "template_changes=${TEMPLATE_CHANGES}"
+            echo "style_changes=${STYLE_CHANGES}"
           } >> "$GITHUB_OUTPUT"
 
           # Save full list for the comment (truncated if very large)
@@ -793,9 +795,6 @@ jobs:
             const repo  = context.repo.repo;
             const headSha = context.payload.pull_request.head.sha;
             const headShaShort = headSha.substring(0, 7);
-            const prTitle = context.payload.pull_request.title;
-            const prAuthor = context.payload.pull_request.user.login;
-            const headBranch = context.payload.pull_request.head.ref;
             const runId = context.runId;
             const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
             const compareUrl = `https://github.com/${owner}/${repo}/pull/${prNumber}/files`;
@@ -815,15 +814,8 @@ jobs:
             // Reuse existing Preview URL if present (so failures keep the same link)
             let existingPreviewUrl = undefined;
             if (existing) {
-              const m = existing.body.match(/\*\*Preview URL:\*\*\s*(\S+)/);
+              const m = existing.body.match(/\*\*Preview URL\*\*\s*\|\s*(\S+)/);
               if (m) existingPreviewUrl = m[1];
-            }
-
-            // Track deployment count from existing comment
-            let deployCount = 1;
-            if (existing) {
-              const dm = existing.body.match(/Deployment #(\d+)/);
-              if (dm) deployCount = parseInt(dm[1]) + 1;
             }
 
             // Compute preview URL for success case
@@ -841,22 +833,13 @@ jobs:
 
             // Read build stats (from step outputs via env)
             const duration = process.env.BUILD_DURATION || 'N/A';
-            const totalFiles = process.env.BUILD_TOTAL_FILES || 'N/A';
-            const htmlFiles = process.env.BUILD_HTML_FILES || 'N/A';
-            const appPages = process.env.BUILD_APP_PAGES || 'N/A';
             const totalSize = process.env.BUILD_TOTAL_SIZE || 'N/A';
-            const cssFiles = process.env.BUILD_CSS_FILES || '0';
-            const jsFiles = process.env.BUILD_JS_FILES || '0';
-            const jsonFiles = process.env.BUILD_JSON_FILES || '0';
-            const imageFiles = process.env.BUILD_IMAGE_FILES || '0';
-            const hasBrowse = process.env.BUILD_HAS_BROWSE === 'true';
-            const hasStats = process.env.BUILD_HAS_STATS === 'true';
-            const hasAlternatives = process.env.BUILD_HAS_ALTERNATIVES === 'true';
-            const hasSitemap = process.env.BUILD_HAS_SITEMAP === 'true';
 
             // PR change summary
             const changesSummary = process.env.PR_CHANGES_SUMMARY || '';
             const changesFileCount = process.env.PR_CHANGES_FILE_COUNT || '0';
+            const templateChanges = parseInt(process.env.PR_TEMPLATE_CHANGES || '0', 10);
+            const styleChanges = parseInt(process.env.PR_STYLE_CHANGES || '0', 10);
 
             // Read changed files list
             let changedFilesList = '';
@@ -869,37 +852,19 @@ jobs:
               // --- SUCCESS COMMENT ---
               body += `| | |\n|---|---|\n`;
               body += `| **Preview URL** | ${effectivePreviewUrl} |\n`;
-              body += `| **Branch** | \`${headBranch}\` |\n`;
               body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
-              body += `| **Author** | @${prAuthor} |\n`;
-              body += `| **Build Duration** | ${duration} |\n`;
-              body += `| **Deployment** | #${deployCount} |\n\n`;
+              body += `| **Build** | ${duration} -- ${totalSize} |\n\n`;
 
-              // Quick page links
-              body += `### Preview Pages\n\n`;
-              body += `| Page | Link |\n|---|---|\n`;
-              body += `| Home | [index.html](${effectivePreviewUrl}) |\n`;
-              if (hasBrowse) body += `| Browse | [browse.html](${effectivePreviewUrl}browse.html) |\n`;
-              if (hasStats) body += `| Statistics | [statistics.html](${effectivePreviewUrl}statistics.html) |\n`;
-              if (hasAlternatives) body += `| Alternatives | [alternatives.html](${effectivePreviewUrl}alternatives.html) |\n`;
-              if (hasSitemap) body += `| Sitemap | [sitemap.xml](${effectivePreviewUrl}sitemap.xml) |\n`;
-              body += `\n`;
-
-              // Build output breakdown
-              body += `### Build Output\n\n`;
-              body += `| Metric | Value |\n|---|---|\n`;
-              body += `| Total Size | ${totalSize} |\n`;
-              body += `| Total Files | ${totalFiles} |\n`;
-              body += `| HTML Pages | ${htmlFiles} |\n`;
-              body += `| App Detail Pages | ${appPages} |\n`;
-              body += `| CSS Files | ${cssFiles} |\n`;
-              body += `| JS Files | ${jsFiles} |\n`;
-              body += `| JSON Files | ${jsonFiles} |\n`;
-              body += `| Images | ${imageFiles} |\n\n`;
+              // Warning: template changes without style changes
+              if (templateChanges > 0 && styleChanges === 0) {
+                body += `> **Warning**\n`;
+                body += `> This PR contains template changes but no CSS changes. `;
+                body += `If you modified Tailwind classes, you may need to run \`npm run build-css\` to regenerate the stylesheet.\n\n`;
+              }
 
               // PR changes section
               if (changedFilesList) {
-                body += `### PR Changes (${changesFileCount} files: ${changesSummary})\n\n`;
+                body += `**Changes** (${changesFileCount} files: ${changesSummary})\n\n`;
                 body += `<details>\n<summary>Changed files</summary>\n\n\`\`\`\n${changedFilesList}\n\`\`\`\n</details>\n\n`;
               }
 
@@ -912,9 +877,7 @@ jobs:
               body += `### Build Failed\n\n`;
               body += `| | |\n|---|---|\n`;
               if (effectivePreviewUrl) body += `| **Last Working Preview** | ${effectivePreviewUrl} |\n`;
-              body += `| **Branch** | \`${headBranch}\` |\n`;
-              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
-              body += `| **Author** | @${prAuthor} |\n\n`;
+              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n\n`;
 
               body += `The build failed and the preview was not deployed. Check the build log below for details.\n\n`;
 
@@ -937,20 +900,11 @@ jobs:
             }
         env:
           BUILD_DURATION: ${{ steps.build_stats.outputs.duration }}
-          BUILD_TOTAL_FILES: ${{ steps.build_stats.outputs.total_files }}
-          BUILD_HTML_FILES: ${{ steps.build_stats.outputs.html_files }}
-          BUILD_CSS_FILES: ${{ steps.build_stats.outputs.css_files }}
-          BUILD_JS_FILES: ${{ steps.build_stats.outputs.js_files }}
-          BUILD_JSON_FILES: ${{ steps.build_stats.outputs.json_files }}
-          BUILD_IMAGE_FILES: ${{ steps.build_stats.outputs.image_files }}
-          BUILD_APP_PAGES: ${{ steps.build_stats.outputs.app_pages }}
           BUILD_TOTAL_SIZE: ${{ steps.build_stats.outputs.total_size }}
-          BUILD_HAS_BROWSE: ${{ steps.build_stats.outputs.has_browse }}
-          BUILD_HAS_STATS: ${{ steps.build_stats.outputs.has_stats }}
-          BUILD_HAS_ALTERNATIVES: ${{ steps.build_stats.outputs.has_alternatives }}
-          BUILD_HAS_SITEMAP: ${{ steps.build_stats.outputs.has_sitemap }}
           PR_CHANGES_SUMMARY: ${{ steps.pr_changes.outputs.summary }}
           PR_CHANGES_FILE_COUNT: ${{ steps.pr_changes.outputs.file_count }}
+          PR_TEMPLATE_CHANGES: ${{ steps.pr_changes.outputs.template_changes }}
+          PR_STYLE_CHANGES: ${{ steps.pr_changes.outputs.style_changes }}
 
   cleanup-preview:
     if: github.event.action == 'closed'
