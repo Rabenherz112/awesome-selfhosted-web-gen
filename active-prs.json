@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "number": 61,
+    "title": "build: enhance PR preview workflow with build statistics and concurre\u2026",
+    "author": "Rabenherz112",
+    "branch": "tst-deploy",
+    "commit": "2b4de94",
+    "commit_full": "2b4de9431c070b1992eb23822617515dd7405f21",
+    "url": "pr-61/",
+    "pr_url": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen/pull/61",
+    "updated": "2026-02-07T12:27:57+00:00",
+    "build": {
+      "size": "32M",
+      "total_files": "1337",
+      "html_pages": "1322",
+      "app_pages": "1318",
+      "duration": "47s"
+    }
+  }
+]

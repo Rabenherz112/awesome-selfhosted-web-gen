@@ -5,51 +5,470 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PR Previews - Awesome Self-Hosted Web Generator</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 40px; background: #f7fafc; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .preview-list { list-style: none; padding: 0; }
-        .preview-item { margin: 10px 0; padding: 20px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .preview-item a { text-decoration: none; color: #3182ce; font-weight: 500; font-size: 1.1em; }
-        .preview-item a:hover { text-decoration: underline; }
-        .pr-meta { font-size: 0.9em; color: #718096; margin-top: 5px; }
-        .badge { display: inline-block; padding: 2px 8px; background: #edf2f7; color: #4a5568; border-radius: 4px; font-size: 0.8em; margin-left: 8px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-code: #f1f5f9;
+            --bg-badge: #eff6ff;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --text-link: #2563eb;
+            --text-link-hover: #1d4ed8;
+            --accent: #2563eb;
+            --accent-light: #dbeafe;
+            --green: #16a34a;
+            --green-bg: #f0fdf4;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --radius: 10px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-card: #1e293b;
+                --bg-code: #334155;
+                --bg-badge: #1e3a5f;
+                --border: #334155;
+                --border-hover: #475569;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-muted: #64748b;
+                --text-link: #60a5fa;
+                --text-link-hover: #93bbfd;
+                --accent: #3b82f6;
+                --accent-light: #1e3a5f;
+                --green: #4ade80;
+                --green-bg: #0a2e1a;
+                --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+                --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .page-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+        }
+
+        /* --- Header --- */
+        .page-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 6px;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .repo-link {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-link);
+            text-decoration: none;
+        }
+        .repo-link:hover { text-decoration: underline; color: var(--text-link-hover); }
+
+        /* --- Summary bar --- */
+        .summary-bar {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+        .summary-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-sm);
+        }
+        .summary-chip .num {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* --- Search --- */
+        .search-box {
+            margin-bottom: 24px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .search-box input:focus { border-color: var(--accent); }
+        .search-box input::placeholder { color: var(--text-muted); }
+
+        /* --- Cards --- */
+        .card-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.15s, border-color 0.15s;
+            overflow: hidden;
+        }
+        .card:hover { box-shadow: var(--shadow-md); border-color: var(--border-hover); }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px 0;
+            flex-wrap: wrap;
+        }
+        .card-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+        .card-title a {
+            color: var(--text-link);
+            text-decoration: none;
+        }
+        .card-title a:hover { text-decoration: underline; color: var(--text-link-hover); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+        .badge-active { background: var(--green-bg); color: var(--green); }
+        .badge-branch { background: var(--bg-badge); color: var(--accent); }
+
+        .card-subtitle {
+            padding: 4px 20px 0;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            padding: 12px 20px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .meta-item { display: flex; align-items: center; gap: 4px; }
+        .meta-item code {
+            font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.8rem;
+            padding: 1px 5px;
+            background: var(--bg-code);
+            border-radius: 4px;
+        }
+
+        .card-stats {
+            display: flex;
+            gap: 1px;
+            background: var(--border);
+            border-top: 1px solid var(--border);
+        }
+        .stat-cell {
+            flex: 1;
+            text-align: center;
+            padding: 10px 8px;
+            background: var(--bg-card);
+        }
+        .stat-cell .stat-val {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+        .stat-cell .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 14px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--text-link-hover); }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+        /* --- Empty state --- */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .empty-state p { font-size: 0.95rem; }
+
+        /* --- Footer --- */
+        .page-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .page-footer a { color: var(--text-link); text-decoration: none; }
+        .page-footer a:hover { text-decoration: underline; }
+
+        /* --- Auto-refresh indicator --- */
+        .refresh-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .dot-pulse {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* --- Loading skeleton --- */
+        .skeleton-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 14px;
+        }
+        .skeleton-line {
+            height: 14px;
+            background: var(--bg-code);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            animation: shimmer 1.5s infinite;
+        }
+        .skeleton-line:nth-child(1) { width: 45%; height: 18px; }
+        .skeleton-line:nth-child(2) { width: 70%; }
+        .skeleton-line:nth-child(3) { width: 55%; }
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .page-wrapper { padding: 24px 16px 40px; }
+            .card-stats { flex-wrap: wrap; }
+            .stat-cell { min-width: 33.33%; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔍 PR Previews</h1>
-            <p>Available preview deployments for pull requests</p>
+    <div class="page-wrapper">
+        <header class="page-header">
+            <h1>PR Preview Dashboard</h1>
+            <p>Live preview deployments for open pull requests</p>
+            <a class="repo-link" href="https://github.com/rabenherz112/awesome-selfhosted-web-gen" target="_blank" rel="noopener">
+                rabenherz112/awesome-selfhosted-web-gen
+            </a>
+        </header>
+
+        <div class="summary-bar" id="summaryBar"></div>
+
+        <div class="search-box" id="searchWrapper" style="display:none;">
+            <input type="text" id="searchInput" placeholder="Filter by PR number, title, author, or branch...">
         </div>
-        <ul class="preview-list" id="previewList">
-            <li>Loading...</li>
+
+        <div class="refresh-bar">
+            <span class="dot-pulse"></span>
+            <span id="refreshLabel">Auto-refreshes every 60s</span>
+        </div>
+
+        <ul class="card-list" id="previewList">
+            <li class="skeleton-card"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></li>
+            <li class="skeleton-card"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></li>
         </ul>
+
+        <footer class="page-footer">
+            <p>Powered by <a href="https://github.com/rabenherz112/awesome-selfhosted-web-gen" target="_blank" rel="noopener">awesome-selfhosted-web-gen</a> &middot; Previews are automatically cleaned up when PRs close</p>
+        </footer>
     </div>
+
     <script>
-        async function loadPreviews() {
-            try {
-                const response = await fetch('./active-prs.json');
-                if (!response.ok) throw new Error('Failed to load active PRs');
-                const activePrs = await response.json();
-                const previewList = document.getElementById('previewList');
-                if (activePrs.length === 0) {
-                    previewList.innerHTML = '<li>No PR previews available</li>';
-                } else {
-                    previewList.innerHTML = activePrs.map(pr => {
-                        return `<li class="preview-item">
-                            <a href="${pr.url}">PR #${pr.number} Preview</a>
-                            <span class="badge">Active</span>
-                            <div class="pr-meta">Preview for Pull Request #${pr.number}</div>
-                        </li>`;
-                    }).join('');
-                }
-            } catch (error) {
-                console.error('Error loading previews:', error);
-                document.getElementById('previewList').innerHTML = '<li>Error loading preview list. No active PRs found.</li>';
-            }
+        /** Compute a human-readable relative time string. */
+        function timeAgo(dateStr) {
+            if (!dateStr) return '';
+            var diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+            if (diff < 60)   return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
         }
+
+        /** Safely escape HTML to prevent XSS from JSON data. */
+        function esc(s) {
+            var d = document.createElement('div');
+            d.appendChild(document.createTextNode(s || ''));
+            return d.innerHTML;
+        }
+
+        /** Render the full PR list from the given data array. */
+        function render(prs) {
+            var list = document.getElementById('previewList');
+            var bar  = document.getElementById('summaryBar');
+            var searchWrap = document.getElementById('searchWrapper');
+
+            if (!prs || prs.length === 0) {
+                bar.innerHTML = '';
+                searchWrap.style.display = 'none';
+                list.innerHTML = '<li class="empty-state">' +
+                    '<div class="empty-icon">--</div>' +
+                    '<p>No active PR previews at the moment.<br>Open a pull request to generate one automatically.</p>' +
+                    '</li>';
+                return;
+            }
+
+            // Summary chips
+            bar.innerHTML =
+                '<span class="summary-chip"><span class="num">' + prs.length + '</span> Active Preview' + (prs.length > 1 ? 's' : '') + '</span>';
+
+            // Show search if 2+ PRs
+            searchWrap.style.display = prs.length >= 2 ? '' : 'none';
+
+            list.innerHTML = prs.map(function(pr) {
+                var b = pr.build || {};
+                var ago = timeAgo(pr.updated);
+                var prUrl = pr.pr_url || '#';
+                var commitUrl = pr.commit_full
+                    ? 'https://github.com/rabenherz112/awesome-selfhosted-web-gen/commit/' + esc(pr.commit_full)
+                    : '#';
+
+                var html = '<li class="card" data-search="' + esc(String(pr.number) + ' ' + pr.title + ' ' + pr.author + ' ' + pr.branch).toLowerCase() + '">';
+
+                // Top row: title + badges
+                html += '<div class="card-top">';
+                html += '<span class="card-title"><a href="' + esc(pr.url) + '">#' + esc(String(pr.number)) + ' ' + esc(pr.title) + '</a></span>';
+                html += '<span class="badge badge-active">Active</span>';
+                if (pr.branch) html += '<span class="badge badge-branch">' + esc(pr.branch) + '</span>';
+                html += '</div>';
+
+                // Subtitle / author
+                html += '<div class="card-subtitle">by <strong>' + esc(pr.author || 'unknown') + '</strong>';
+                if (ago) html += ' &middot; updated ' + ago;
+                html += '</div>';
+
+                // Meta row
+                html += '<div class="card-meta">';
+                if (pr.commit) html += '<span class="meta-item">Commit <code><a href="' + commitUrl + '" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">' + esc(pr.commit) + '</a></code></span>';
+                if (b.duration && b.duration !== 'N/A') html += '<span class="meta-item">Built in ' + esc(b.duration) + '</span>';
+                html += '</div>';
+
+                // Stats bar
+                html += '<div class="card-stats">';
+                if (b.size && b.size !== 'N/A')        html += '<div class="stat-cell"><div class="stat-val">' + esc(b.size)        + '</div><div class="stat-label">Size</div></div>';
+                if (b.total_files && b.total_files !== 'N/A') html += '<div class="stat-cell"><div class="stat-val">' + esc(b.total_files) + '</div><div class="stat-label">Files</div></div>';
+                if (b.html_pages && b.html_pages !== 'N/A')  html += '<div class="stat-cell"><div class="stat-val">' + esc(b.html_pages)  + '</div><div class="stat-label">Pages</div></div>';
+                if (b.app_pages && b.app_pages !== 'N/A')   html += '<div class="stat-cell"><div class="stat-val">' + esc(b.app_pages)   + '</div><div class="stat-label">Apps</div></div>';
+                html += '</div>';
+
+                // Action buttons
+                html += '<div class="card-actions" style="margin-top:12px;">';
+                html += '<a class="btn btn-primary" href="' + esc(pr.url) + '">Open Preview</a>';
+                html += '<a class="btn btn-outline" href="' + esc(prUrl) + '" target="_blank" rel="noopener">View PR</a>';
+                html += '</div>';
+
+                html += '</li>';
+                return html;
+            }).join('');
+        }
+
+        /** Fetch the JSON and render. Returns the data array. */
+        function loadPreviews() {
+            return fetch('./active-prs.json?_=' + Date.now())
+                .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(function(data) { window._prData = data; render(data); return data; })
+                .catch(function() { render([]); });
+        }
+
+        // Initial load
         loadPreviews();
+
+        // Auto-refresh every 60 seconds
+        setInterval(function() {
+            loadPreviews().then(function() {
+                document.getElementById('refreshLabel').textContent = 'Last refresh: ' + new Date().toLocaleTimeString();
+            });
+        }, 60000);
+
+        // Client-side search/filter
+        document.getElementById('searchInput').addEventListener('input', function() {
+            var q = this.value.toLowerCase().trim();
+            var cards = document.querySelectorAll('.card[data-search]');
+            for (var i = 0; i < cards.length; i++) {
+                cards[i].style.display = (!q || cards[i].getAttribute('data-search').indexOf(q) !== -1) ? '' : 'none';
+            }
+        });
     </script>
 </body>
 </html>
