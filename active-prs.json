@@ -8,13 +8,13 @@
     "commit_full": "222774eae1e0bfc29520b4125e563f6afcd14eea",
     "url": "pr-61/",
     "pr_url": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen/pull/61",
-    "updated": "2026-02-07T13:04:29+00:00",
+    "updated": "2026-02-07T13:05:36+00:00",
     "build": {
       "size": "32M",
       "total_files": "1337",
       "html_pages": "1322",
       "app_pages": "1318",
-      "duration": "44s"
+      "duration": "47s"
     }
   }
 ]
