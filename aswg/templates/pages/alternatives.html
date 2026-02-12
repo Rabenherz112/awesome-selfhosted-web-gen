@@ -39,91 +39,63 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-text mb-4">
+        <h1 class="text-3xl sm:text-4xl font-bold text-text mb-2">
             Alternative Software
         </h1>
-        <p class="text-xl text-text-muted">
-            Find selfhosted alternatives to popular software - {{ total_software }} software with {{ total_alternatives }} alternatives
+        <p class="text-base sm:text-lg text-text-muted">
+            Find selfhosted alternatives to popular software -- {{ total_software }} software with {{ total_alternatives }} alternatives
         </p>
     </div>
 
     {% if alternatives_config.show_statistics %}
     <!-- Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <div id="statisticsSection" class="contents">
-            <!-- Total Software -->
-            <div class="bg-surface rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-info/20 rounded-md flex items-center justify-center">
-                            <svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-text-muted truncate">Software with Alternatives</dt>
-                            <dd class="text-3xl font-bold text-text" id="totalSoftwareCount">{{ total_software }}</dd>
-                        </dl>
-                    </div>
+            <div class="stat-card bg-surface border border-border shadow-sm">
+                <div class="stat-card-icon bg-info/15">
+                    <svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-card-value text-text" id="totalSoftwareCount">{{ total_software }}</div>
+                    <div class="stat-card-label">With Alternatives</div>
                 </div>
             </div>
-            
-            <!-- Total Alternatives -->
-            <div class="bg-surface rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-success/20 rounded-md flex items-center justify-center">
-                            <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-text-muted truncate">Alternative Apps</dt>
-                            <dd class="text-3xl font-bold text-text" id="totalAlternativesCount">{{ total_alternatives }}</dd>
-                        </dl>
-                    </div>
+
+            <div class="stat-card bg-surface border border-border shadow-sm">
+                <div class="stat-card-icon bg-success/15">
+                    <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-card-value text-text" id="totalAlternativesCount">{{ total_alternatives }}</div>
+                    <div class="stat-card-label">Alternative Apps</div>
                 </div>
             </div>
-            
-            <!-- Average Alternatives -->
-            <div class="bg-surface rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-cta/20 rounded-md flex items-center justify-center">
-                            <svg class="w-5 h-5 text-cta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-text-muted truncate">Avg. Alternatives per Software</dt>
-                            <dd class="text-3xl font-bold text-text" id="averageAlternativesCount">{{ "%.1f"|format(total_alternatives / total_software if total_software > 0 else 0) }}</dd>
-                        </dl>
-                    </div>
+
+            <div class="stat-card bg-surface border border-border shadow-sm">
+                <div class="stat-card-icon bg-cta/15">
+                    <svg class="w-5 h-5 text-cta" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-card-value text-text" id="averageAlternativesCount">{{ "%.1f"|format(total_alternatives / total_software if total_software > 0 else 0) }}</div>
+                    <div class="stat-card-label">Avg. Alternatives</div>
                 </div>
             </div>
-            
-            <!-- Software Coverage Percentage -->
-            <div class="bg-surface rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-warning/20 rounded-md flex items-center justify-center">
-                            <svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="ml-5 w-0 flex-1">
-                        <dl>
-                            <dt class="text-sm font-medium text-text-muted truncate">Apps alternative set</dt>
-                            <dd class="text-3xl font-bold text-text" id="coveragePercentage">{{ "%.1f"|format((total_software / total_all_applications * 100) if total_all_applications > 0 else 0) }}%</dd>
-                        </dl>
-                    </div>
+
+            <div class="stat-card bg-surface border border-border shadow-sm">
+                <div class="stat-card-icon bg-warning/15">
+                    <svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-card-value text-text" id="coveragePercentage">{{ "%.1f"|format((total_software / total_all_applications * 100) if total_all_applications > 0 else 0) }}%</div>
+                    <div class="stat-card-label">Apps Coverage</div>
                 </div>
             </div>
         </div>
@@ -132,7 +104,7 @@
 
     <!-- Search and Filter Section -->
     <div class="max-w-4xl mx-auto mb-8">
-        <div class="bg-surface rounded-lg shadow-md p-6">
+        <div class="bg-surface rounded-lg border border-border shadow-sm p-5 sm:p-6">
             <!-- Search Bar -->
             <div class="mb-6">
                 <div class="relative max-w-2xl mx-auto">
@@ -181,7 +153,7 @@
 
     <!-- No Results Message -->
     <div class="max-w-7xl mx-auto">
-        <div id="noResultsMessage" class="hidden text-center py-12 bg-surface rounded-lg shadow-md">
+        <div id="noResultsMessage" class="hidden text-center py-12 bg-surface rounded-lg border border-border shadow-sm">
             <div class="text-text-muted">
                 <div class="text-6xl mb-4">🔍</div>
                 <p class="text-lg font-medium mb-2">No alternatives found</p>
@@ -193,7 +165,7 @@
     <!-- Pagination -->
     <div class="max-w-7xl mx-auto">
         <div id="paginationContainer" class="hidden mt-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface rounded-lg shadow-md p-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface rounded-lg border border-border shadow-sm p-4">
                 <div class="text-sm text-text-muted">
                     Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
                 </div>

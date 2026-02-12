@@ -10,6 +10,7 @@
     <meta name="author" content="{{ site_config.author }}">
     <meta name="items-per-page" content="{{ items_per_page|default(24) }}">
     <meta name="enable-pagination" content="{{ generation_config.get('enable_pagination', true) }}">
+    <meta name="let-user-choose-pagination-size" content="{{ generation_config.get('let_user_choose_pagination_size', false) }}">
     <meta name="open-external-new-tab" content="{{ links_config.get('open_in_new_tab_for_external_links', false) }}">
     <meta name="open-internal-new-tab" content="{{ links_config.get('open_in_new_tab_for_internal_links', false) }}">
     <meta name="browse-description-length" content="{{ ui_config.get('truncation', {}).get('browse_description_length', 80) }}">
@@ -20,6 +21,7 @@
     <meta name="browse-max-categories-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_categories_per_card', 2) }}">
     <meta name="browse-max-platforms-per-card" content="{{ ui_config.get('limits', {}).get('browse_max_platforms_per_card', 3) }}">
     <meta name="lazy-load-images" content="{{ performance_config.get('lazy_load_images', true) }}">
+    <meta name="show-project-icons" content="{{ ui_config.get('show_project_icons', true) }}">
     <meta name="base-path" content="{{ base_path }}">
     {% if alternatives_config %}
     <meta name="alternatives-show-more-threshold" content="{{ alternatives_config.get('show_more_threshold', 3) }}">
@@ -45,7 +47,7 @@
     <link rel="stylesheet" href="{{ asset_url('static/css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ asset_url('static/css/custom.css') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset_url('static/images/favicon.ico') }}">
-    
+
     <!-- Theme handling inline to prevent flash -->
     <script>
         (function() {
@@ -55,7 +57,7 @@
             }
         })();
     </script>
-    
+
     {% block extra_head %}{% endblock %}
 </head>
 <body class="h-full bg-background">
@@ -65,14 +67,12 @@
     <div id="site-banner" class="relative isolate flex items-center justify-center gap-x-6 overflow-hidden {% if banner_config.get('style') == 'warning' %}bg-banner-warning{% elif banner_config.get('style') == 'success' %}bg-banner-success{% elif banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-banner-announcement-from to-banner-announcement-to{% else %}bg-banner-default{% endif %} px-6 py-2.5 sm:px-3.5">
         <!-- Decorative background elements with clip-path -->
         <div aria-hidden="true" class="absolute top-1/2 left-[max(-7rem,calc(50%-52rem))] -z-10 -translate-y-1/2 transform-gpu blur-2xl">
-            <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"
-                 class="aspect-[577/310] w-[36.0625rem] {% if banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% elif banner_config.get('style') == 'warning' %}bg-gradient-to-r from-yellow-200 to-orange-200{% elif banner_config.get('style') == 'success' %}bg-gradient-to-r from-green-400 to-blue-400{% else %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% endif %} opacity-40"></div>
+            <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)" class="aspect-[577/310] w-[36.0625rem] {% if banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% elif banner_config.get('style') == 'warning' %}bg-gradient-to-r from-yellow-200 to-orange-200{% elif banner_config.get('style') == 'success' %}bg-gradient-to-r from-green-400 to-blue-400{% else %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% endif %} opacity-40"></div>
         </div>
         <div aria-hidden="true" class="absolute top-1/2 left-[max(45rem,calc(50%+8rem))] -z-10 -translate-y-1/2 transform-gpu blur-2xl">
-            <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)"
-                 class="aspect-[577/310] w-[36.0625rem] {% if banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% elif banner_config.get('style') == 'warning' %}bg-gradient-to-r from-yellow-200 to-orange-200{% elif banner_config.get('style') == 'success' %}bg-gradient-to-r from-green-400 to-blue-400{% else %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% endif %} opacity-40"></div>
+            <div style="clip-path: polygon(74.8% 41.9%, 97.2% 73.2%, 100% 34.9%, 92.5% 0.4%, 87.5% 0%, 75% 28.6%, 58.5% 54.6%, 50.1% 56.8%, 46.9% 44%, 48.3% 17.4%, 24.7% 53.9%, 0% 27.9%, 11.9% 74.2%, 24.9% 54.1%, 68.6% 100%, 74.8% 41.9%)" class="aspect-[577/310] w-[36.0625rem] {% if banner_config.get('style') == 'announcement' %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% elif banner_config.get('style') == 'warning' %}bg-gradient-to-r from-yellow-200 to-orange-200{% elif banner_config.get('style') == 'success' %}bg-gradient-to-r from-green-400 to-blue-400{% else %}bg-gradient-to-r from-[#ff80b5] to-[#9089fc]{% endif %} opacity-40"></div>
         </div>
-        
+
         <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 flex-1">
             <p class="text-sm leading-6 text-white text-center">
                 {{ process_banner_text(banner_config.get('text', '')) | safe }}
@@ -83,13 +83,12 @@
             {% if banner_config.get('button') %}
             {% set button = banner_config.get('button', {}) %}
             {% set button_url = button.get('url', '#') %}
-            <a href="{{ url_for(button_url) }}"{{ get_link_target_attrs(url_for(button_url), not button.get('external', false)) | safe }} 
-               class="flex-none rounded-full bg-white/10 px-3.5 py-1 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50">
+            <a href="{{ url_for(button_url) }}"{{ get_link_target_attrs(url_for(button_url), not button.get('external', false)) | safe }} class="flex-none rounded-full bg-white/10 px-3.5 py-1 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/20 hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50">
                 {{ button.get('text', 'Learn More') }} <span aria-hidden="true">&rarr;</span>
             </a>
             {% endif %}
         </div>
-        
+
         {% if banner_config.get('dismissible', true) %}
         <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
             <button type="button" id="dismiss-banner" class="-m-3 p-3 focus:outline-none focus:ring-2 focus:ring-white/50 rounded-lg hover:bg-white/10 transition-colors duration-200">
@@ -104,35 +103,32 @@
     {% endif %}
 
     <!-- Navigation -->
-    <nav class="bg-surface shadow-sm border-b border-border">
+    <nav id="main-nav" class="sticky top-0 z-40 bg-surface/95 border-b border-border transition-shadow duration-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <!-- Logo -->
-                    <a href="{{ url_for('/') }}" class="flex items-center space-x-3">
-                        <img src="{{ asset_url('static/images/logo.svg') }}" alt="Awesome Self-Hosted" class="h-10 w-10">
-                        <span class="text-xl font-bold text-text">{{ site_config.title }}</span>
+                    <a href="{{ url_for('/') }}" class="flex items-center space-x-2.5 mr-8">
+                        <img src="{{ asset_url('static/images/logo.svg') }}" alt="Awesome Self-Hosted" class="h-9 w-9">
+                        <span class="text-lg font-bold text-text hidden sm:inline">{{ site_config.title }}</span>
                     </a>
-                    
+
                     <!-- Main Navigation -->
-                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                    <div class="hidden md:flex md:items-center md:space-x-1">
                         {% for nav_item in filter_navigation(navigation_config) %}
-                        <a href="{{ url_for(nav_item.url) }}" class="text-text-muted hover:text-link px-3 py-2 text-sm font-medium">
+                        <a href="{{ url_for(nav_item.url) }}" class="text-text-muted hover:text-link hover:bg-surface-alt px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                             {{ nav_item.title }}
                         </a>
                         {% endfor %}
                     </div>
                 </div>
-                
+
                 <!-- Search and Theme Toggle -->
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 sm:space-x-3">
                     <!-- Search Bar -->
                     <div class="hidden sm:block">
                         <div class="relative">
-                            <input type="text" 
-                                   id="search-input" 
-                                   placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" 
-                                   class="w-64 px-4 py-2 pl-10 pr-4 text-sm bg-surface-alt border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text">
+                            <input type="text" id="search-input" placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" class="w-48 lg:w-64 px-4 py-2 pl-10 pr-4 text-sm bg-surface-alt border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text transition-all focus:w-64 lg:focus:w-80">
                             <div class="absolute left-3 top-2.5">
                                 <svg class="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -140,13 +136,13 @@
                             </div>
                         </div>
                         <!-- Search Results Dropdown -->
-                        <div id="search-results" class="absolute mt-1 w-64 bg-surface rounded-lg shadow-lg border border-border hidden z-50">
+                        <div id="search-results" class="absolute mt-1 w-64 lg:w-80 bg-surface rounded-lg shadow-lg border border-border hidden z-50">
                             <!-- Search results will be populated by JavaScript -->
                         </div>
                     </div>
-                    
+
                     <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="p-2 text-text-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-primary rounded-lg">
+                    <button id="theme-toggle" class="p-2 text-text-muted hover:text-text hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-colors">
                         <svg id="theme-toggle-dark-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                         </svg>
@@ -154,73 +150,78 @@
                             <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
                         </svg>
                     </button>
-                    
+
                     <!-- Mobile Menu Button -->
-                    <button id="mobile-menu-button" class="md:hidden p-2 text-text-muted hover:text-text focus:outline-none focus:ring-2 focus:ring-primary">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button id="mobile-menu-button" class="md:hidden p-2 text-text-muted hover:text-text hover:bg-surface-alt focus:outline-none focus:ring-2 focus:ring-primary rounded-lg transition-colors">
+                        <svg id="mobile-menu-open-icon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg id="mobile-menu-close-icon" class="hidden w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
             </div>
         </div>
-        
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="md:hidden hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-surface border-t border-border">
+
+        <!-- Mobile Menu (slide-down panel) -->
+        <div id="mobile-menu" class="md:hidden hidden overflow-hidden transition-all duration-300 ease-in-out" style="max-height: 0;">
+            <div class="px-4 pt-3 pb-4 space-y-1 bg-surface border-t border-border">
                 {% for nav_item in filter_navigation(navigation_config) %}
-                <a href="{{ url_for(nav_item.url) }}" class="block px-3 py-2 text-base font-medium text-text-muted hover:text-link">
+                <a href="{{ url_for(nav_item.url) }}" class="block px-4 py-2.5 text-base font-medium text-text-muted hover:text-link hover:bg-surface-alt rounded-lg transition-colors">
                     {{ nav_item.title }}
                 </a>
                 {% endfor %}
                 <!-- Mobile Search -->
-                <div class="px-3 py-2 relative">
-                    <input type="text" 
-                           id="mobile-search-input" 
-                           placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" 
-                           class="w-full px-4 py-2 text-sm bg-surface-alt border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text">
+                <div class="pt-2 relative">
+                    <div class="relative">
+                        <input type="text" id="mobile-search-input" placeholder="{{ search_config.get('placeholder_text', 'Search applications...') }}" class="w-full px-4 py-2.5 pl-10 text-sm bg-surface-alt border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text">
+                        <div class="absolute left-3 top-3">
+                            <svg class="h-4 w-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                    </div>
                     <!-- Mobile Search Results Dropdown -->
-                    <div id="mobile-search-results" class="absolute mt-1 w-full bg-surface rounded-lg shadow-lg border border-border hidden z-50 max-h-64 overflow-y-auto">
+                    <div id="mobile-search-results" class="absolute mt-1 left-0 right-0 bg-surface rounded-lg shadow-lg border border-border hidden z-50 max-h-64 overflow-y-auto">
                         <!-- Search results will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
         </div>
     </nav>
-    
+
     <!-- Main Content -->
     <main class="min-h-screen">
         {% block content %}{% endblock %}
     </main>
-    
+
     <!-- Footer -->
     <footer class="bg-surface border-t border-border">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="{{ asset_url('static/images/logo.svg') }}" alt="Logo" class="h-8 w-8">
+                    <div class="flex items-center space-x-2 mb-3">
+                        <img src="{{ asset_url('static/images/logo.svg') }}" alt="Logo" class="h-7 w-7">
                         <span class="text-xl font-bold text-text">{{ render_template_string(footer_config.logo_text) or site_config.title }}</span>
                     </div>
-                    <p class="text-text-muted mb-4">
+                    <p class="text-text-muted mb-3 max-w-md leading-relaxed">
                         {{ render_template_string(footer_config.tagline) or site_config.description }}
                     </p>
                     <p class="text-sm text-text-muted">
-                        {{ render_template_string(footer_config.credit_text) or 'Built with ❤️ for the self-hosting community' }}
+                        {{ render_template_string(footer_config.credit_text) or 'Built for the self-hosting community' }}
                     </p>
                 </div>
-                
+
                 {% for section_id, section in footer_config.sections.items() %}
                 <div>
-                    <h3 class="text-sm font-semibold text-text uppercase tracking-wider mb-4">
+                    <h3 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">
                         {{ section.title }}
                     </h3>
-                    <ul class="space-y-2">
+                    <ul class="space-y-1.5">
                         {% for link in filter_navigation(section.links) %}
                         <li>
-                            <a href="{{ url_for(link.url) }}" 
-                               {{ get_link_target_attrs(url_for(link.url), not link.external) | safe }}
-                               class="text-text-muted hover:text-link">
+                            <a href="{{ url_for(link.url) }}" {{ get_link_target_attrs(url_for(link.url), not link.external) | safe }} class="text-text-muted hover:text-link transition-colors">
                                 {{ link.title }}
                             </a>
                         </li>
@@ -229,20 +230,20 @@
                 </div>
                 {% endfor %}
             </div>
-            
-            <div class="mt-8 pt-8 border-t border-border">
+
+            <div class="mt-8 pt-6 border-t border-border">
                 <div class="text-center text-sm text-text-muted">
                     {{ render_template_string(footer_config.footer_text) | safe }}
                 </div>
             </div>
         </div>
     </footer>
-    
+
     <!-- JavaScript -->
     <script src="{{ asset_url('static/js/theme.js') }}"></script>
     <script src="{{ asset_url('static/js/search.js') }}"></script>
     <script src="{{ asset_url('static/js/app.js') }}"></script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
-</html> 
+</html>

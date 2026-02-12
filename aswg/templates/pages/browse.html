@@ -39,10 +39,10 @@
 <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-text mb-4">
+        <h1 class="text-3xl sm:text-4xl font-bold text-text mb-2">
             Browse Applications
         </h1>
-        <p class="text-lg text-text-muted">
+        <p class="text-base sm:text-lg text-text-muted">
             Discover {{ total_applications }} selfhosted applications
         </p>
     </div>
@@ -233,9 +233,9 @@
         <!-- Filters Sidebar (hidden on mobile, visible on desktop) -->
         <div id="desktopFilterSidebar" class="lg:col-span-1 mb-8 lg:mb-0 space-y-6">
             <!-- Category Filter -->
-            <div class="bg-surface rounded-lg shadow-md p-6">
+            <div class="bg-surface rounded-lg border border-border shadow-sm p-5">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-text">
+                    <h3 class="text-base font-semibold text-text">
                         Categories
                     </h3>
                     <button class="filter-search-toggle p-1 text-text-muted hover:text-text" data-target="categorySearch">
@@ -252,9 +252,9 @@
                 </div>
             </div>
             <!-- Platform Filter -->
-            <div class="bg-surface rounded-lg shadow-md p-6">
+            <div class="bg-surface rounded-lg border border-border shadow-sm p-5">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-text">
+                    <h3 class="text-base font-semibold text-text">
                         Platforms
                     </h3>
                     <button class="filter-search-toggle p-1 text-text-muted hover:text-text" data-target="platformSearch">
@@ -271,9 +271,9 @@
                 </div>
             </div>
             <!-- License Filter -->
-            <div class="bg-surface rounded-lg shadow-md p-6">
+            <div class="bg-surface rounded-lg border border-border shadow-sm p-5">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-text">
+                    <h3 class="text-base font-semibold text-text">
                         Licenses
                     </h3>
                     <button class="filter-search-toggle p-1 text-text-muted hover:text-text" data-target="licenseSearch">
@@ -298,9 +298,9 @@
             </div>
 
             <!-- Star Count Filter -->
-            <div class="bg-surface rounded-lg shadow-md p-6">
+            <div class="bg-surface rounded-lg border border-border shadow-sm p-5">
                 <div class="range-filter-header">
-                    <h3 class="text-lg font-semibold text-text">
+                    <h3 class="text-base font-semibold text-text">
                         Star Count
                     </h3>
                     <button id="resetStarsFilter" class="range-filter-reset hidden">
@@ -322,9 +322,9 @@
             </div>
 
             <!-- Last Updated Filter -->
-            <div class="bg-surface rounded-lg shadow-md p-6">
+            <div class="bg-surface rounded-lg border border-border shadow-sm p-5">
                 <div class="range-filter-header">
-                    <h3 class="text-lg font-semibold text-text">
+                    <h3 class="text-base font-semibold text-text">
                         Last Updated
                     </h3>
                     <button id="resetUpdatedFilter" class="range-filter-reset hidden">
@@ -357,7 +357,7 @@
         <!-- Applications Grid -->
         <div class="lg:col-span-4">
             <!-- Sort Controls (Desktop Only) -->
-            <div id="desktopSortControls" class="flex justify-between items-center mb-6 bg-surface rounded-lg shadow-md p-4">
+            <div id="desktopSortControls" class="flex justify-between items-center mb-6 bg-surface rounded-lg border border-border shadow-sm p-4">
                 <div class="text-sm text-text-muted">
                     Showing <span id="visibleCount">Loading...</span> of <span id="totalCount">{{ total_applications }}</span> applications
                 </div>
@@ -378,7 +378,7 @@
             </div>
 
             <!-- Applications Grid -->
-            <div id="applicationsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+            <div id="applicationsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
                 <!-- Applications will be populated by JavaScript -->
                 <div id="loadingMessage" class="col-span-full text-center py-12">
                     <div class="text-text-muted">Loading applications...</div>
@@ -387,9 +387,16 @@
 
             <!-- Client-side Pagination -->
             <div id="paginationContainer" class="hidden">
-                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface rounded-lg shadow-md p-4">
-                    <div class="text-sm text-text-muted">
-                        Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface rounded-lg border border-border shadow-sm p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="text-sm text-text-muted">
+                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                        </div>
+                        <div id="paginationSizeChooser" class="hidden">
+                            <select id="paginationSizeSelect" class="text-sm bg-surface-alt border border-border rounded px-2 py-1 text-text cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary">
+                                <!-- Options populated by JavaScript -->
+                            </select>
+                        </div>
                     </div>
                     
                     <div id="paginationButtons" class="flex items-center justify-center sm:justify-end space-x-1">

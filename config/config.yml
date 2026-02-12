@@ -36,6 +36,7 @@ generation:
   minify_html: false
   generate_sitemap: true
   enable_pagination: true
+  let_user_choose_pagination_size: true
   use_git_data: true
 
 # =============================================================================
@@ -56,6 +57,8 @@ ui:
       text: "Release Notes"
       url: "https://github.com/awesome-selfhosted/awesome-selfhosted/releases" # this can also be "/browse.html" if external is set to false
       external: true
+
+  show_project_icons: false
 
   # Content limits for different sections
   limits:
@@ -216,7 +219,7 @@ pages:
 # ALTERNATIVES PAGE CONFIGURATION
 # =============================================================================
 alternatives:
-  enabled: false  # Set to false to disable the alternatives page
+  enabled: true  # Set to false to disable the alternatives page
   min_alternatives: 2  # Minimum number of alternatives required to show a software
   show_more_threshold: 3 # Show "Show More" button if there are more than this number of alternatives
   show_statistics: true  # Show statistics section on the page

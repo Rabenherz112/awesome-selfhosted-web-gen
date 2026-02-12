@@ -31,6 +31,7 @@ class Application:
     forks: Optional[int] = None
     last_updated: Optional[str] = None
     depends_3rdparty: bool = False
+    icon_url: Optional[str] = None
     current_release: Optional[Dict[str, str]] = None
     commit_history: Optional[Dict[str, int]] = None
     # Special annotations parsed from description
@@ -290,6 +291,7 @@ class DataProcessor:
                 stars=app_data.get("stargazers_count"),
                 last_updated=app_data.get("updated_at"),
                 depends_3rdparty=app_data.get("depends_3rdparty", False),
+                icon_url=app_data.get("icon_url"),
                 current_release=app_data.get("current_release"),
                 commit_history=app_data.get("commit_history"),
                 # Parsed annotations
@@ -541,10 +543,10 @@ class DataProcessor:
             for app in applications
             if (parsed := parse_date(getattr(app, "last_updated", None)))
         ]
-        active_apps_last_365 = None
+        active_apps_last_180 = None
         if last_updated_dates:
-            cutoff_date = today - timedelta(days=365)
-            active_apps_last_365 = sum(1 for parsed_date in last_updated_dates if parsed_date >= cutoff_date)
+            cutoff_date = today - timedelta(days=180)
+            active_apps_last_180 = sum(1 for parsed_date in last_updated_dates if parsed_date >= cutoff_date)
 
         date_added_dates = [
             parsed
@@ -577,7 +579,7 @@ class DataProcessor:
             "apps_with_multiple_licenses": apps_with_multiple_licenses,
             "apps_with_multiple_platforms": apps_with_multiple_platforms,
             "apps_with_demo": apps_with_demo,
-            "apps_with_recent_activity": active_apps_last_365,
+            "apps_with_recent_activity": active_apps_last_180,
             "apps_with_releases": apps_with_releases,
             "new_apps_current_year": new_apps_current_year,
             "new_apps_current_year_label": new_apps_current_year_label,

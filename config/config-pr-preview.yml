@@ -37,6 +37,7 @@ generation:
   minify_html: true
   generate_sitemap: true
   enable_pagination: true
+  let_user_choose_pagination_size: true
   use_git_data: true
 
 # =============================================================================
@@ -53,6 +54,8 @@ ui:
     dismissible: false
     style: "warning"  # info, warning, success, announcement
     text: "**PR Preview** This is a preview build for testing purposes"
+
+  show_project_icons: true
 
   # Content limits for different sections
   limits:

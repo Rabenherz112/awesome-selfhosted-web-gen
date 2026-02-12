@@ -25,6 +25,43 @@ class TemplateHelpers:
         slug = re.sub(r"[^a-z0-9]+", "-", text.lower().strip())
         return slug.strip("-")
 
+    def get_letter_avatar_color(self, name: str) -> str:
+        """Generate a deterministic HSL color from a name string for letter avatars."""
+        hash_val = 0
+        for ch in name:
+            hash_val = ord(ch) + ((hash_val << 5) - hash_val)
+            hash_val = hash_val & 0xFFFFFFFF  # keep 32-bit
+        hue = abs(hash_val) % 360
+        return f"hsl({hue}, 45%, 55%)"
+
+    def get_app_icon_html(self, app, size: str = "sm") -> str:
+        """Return HTML for an app icon or letter-avatar fallback. Returns empty string if disabled.
+        Empty icon_url: letter avatar is used. Invalid icon_url (bad URL or failed load): server-
+        rendered HTML has no onerror; the img may show as broken. Client-side (JS) uses onerror
+        to show the letter avatar fallback."""
+        if not self.config.get("ui.show_project_icons", True):
+            return ""
+
+        if size == "lg":
+            avatar_cls = "letter-avatar letter-avatar-lg"
+            img_cls = "app-icon-lg"
+        else:
+            avatar_cls = "letter-avatar letter-avatar-sm"
+            img_cls = "app-icon"
+
+        first_letter = app.name[0].upper() if app.name else "?"
+        color = self.get_letter_avatar_color(app.name)
+        icon_url = getattr(app, "icon_url", None)
+
+        if icon_url:
+            return (
+                f'<img src="{icon_url}" alt="" class="{img_cls}" loading="lazy">'
+            )
+        return (
+            f'<div class="{avatar_cls}" style="background:{color};">'
+            f'{first_letter}</div>'
+        )
+
     def format_stars(self, stars: int) -> str:
         """Format star count for display."""
         if stars is None or stars == 0:
@@ -446,7 +483,7 @@ class TemplateHelpers:
 
                     if list_items:
                         html_paragraphs.append(
-                            f'<ul class="list-disc list-inside mb-4 space-y-1">\n{"".join(list_items)}\n</ul>'
+                            f'<ul class="list-disc list-outside mb-4 space-y-1 pl-5">\n{"".join(list_items)}\n</ul>'
                         )
                 else:
                     # Handle as regular paragraph
