@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "number": 63,
+    "title": "feat: page design & icon support",
+    "author": "Rabenherz112",
+    "branch": "feat-page-design",
+    "commit": "71de8d4",
+    "commit_full": "71de8d4c5b3f0d07b3d7041e0eab1a6c4e3208f1",
+    "url": "pr-63/",
+    "pr_url": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen/pull/63",
+    "updated": "2026-02-12T20:05:48+00:00",
+    "build": {
+      "size": "35M",
+      "total_files": "1335",
+      "html_pages": "1320",
+      "app_pages": "1316",
+      "duration": "49s"
+    }
+  }
+]
