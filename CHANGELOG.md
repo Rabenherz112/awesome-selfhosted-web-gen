@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. The format 
 - Fixed search bar showing formatted number instead of raw star count
 - Fixed scroll-to-top button a circle shape
 - Fixed (hopefully) the issue some users had issue with truncation of the app name happing too early
+- Fixed broken link to browse page on statistics page
 
 ### Other changes
 
