@@ -2,11 +2,13 @@
 Data processing module for fetching and processing awesome-selfhosted data.
 """
 
+import html
 import yaml
 import subprocess
 import unicodedata
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from datetime import datetime, date, timedelta, timezone
 
@@ -272,6 +274,9 @@ class DataProcessor:
                 app_data.get("description", "")
             )
 
+            # Validate icon_url
+            icon_url = self._validate_url(app_data.get("icon_url"))
+
             # Get git data if available
             date_added = None
             if git_data and app_id in git_data:
@@ -291,7 +296,7 @@ class DataProcessor:
                 stars=app_data.get("stargazers_count"),
                 last_updated=app_data.get("updated_at"),
                 depends_3rdparty=app_data.get("depends_3rdparty", False),
-                icon_url=app_data.get("icon_url"),
+                icon_url=icon_url,
                 current_release=app_data.get("current_release"),
                 commit_history=app_data.get("commit_history"),
                 # Parsed annotations
@@ -306,6 +311,22 @@ class DataProcessor:
             applications.append(app)
 
         return applications
+
+    def _validate_url(self, url: Optional[Any]) -> Optional[str]:
+        """Validate icon_url is a well-formed HTTP/HTTPS URL and return it HTML-escaped for safe embedding in attributes."""
+        if url is None or not isinstance(url, str):
+            return None
+        value = url.strip()
+        if not value:
+            return None
+        try:
+            parsed = urlparse(value)
+            scheme = (parsed.scheme or "").lower()
+            if scheme not in ("http", "https"):
+                return None
+            return html.escape(value, quote=True)
+        except Exception:
+            return None
 
     def _create_app_id(self, name: str) -> str:
         """Create a unique ID from application name."""

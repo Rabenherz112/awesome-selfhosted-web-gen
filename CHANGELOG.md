@@ -12,9 +12,9 @@ All notable changes to this project will be documented in this file. The format 
 ### Bug Fixes
 
 - Fixed search bar which sometimes hid itself when typing too fast
-- Fixed search bar showing formatted number instead of raw star count
+- Fixed search bar showing raw star count instead of formatted number
 - Fixed scroll-to-top button a circle shape
-- Fixed (hopefully) the issue some users had issue with truncation of the app name happing too early
+- Fixed (hopefully) the issue some users had issue with truncation of the app name happening too early
 - Fixed broken link to browse page on statistics page
 
 ### Other changes

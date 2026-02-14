@@ -35,10 +35,7 @@ class TemplateHelpers:
         return f"hsl({hue}, 45%, 55%)"
 
     def get_app_icon_html(self, app, size: str = "sm") -> str:
-        """Return HTML for an app icon or letter-avatar fallback. Returns empty string if disabled.
-        Empty icon_url: letter avatar is used. Invalid icon_url (bad URL or failed load): server-
-        rendered HTML has no onerror; the img may show as broken. Client-side (JS) uses onerror
-        to show the letter avatar fallback."""
+        """Return HTML for an app icon or letter-avatar fallback. Returns empty string if disabled."""
         if not self.config.get("ui.show_project_icons", True):
             return ""
 
