@@ -616,9 +616,9 @@ class AlternativesPage {
         }
 
         // Category badges (up to configured limit)
-        const categoriesHtml = app.categories ? app.categories.slice(0, this.browseMaxCategoriesPerCard).map(category =>
+        const categoriesHtml = app.categories ? app.categories.slice(0, this.alternativesMaxCategoriesPerCard).map(category =>
             `<span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-0.5 rounded-full">${category}</span>`
-        ).join('') + (app.categories.length > this.browseMaxCategoriesPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-0.5 rounded-full">+${app.categories.length - this.browseMaxCategoriesPerCard}</span>` : '') : '';
+        ).join('') + (app.categories.length > this.alternativesMaxCategoriesPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-0.5 rounded-full">+${app.categories.length - this.alternativesMaxCategoriesPerCard}</span>` : '') : '';
 
         // Platform badges (up to configured limit)
         const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.browseMaxPlatformsPerCard).map(platform => {
@@ -626,7 +626,7 @@ class AlternativesPage {
             return `<span class="inline-flex items-center text-text-muted text-xs">
                 <span class="w-2.5 h-2.5 rounded-full mr-1.5 flex-shrink-0" style="background-color: ${color};"></span>${platform}
             </span>`;
-        }).join('') + (app.platforms.length > this.browseMaxPlatformsPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-1.5 py-0.5 rounded">+${app.platforms.length - this.browseMaxPlatformsPerCard}</span>` : '') : '';
+        }).join('') + (app.platforms.length > this.alternativesMaxPlatformsPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-1.5 py-0.5 rounded">+${app.platforms.length - this.alternativesMaxPlatformsPerCard}</span>` : '') : '';
 
         // Action links
         const demoLink = (app.demo_url && app.demo_url.trim()) ? `<a href="${app.demo_url}"${getLinkAttrs(app.demo_url, false)} class="text-link hover:text-link-hover font-medium">Demo</a>` : '';
