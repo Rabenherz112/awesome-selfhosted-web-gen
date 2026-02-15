@@ -4,17 +4,17 @@
     "title": "feat: page design & icon support",
     "author": "Rabenherz112",
     "branch": "feat-page-design",
-    "commit": "b87f9bd",
-    "commit_full": "b87f9bd70c956262e57d32fd5651704a174e81ce",
+    "commit": "4089a39",
+    "commit_full": "4089a396915e087158aaf5a5d802bd15f5170b7a",
     "url": "pr-63/",
     "pr_url": "https://github.com/Rabenherz112/aswg/pull/63",
-    "updated": "2026-02-15T16:54:35+00:00",
+    "updated": "2026-02-15T17:00:36+00:00",
     "build": {
-      "size": "35M",
+      "size": "33M",
       "total_files": "1335",
       "html_pages": "1320",
       "app_pages": "1316",
-      "duration": "45s"
+      "duration": "49s"
     }
   }
 ]
