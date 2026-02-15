@@ -68,7 +68,7 @@ jobs:
           # Create a temporary config file with dynamic base_path
           cp ./config/config-pr-preview.yml ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
           # Update base_path to include repository name and PR number
-          sed -i 's|base_path: ""|base_path: "/awesome-selfhosted-web-gen/pr-${{ github.event.number }}"|g' ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
+          sed -i 's|base_path: ""|base_path: "/aswg/pr-${{ github.event.number }}"|g' ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
           # Generate website with the modified config
           aswg --config ./config/config-pr-preview-temp.yml build 2>&1 | tee -a build.log
           # Clean up temporary config file
@@ -271,7 +271,7 @@ jobs:
           <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>PR Previews - awesome-selfhosted-web-gen</title>
+          <title>PR Previews - ASWG</title>
           <style>
           :root { color-scheme: light dark; }
           body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 2rem 1rem; }
@@ -297,7 +297,7 @@ jobs:
           <body>
           <header>
             <h1>PR Preview Dashboard</h1>
-            <p><a href="https://github.com/rabenherz112/awesome-selfhosted-web-gen">rabenherz112/awesome-selfhosted-web-gen</a></p>
+            <p><a href="https://github.com/rabenherz112/aswg">rabenherz112/aswg</a></p>
           </header>
           <input type="text" id="filter" placeholder="Filter by PR number, title, author, or branch...">
           <div id="status">Loading...</div>
@@ -306,7 +306,7 @@ jobs:
           <script>
           function timeAgo(d){if(!d)return'';var s=(Date.now()-new Date(d).getTime())/1e3;if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
           function esc(s){var e=document.createElement('span');e.textContent=s||'';return e.innerHTML;}
-          var repoBase='https://github.com/rabenherz112/awesome-selfhosted-web-gen';
+          var repoBase='https://github.com/rabenherz112/aswg';
 
           function render(prs){
             var c=document.getElementById('content');
