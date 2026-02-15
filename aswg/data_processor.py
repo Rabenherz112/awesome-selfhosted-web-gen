@@ -254,8 +254,12 @@ class DataProcessor:
             # Use the ID that was set from filename
             app_id = app_data.get("id", self._create_app_id(app_data.get("name", "")))
 
-            # Get repository URL
-            repo_url = app_data.get("source_code_url")
+            # Validate URL fields from app_data (defense-in-depth: prevent XSS via javascript: etc.)
+            repo_url = self._validate_url(app_data.get("source_code_url"))
+            demo_url = self._validate_url(app_data.get("demo_url"))
+            related_software_url = self._validate_url(app_data.get("related_software_url"))
+            website_url = self._validate_url(app_data.get("website_url")) or ""
+            icon_url = self._validate_url(app_data.get("icon_url"))
 
             # Get platforms (technologies/languages) - keep all platforms
             platforms = app_data.get("platforms", [])
@@ -273,9 +277,7 @@ class DataProcessor:
             desc_data = self._parse_description_annotations(
                 app_data.get("description", "")
             )
-
-            # Validate icon_url
-            icon_url = self._validate_url(app_data.get("icon_url"))
+            fork_url = self._validate_url(desc_data.get("fork_url"))
 
             # Get git data if available
             date_added = None
@@ -286,10 +288,10 @@ class DataProcessor:
                 id=app_id,
                 name=app_data.get("name", ""),
                 description=desc_data["description"],
-                url=app_data.get("website_url", ""),
+                url=website_url,
                 repo_url=repo_url,
-                demo_url=app_data.get("demo_url"),
-                related_software_url=app_data.get("related_software_url"),
+                demo_url=demo_url,
+                related_software_url=related_software_url,
                 categories=app_data.get("tags", []),
                 license=licenses,
                 platforms=platforms,
@@ -301,7 +303,7 @@ class DataProcessor:
                 commit_history=app_data.get("commit_history"),
                 # Parsed annotations
                 fork_of=desc_data["fork_of"],
-                fork_url=desc_data["fork_url"],
+                fork_url=fork_url,
                 alternative_to=desc_data["alternative_to"],
                 documentation_language=desc_data["documentation_language"],
                 # Git data
