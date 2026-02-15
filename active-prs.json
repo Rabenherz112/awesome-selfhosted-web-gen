@@ -4,17 +4,17 @@
     "title": "feat: page design & icon support",
     "author": "Rabenherz112",
     "branch": "feat-page-design",
-    "commit": "74ddd72",
-    "commit_full": "74ddd729baeaf3865195798680e418a2fb8a86aa",
+    "commit": "b87f9bd",
+    "commit_full": "b87f9bd70c956262e57d32fd5651704a174e81ce",
     "url": "pr-63/",
-    "pr_url": "https://github.com/Rabenherz112/awesome-selfhosted-web-gen/pull/63",
-    "updated": "2026-02-15T16:35:34+00:00",
+    "pr_url": "https://github.com/Rabenherz112/aswg/pull/63",
+    "updated": "2026-02-15T16:54:35+00:00",
     "build": {
       "size": "35M",
       "total_files": "1335",
       "html_pages": "1320",
       "app_pages": "1316",
-      "duration": "50s"
+      "duration": "45s"
     }
   }
 ]
