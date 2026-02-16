@@ -22,7 +22,7 @@ body:
   - type: textarea
     id: steps-to-reproduce
     attributes:
-      label: Steps to Reproduce
+      label: Steps to Reproduce (if applicable)
       description: Please provide detailed steps to reproduce the issue
       placeholder: |
         1. Run command '...'
@@ -30,7 +30,7 @@ body:
         3. Click on '...'
         4. See error
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: additional-context
@@ -48,6 +48,4 @@ body:
       description: Please confirm the following
       options:
         - label: I have searched existing issues to ensure this bug hasn't been reported before
-          required: true
-        - label: I have provided all relevant information to help reproduce this issue
           required: true
