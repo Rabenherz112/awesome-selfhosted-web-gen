@@ -29,9 +29,9 @@ A Python-based static site generator that creates an interactive website from th
 2. Install the package:
 
   ```bash
-  pip install git+https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git
+  pip install git+https://github.com/Rabenherz112/aswg.git
   # or install a specific version
-  pip install git+https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git@v2.0.0 # replace v2.0.0 with the version you want to install
+  pip install git+https://github.com/Rabenherz112/aswg.git@v2.0.0 # replace v2.0.0 with the version you want to install
   ```
 
 3. Clone the data repository:
@@ -89,8 +89,8 @@ aswg --config custom-config.yaml build
 ### Installing from Source
 
 ```bash
-git clone https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git
-cd awesome-selfhosted-web-gen
+git clone https://github.com/Rabenherz112/aswg.git
+cd aswg
 pip install -e .
 ```
 
@@ -162,7 +162,7 @@ jobs:
         with:
           python-version: '3.13'
       - name: Clone data repository
-        run: pip install git+https://github.com/Rabenherz112/awesome-selfhosted-web-gen.git@v2.0.0 # replace v2.0.0 with the version you want to install
+        run: pip install git+https://github.com/Rabenherz112/aswg.git@v2.0.0 # replace v2.0.0 with the version you want to install
       # You probably want to add a step to overwrite the default config/config.yml with your own config.yml
       - name: Build website
         run: aswg build
