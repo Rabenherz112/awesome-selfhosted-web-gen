@@ -36,6 +36,7 @@ generation:
   minify_html: false
   generate_sitemap: true
   enable_pagination: true
+  let_user_choose_pagination_size: false
   use_git_data: true
 
 # =============================================================================
@@ -56,6 +57,8 @@ ui:
       text: "Release Notes"
       url: "https://github.com/awesome-selfhosted/awesome-selfhosted/releases" # this can also be "/browse.html" if external is set to false
       external: true
+
+  show_project_icons: false
 
   # Content limits for different sections
   limits:

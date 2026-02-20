@@ -4,9 +4,22 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [Unreleased]
 
+### Additions
+
+- Added Icon support for application cards
+- Added ability to let users choose the pagination size
+
 ### Bug Fixes
 
 - Fixed search bar which sometimes hid itself when typing too fast
+- Fixed search bar showing raw star count instead of formatted number
+- Fixed scroll-to-top button a circle shape
+- Fixed (hopefully) the issue some users had issue with truncation of the app name happening too early
+- Fixed broken link to browse page on statistics page
+
+### Other changes
+
+- Slightly changed overall design to match icon support
 
 ## [2.1.0] - 2025-12-27
 

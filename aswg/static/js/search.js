@@ -100,6 +100,13 @@
             .slice(0, searchConfig.maxResults); // Limit to maxResults
     }
     
+    // Format star count for display (e.g. 14000 -> "14.0k").
+    function formatStars(stars) {
+        if (stars == null || stars === 0) return '';
+        if (stars >= 1000) return (stars / 1000).toFixed(1) + 'k';
+        return String(stars);
+    }
+
     // Display search results
     function displaySearchResults(results, query, resultsId = 'search-results') {
         const searchResults = document.getElementById(resultsId);
@@ -115,7 +122,7 @@
                 <a href="${basePath}/apps/${app.id}.html" class="block">
                     <div class="font-medium text-text">${highlightMatch(app.name, query)}</div>
                     <div class="text-sm text-text-muted truncate">${highlightMatch(app.description.substring(0, 100), query)}...</div>
-                    ${app.stars ? `<div class="text-xs text-star mt-1">⭐ ${app.stars}</div>` : ''}
+                    ${app.stars ? `<div class="text-xs text-star mt-1">⭐ ${formatStars(app.stars)}</div>` : ''}
                 </a>
             </div>
         `).join('');

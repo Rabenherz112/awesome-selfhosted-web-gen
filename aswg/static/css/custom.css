@@ -345,6 +345,20 @@ input:checked + .toggle-slider:before {
     animation: fadeIn 0.3s ease-out;
 }
 
+/* Card hover animation - subtle lift with enhanced shadow */
+.app-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .app-card:hover {
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3), 0 4px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
 /* COMMIT ACTIVITY GRAPH STYLES
    
    Styling for the GitHub-style commit activity graph displayed on application
@@ -393,7 +407,7 @@ input:checked + .toggle-slider:before {
 */
 
 /* Mobile responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     /* Smaller font size for month labels on mobile */
     .commit-graph .month-label {
         font-size: 8px;
@@ -532,7 +546,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* Hide decorative elements on mobile to prevent interference */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     #site-banner [aria-hidden="true"] {
         display: none;
     }
@@ -918,16 +932,19 @@ body.mobile-drawer-open {
 /* Range slider value labels container */
 .range-slider-labels {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
     margin-top: 12px;
     font-size: 13px;
 }
 
 /* Editable value input */
 .range-value-input {
-    width: 70px;
-    padding: 4px 8px;
+    width: 60px;
+    min-width: 0;
+    padding: 4px 4px;
     font-size: 13px;
     text-align: center;
     border: 1px solid var(--color-border);
@@ -949,14 +966,15 @@ body.mobile-drawer-open {
 
 /* Days value input - narrower for days display */
 .range-value-input.days-input {
-    width: 55px;
+    width: 50px;
 }
 
 /* Range slider separator text */
 .range-slider-separator {
     color: var(--color-text-muted);
     font-weight: 500;
-    padding: 0 8px;
+    padding: 0 4px;
+    flex-shrink: 0;
 }
 
 /* Range slider section header with reset button */
@@ -992,13 +1010,13 @@ body.mobile-drawer-open {
 /* Mobile adjustments for range sliders */
 @media (max-width: 640px) {
     .range-value-input {
-        width: 60px;
-        padding: 6px 4px;
-        font-size: 14px;
+        width: 55px;
+        padding: 6px 2px;
+        font-size: 13px;
     }
     
     .range-value-input.days-input {
-        width: 50px;
+        width: 45px;
     }
     
     .range-slider-input::-webkit-slider-thumb {
@@ -1010,4 +1028,239 @@ body.mobile-drawer-open {
         width: 22px;
         height: 22px;
     }
+
+    .range-slider-separator {
+        padding: 0 2px;
+    }
+}
+
+/* Desktop sidebar narrow context - ensure range filters don't overflow */
+@media (min-width: 1024px) {
+    #desktopFilterSidebar .range-value-input {
+        width: 52px;
+        padding: 4px 2px;
+        font-size: 12px;
+    }
+
+    #desktopFilterSidebar .range-value-input.days-input {
+        width: 42px;
+    }
+
+    #desktopFilterSidebar .range-slider-separator {
+        padding: 0 2px;
+    }
+
+    #desktopFilterSidebar .range-slider-labels {
+        font-size: 12px;
+        gap: 2px;
+    }
+}
+
+/* =============================================================================
+   APPLICATION ICON COMPONENTS
+   =============================================================================
+   
+   Icon and letter-avatar components for displaying project icons on cards
+   and detail pages. Supports both actual image icons and generated
+   letter-avatar fallbacks.
+   
+   Used by: browse cards, homepage cards, app detail pages, alternatives cards
+   Templates: index.html, browse.html, app_detail.html, alternatives.html
+*/
+
+/* Standard app icon (32x32) used on cards */
+.app-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Large app icon (56x56) used on detail pages */
+.app-icon-lg {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Letter avatar base - used as fallback when no icon_url is set */
+.letter-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #FFFFFF;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+/* Standard size letter avatar (32x32) */
+.letter-avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Large size letter avatar (56x56) */
+.letter-avatar-lg {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    font-size: 22px;
+}
+
+/* Mobile adjustments for app icons */
+@media (max-width: 640px) {
+    .app-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+    }
+    
+    .letter-avatar-sm {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        font-size: 12px;
+    }
+    
+    .app-icon-lg {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+    }
+    
+    .letter-avatar-lg {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        font-size: 20px;
+    }
+}
+
+/* =============================================================================
+   NAVIGATION SCROLL EFFECT
+   =============================================================================
+   
+   Adds a subtle backdrop blur and enhanced shadow to the navigation bar
+   when the user scrolls down. Controlled by JavaScript in app.js.
+   
+   Used by: Main navigation bar in base.html
+   Templates: base.html
+*/
+
+/* Navigation bar scroll state */
+.nav-scrolled {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark .nav-scrolled {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Scroll-to-top button: circle, centered icon, clickable cursor */
+.scroll-to-top-btn {
+    width: 3rem;
+    height: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+
+/* =============================================================================
+   SECTION DIVIDER
+   =============================================================================
+   
+   Subtle horizontal divider between homepage sections, replacing the
+   alternating background color pattern.
+   
+   Used by: Homepage section separators
+   Templates: index.html
+*/
+
+.section-divider {
+    height: 1px;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--color-border),
+        transparent
+    );
+    margin: 0 auto;
+    max-width: 80%;
+}
+
+/* =============================================================================
+   STAT CARD HORIZONTAL LAYOUT
+   =============================================================================
+   
+   Compact horizontal stat cards for statistics sections on homepage
+   and statistics page.
+   
+   Used by: Statistics overview cards
+   Templates: index.html, statistics.html
+*/
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+
+.dark .stat-card:hover {
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.25);
+}
+
+.stat-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-card-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.stat-card-label {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    background: var(--color-surface-alt);
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    line-height: 1.5;
+    margin-top: 0.125rem;
+}
+
+.stat-card-sub {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    margin-top: 0.125rem;
 }

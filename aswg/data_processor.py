@@ -2,11 +2,13 @@
 Data processing module for fetching and processing awesome-selfhosted data.
 """
 
+import html
 import yaml
 import subprocess
 import unicodedata
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from datetime import datetime, date, timedelta, timezone
 
@@ -31,6 +33,7 @@ class Application:
     forks: Optional[int] = None
     last_updated: Optional[str] = None
     depends_3rdparty: bool = False
+    icon_url: Optional[str] = None
     current_release: Optional[Dict[str, str]] = None
     commit_history: Optional[Dict[str, int]] = None
     # Special annotations parsed from description
@@ -251,8 +254,12 @@ class DataProcessor:
             # Use the ID that was set from filename
             app_id = app_data.get("id", self._create_app_id(app_data.get("name", "")))
 
-            # Get repository URL
-            repo_url = app_data.get("source_code_url")
+            # Validate URL fields from app_data (defense-in-depth: prevent XSS via javascript: etc.)
+            repo_url = self._validate_url(app_data.get("source_code_url"))
+            demo_url = self._validate_url(app_data.get("demo_url"))
+            related_software_url = self._validate_url(app_data.get("related_software_url"))
+            website_url = self._validate_url(app_data.get("website_url")) or ""
+            icon_url = self._validate_url(app_data.get("icon_url"))
 
             # Get platforms (technologies/languages) - keep all platforms
             platforms = app_data.get("platforms", [])
@@ -270,6 +277,7 @@ class DataProcessor:
             desc_data = self._parse_description_annotations(
                 app_data.get("description", "")
             )
+            fork_url = self._validate_url(desc_data.get("fork_url"))
 
             # Get git data if available
             date_added = None
@@ -280,21 +288,22 @@ class DataProcessor:
                 id=app_id,
                 name=app_data.get("name", ""),
                 description=desc_data["description"],
-                url=app_data.get("website_url", ""),
+                url=website_url,
                 repo_url=repo_url,
-                demo_url=app_data.get("demo_url"),
-                related_software_url=app_data.get("related_software_url"),
+                demo_url=demo_url,
+                related_software_url=related_software_url,
                 categories=app_data.get("tags", []),
                 license=licenses,
                 platforms=platforms,
                 stars=app_data.get("stargazers_count"),
                 last_updated=app_data.get("updated_at"),
                 depends_3rdparty=app_data.get("depends_3rdparty", False),
+                icon_url=icon_url,
                 current_release=app_data.get("current_release"),
                 commit_history=app_data.get("commit_history"),
                 # Parsed annotations
                 fork_of=desc_data["fork_of"],
-                fork_url=desc_data["fork_url"],
+                fork_url=fork_url,
                 alternative_to=desc_data["alternative_to"],
                 documentation_language=desc_data["documentation_language"],
                 # Git data
@@ -304,6 +313,22 @@ class DataProcessor:
             applications.append(app)
 
         return applications
+
+    def _validate_url(self, url: Optional[Any]) -> Optional[str]:
+        """Validate icon_url is a well-formed HTTP/HTTPS URL and return it HTML-escaped for safe embedding in attributes."""
+        if url is None or not isinstance(url, str):
+            return None
+        value = url.strip()
+        if not value:
+            return None
+        try:
+            parsed = urlparse(value)
+            scheme = (parsed.scheme or "").lower()
+            if scheme not in ("http", "https"):
+                return None
+            return html.escape(value, quote=True)
+        except Exception:
+            return None
 
     def _create_app_id(self, name: str) -> str:
         """Create a unique ID from application name."""
@@ -541,10 +566,10 @@ class DataProcessor:
             for app in applications
             if (parsed := parse_date(getattr(app, "last_updated", None)))
         ]
-        active_apps_last_365 = None
+        active_apps_last_180 = None
         if last_updated_dates:
-            cutoff_date = today - timedelta(days=365)
-            active_apps_last_365 = sum(1 for parsed_date in last_updated_dates if parsed_date >= cutoff_date)
+            cutoff_date = today - timedelta(days=180)
+            active_apps_last_180 = sum(1 for parsed_date in last_updated_dates if parsed_date >= cutoff_date)
 
         date_added_dates = [
             parsed
@@ -577,7 +602,7 @@ class DataProcessor:
             "apps_with_multiple_licenses": apps_with_multiple_licenses,
             "apps_with_multiple_platforms": apps_with_multiple_platforms,
             "apps_with_demo": apps_with_demo,
-            "apps_with_recent_activity": active_apps_last_365,
+            "apps_with_recent_activity": active_apps_last_180,
             "apps_with_releases": apps_with_releases,
             "new_apps_current_year": new_apps_current_year,
             "new_apps_current_year_label": new_apps_current_year_label,

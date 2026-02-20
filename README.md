@@ -183,7 +183,7 @@ This project was created with the assistance of Large Language Models (LLMs). So
 For transparency, the following models/tools were used during development:
 
 - OpenAI [GPT-5](https://openai.com/index/introducing-gpt-5/), [GPT-4o](https://openai.com/index/introducing-gpt-4o/) (code suggestions and documentation drafting)
-- [Claude 4.5 Sonnet](https://www.anthropic.com/news/claude-sonnet-4-5), [Claude 4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1), [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (code suggestions and design suggestions)
+- Claude [4.5 Opus](https://www.anthropic.com/news/claude-opus-4-5), [4.5 Sonnet](https://www.anthropic.com/news/claude-sonnet-4-5), [4.1 Opus](https://www.anthropic.com/news/claude-opus-4-1), [3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet) (code suggestions and design suggestions)
 - [Cursor "Auto"](https://docs.cursor.com/en/models#auto) (code suggestions)
 
 While AI was used as a development aid, all outputs have been reviewed and, where necessary, modified by a human contributor.

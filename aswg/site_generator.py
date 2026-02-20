@@ -80,6 +80,8 @@ class SiteGenerator:
                 "url_for": self.template_helpers.url_for,
                 "asset_url": self.template_helpers.asset_url,
                 "filter_navigation": self.template_helpers.filter_navigation,
+                "get_letter_avatar_color": self.template_helpers.get_letter_avatar_color,
+                "get_app_icon_html": self.template_helpers.get_app_icon_html,
             }
         )
 
@@ -468,6 +470,7 @@ class SiteGenerator:
                 "stars": app.stars or 0,
                 "last_updated": app.last_updated,
                 "depends_3rdparty": app.depends_3rdparty,
+                "icon_url": app.icon_url,
                 "current_release": app.current_release,
                 "commit_history": app.commit_history,
                 "is_nonfree": self.related_apps_finder.is_app_nonfree(app),

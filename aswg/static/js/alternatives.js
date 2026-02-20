@@ -474,19 +474,20 @@ class AlternativesPage {
     }
 
     createSoftwareGroup(softwareName, alternatives) {
+        // Creates a group container for a software's alternatives
         const groupDiv = document.createElement('div');
-        groupDiv.className = 'bg-surface rounded-lg shadow-md border border-border p-6 hover:shadow-lg transition-shadow duration-300 mb-8 mt-4';
+        groupDiv.className = 'bg-surface rounded-lg border border-border shadow-sm p-5 sm:p-6 mb-6 mt-4';
 
         // Create header
         const headerDiv = document.createElement('div');
-        headerDiv.className = 'mb-6';
+        headerDiv.className = 'flex items-center justify-between mb-5';
         
         const title = document.createElement('h2');
-        title.className = 'text-2xl font-bold text-text mb-2';
+        title.className = 'text-xl font-bold text-text';
         title.textContent = softwareName;
         
-        const subtitle = document.createElement('p');
-        subtitle.className = 'text-text-muted';
+        const subtitle = document.createElement('span');
+        subtitle.className = 'text-xs font-medium text-primary bg-primary-light px-2.5 py-1 rounded-full flex-shrink-0 ml-3';
         subtitle.textContent = `${alternatives.length} alternative${alternatives.length !== 1 ? 's' : ''}`;
         
         headerDiv.appendChild(title);
@@ -539,176 +540,137 @@ class AlternativesPage {
     }
 
     createApplicationCard(app) {
+        // Creates a single application card for the alternatives page
         const card = document.createElement('div');
-        card.className = 'bg-surface rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col border border-border';
+        card.className = 'app-card bg-surface rounded-lg border border-border shadow-sm overflow-hidden h-full flex flex-col';
 
         const openExternalInNewTab = document.querySelector('meta[name="open-external-new-tab"]')?.content === 'true' || false;
         const openInternalInNewTab = document.querySelector('meta[name="open-internal-new-tab"]')?.content === 'true' || false;
 
-        // Helper function to get target attributes
+        // Helper for link target attributes
         const getLinkAttrs = (url, isInternal = null) => {
             if (isInternal === null) {
                 isInternal = url.startsWith('/') || url.startsWith(window.location.origin);
             }
-
-            if (isInternal && openInternalInNewTab) {
-                return ' target="_blank" rel="noopener"';
-            } else if (isInternal && !openInternalInNewTab) {
-                return ' target="_self"';
-            } else if (!isInternal && openExternalInNewTab) {
-                return ' target="_blank" rel="noopener noreferrer"';
-            } else if (!isInternal && !openExternalInNewTab) {
-                return ' target="_self" rel="noreferrer"';
-            }
+            if (isInternal && openInternalInNewTab) return ' target="_blank" rel="noopener"';
+            if (isInternal && !openInternalInNewTab) return ' target="_self"';
+            if (!isInternal && openExternalInNewTab) return ' target="_blank" rel="noopener noreferrer"';
+            if (!isInternal && !openExternalInNewTab) return ' target="_self" rel="noreferrer"';
             return '';
         };
-        
+
+        // Icon / letter avatar
+        const iconHtml = window.getAppIconHtml ? window.getAppIconHtml(app, 'sm') : '';
+
+        // Status indicator icons
         const dependsIcon = app.depends_3rdparty ? `
-            <div class="flex-shrink-0" title="Depends on a proprietary service outside the user's control">
+            <span class="flex-shrink-0 cursor-help" title="Depends on a proprietary service outside the user's control">
                 <svg class="w-4 h-4 text-icon-warning" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                 </svg>
-            </div>
-        ` : '';
+            </span>` : '';
 
         const docLanguageIcon = app.documentation_language && Array.isArray(app.documentation_language) && app.documentation_language.length > 0 ? `
-            <div class="flex items-center text-icon-warning flex-shrink-0" title="Documentation only in ${app.documentation_language.join(', ')}">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <span class="flex-shrink-0 cursor-help" title="Documentation only in ${app.documentation_language.join(', ')}">
+                <svg class="w-4 h-4 text-icon-warning" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
                 </svg>
-            </div>
-        ` : '';
+            </span>` : '';
 
-        const starsIcon = app.stars ? `
-            <div class="flex items-center text-star flex-shrink-0" title="Repository stars">
-                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        const forkIcon = app.fork_of ? `
+            <span class="flex-shrink-0 cursor-help" title="Fork of ${app.fork_of}">
+                <svg class="w-4 h-4 text-info" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                  <path d="M13.273 7.73a2.51 2.51 0 0 0-3.159-.31 2.5 2.5 0 0 0-.921 1.12 2.23 2.23 0 0 0-.13.44 4.52 4.52 0 0 1-4-4 2.23 2.23 0 0 0 .44-.13 2.5 2.5 0 0 0 1.54-2.31 2.45 2.45 0 0 0-.19-1A2.48 2.48 0 0 0 5.503.19a2.45 2.45 0 0 0-1-.19 2.5 2.5 0 0 0-2.31 1.54 2.52 2.52 0 0 0 .54 2.73c.35.343.79.579 1.27.68v5.1a2.411 2.411 0 0 0-.89.37 2.5 2.5 0 1 0 3.47 3.468 2.5 2.5 0 0 0 .42-1.387 2.45 2.45 0 0 0-.19-1 2.48 2.48 0 0 0-1.81-1.49v-2.4a5.52 5.52 0 0 0 2 1.73 5.65 5.65 0 0 0 2.09.6 2.5 2.5 0 0 0 4.95-.49 2.51 2.51 0 0 0-.77-1.72z"/>
+                </svg>
+            </span>` : '';
+
+        // Stars and update age
+        const starsHtml = app.stars ? `
+            <span class="inline-flex items-center text-star cursor-help" title="Repository stars">
+                <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                 </svg>
                 <span class="text-xs font-medium">${this.formatStars(app.stars)}</span>
-            </div>
-        ` : '';
+            </span>` : '';
 
         const days = this.getDaysSinceUpdate(app.last_updated);
-        const clockIcon = days !== null ? `
-            <div class="flex items-center ${this.getUpdateAgeColor(days)} flex-shrink-0" title="Last updated ${days} day${days === 1 ? '' : 's'} ago${app.last_updated ? ' (' + app.last_updated + ')' : ''}">
-                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        const clockHtml = days !== null ? `
+            <span class="inline-flex items-center cursor-help ${this.getUpdateAgeColor(days)}" title="Last updated ${days} day${days === 1 ? '' : 's'} ago${app.last_updated ? ' (' + app.last_updated + ')' : ''}">
+                <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                 </svg>
                 <span class="text-xs font-medium">${days}d</span>
-            </div>
-        ` : '';
+            </span>` : '';
 
-        const forkIcon = app.fork_of ? `
-            <div class="flex-shrink-0" title="Fork of ${app.fork_of}">
-                <svg class="w-4 h-4 text-info" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-                  <path d="M13.273 7.73a2.51 2.51 0 0 0-3.159-.31 2.5 2.5 0 0 0-.921 1.12 2.23 2.23 0 0 0-.13.44 4.52 4.52 0 0 1-4-4 2.23 2.23 0 0 0 .44-.13 2.5 2.5 0 0 0 1.54-2.31 2.45 2.45 0 0 0-.19-1A2.48 2.48 0 0 0 5.503.19a2.45 2.45 0 0 0-1-.19 2.5 2.5 0 0 0-2.31 1.54 2.52 2.52 0 0 0 .54 2.73c.35.343.79.579 1.27.68v5.1a2.411 2.411 0 0 0-.89.37 2.5 2.5 0 1 0 3.47 3.468 2.5 2.5 0 0 0 .42-1.387 2.45 2.45 0 0 0-.19-1 2.48 2.48 0 0 0-1.81-1.49v-2.4a5.52 5.52 0 0 0 2 1.73 5.65 5.65 0 0 0 2.09.6 2.5 2.5 0 0 0 4.95-.49 2.51 2.51 0 0 0-.77-1.72zm-8.2 3.38c.276.117.512.312.68.56a1.5 1.5 0 0 1-2.08 2.08 1.55 1.55 0 0 1-.56-.68 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08zM4.503 4a1.5 1.5 0 0 1-1.39-.93 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08A1.5 1.5 0 0 1 4.503 4zm8.06 6.56a1.5 1.5 0 0 1-2.45-.49 1.49 1.49 0 0 1-.08-.86 1.49 1.49 0 0 1 1.18-1.18 1.49 1.49 0 0 1 .86.08 1.499 1.499 0 0 1 .49 2.45z"/>
-                </svg>
-            </div>
-        ` : '';
-
-        // Category badges (show up to configured limit)
-        const categoriesHtml = app.categories ? app.categories.slice(0, this.alternativesMaxCategoriesPerCard).map(category => 
-            `<span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-1 rounded-full mr-1 mb-1">${category}</span>`
-        ).join('') + (app.categories.length > this.alternativesMaxCategoriesPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-1 rounded-full mr-1 mb-1">+${app.categories.length - this.alternativesMaxCategoriesPerCard}</span>` : '') : '';
-        
-        // Platform badges (show up to configured limit)
-        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.alternativesMaxPlatformsPerCard).map(platform => {
-            const color = this.getPlatformColor(platform);
-            return `<span class="inline-flex items-center text-text-muted text-xs mr-2 mb-1">
-                <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></div>
-                ${platform}
-            </span>`;
-        }).join('') + (app.platforms.length > this.alternativesMaxPlatformsPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-1 rounded mr-1 mb-1">+${app.platforms.length - this.alternativesMaxPlatformsPerCard}</span>` : '') : '';
-
-        // License display (first license + count if multiple)
+        // License badge
         let licenseBadge = '';
-        let licenseText = '';
-        let licenseClass = '';
         if (app.license && app.license.length > 0) {
             const firstLicense = app.license[0];
-            if (app.license.length === 1) {
-                licenseText = firstLicense;
-            } else {
-                licenseText = `${firstLicense} (+${app.license.length - 1})`;
-            }
-            
-            // Check if it's a non-free license
+            const licenseText = app.license.length === 1 ? firstLicense : `${firstLicense} (+${app.license.length - 1})`;
+            const tooltipText = app.license.length > 1 ? app.license.join(', ') : firstLicense;
             const isNonFree = this.isNonFreeLicense(app.license);
-            if (isNonFree) {
-                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-warning text-warning bg-warning/10 rounded';
-            } else {
-                licenseClass = 'inline-block text-xs px-2 py-1 ml-1 border border-border text-text-muted bg-surface-alt rounded';
-            }
-            licenseBadge = `<span class="${licenseClass}">${licenseText}</span>`;
-        };
+            const licenseClass = isNonFree
+                ? 'inline-block text-xs px-1.5 py-0.5 border border-warning text-warning bg-warning/10 rounded cursor-help'
+                : 'inline-block text-xs px-1.5 py-0.5 border border-border text-text-muted bg-surface-alt rounded cursor-help';
+            licenseBadge = `<span class="${licenseClass}" title="${tooltipText}">${licenseText}</span>`;
+        }
 
-        // Only show buttons when they have valid URLs
-        const demoLink = (app.demo_url && app.demo_url.trim()) ? `
-            <a href="${app.demo_url}"${getLinkAttrs(app.demo_url, false)} class="text-link hover:text-link-hover font-medium">
-                Demo
-            </a>
-        ` : '';
+        // Category badges (up to configured limit)
+        const categoriesHtml = app.categories ? app.categories.slice(0, this.alternativesMaxCategoriesPerCard).map(category =>
+            `<span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-0.5 rounded-full">${category}</span>`
+        ).join('') + (app.categories.length > this.alternativesMaxCategoriesPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-0.5 rounded-full">+${app.categories.length - this.alternativesMaxCategoriesPerCard}</span>` : '') : '';
 
-        const sourceLink = (app.repo_url && app.repo_url.trim()) ? `
-        <a href="${app.repo_url}"${getLinkAttrs(app.repo_url, false)} class="text-link hover:text-link-hover font-medium">
-            Source
-        </a>
-        ` : '';
+        // Platform badges (up to configured limit)
+        const platformsHtml = app.platforms && app.platforms.length > 0 ? app.platforms.slice(0, this.browseMaxPlatformsPerCard).map(platform => {
+            const color = this.getPlatformColor(platform);
+            return `<span class="inline-flex items-center text-text-muted text-xs">
+                <span class="w-2.5 h-2.5 rounded-full mr-1.5 flex-shrink-0" style="background-color: ${color};"></span>${platform}
+            </span>`;
+        }).join('') + (app.platforms.length > this.alternativesMaxPlatformsPerCard ? `<span class="inline-block bg-secondary text-secondary-text text-xs px-1.5 py-0.5 rounded">+${app.platforms.length - this.alternativesMaxPlatformsPerCard}</span>` : '') : '';
 
-        // Only show website link if it exists and is different from the source code URL
-        const websiteLink = (app.url && app.url.trim() && app.url !== app.repo_url && app.url !== app.demo_url) ? `
-        <a href="${app.url}"${getLinkAttrs(app.url, false)} class="text-link hover:text-link-hover font-medium">
-            Website
-        </a>
-        ` : '';
+        // Action links
+        const demoLink = (app.demo_url && app.demo_url.trim()) ? `<a href="${app.demo_url}"${getLinkAttrs(app.demo_url, false)} class="text-link hover:text-link-hover font-medium">Demo</a>` : '';
+        const sourceLink = (app.repo_url && app.repo_url.trim()) ? `<a href="${app.repo_url}"${getLinkAttrs(app.repo_url, false)} class="text-link hover:text-link-hover font-medium">Source</a>` : '';
+        const websiteLink = (app.url && app.url.trim() && app.url !== app.repo_url && app.url !== app.demo_url) ? `<a href="${app.url}"${getLinkAttrs(app.url, false)} class="text-link hover:text-link-hover font-medium">Website</a>` : '';
+        const detailsLink = `<a href="${this.basePath}/apps/${app.id}.html"${getLinkAttrs(`${this.basePath}/apps/${app.id}.html`, true)} class="text-link hover:text-link-hover font-medium">Details</a>`;
 
-        // Details link (internal)
-        const detailsLink = `
-        <a href="${this.basePath}/apps/${app.id}.html"${getLinkAttrs(`${this.basePath}/apps/${app.id}.html`, true)} class="text-link hover:text-link-hover font-medium">
-            Details
-        </a>
-        `;
+        // Build indicator icons row
+        const indicatorIcons = [dependsIcon, docLanguageIcon, forkIcon].filter(Boolean).join('');
 
         card.innerHTML = `
             <div class="p-4 flex flex-col flex-grow">
-                <div class="flex items-start justify-between mb-3">
+                <!-- Top row: icon + name + license -->
+                <div class="flex items-center gap-2.5 mb-2.5">
+                    ${iconHtml}
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-lg font-semibold text-text truncate">
-                                <a href="${this.basePath}/apps/${app.id}.html" class="hover:text-link">
-                                    ${app.name}
-                                </a>
-                            </h3>
-                            ${licenseBadge}
-                        </div>
+                        <h3 class="text-base font-semibold text-text truncate leading-tight">
+                            <a href="${this.basePath}/apps/${app.id}.html" class="hover:text-link">${app.name}</a>
+                        </h3>
                     </div>
-                    <div class="flex items-center space-x-2 ml-2">
-                        ${dependsIcon}
-                        ${docLanguageIcon}
-                        ${starsIcon}
-                        ${clockIcon}
-                        ${forkIcon}
-                    </div>
+                    ${licenseBadge}
                 </div>
-                
-                <p class="text-sm text-text-muted mb-3 flex-grow">
+
+                <!-- Status indicators row -->
+                <div class="flex items-center flex-wrap gap-2.5 mb-2 text-xs">
+                    ${starsHtml}${clockHtml}${indicatorIcons}
+                </div>
+
+                <!-- Description -->
+                <p class="text-sm text-text-muted mb-3 flex-grow leading-relaxed">
                     ${this.truncateDescription(app.description)}
                 </p>
-                
-                ${categoriesHtml ? `<div class="mb-1">${categoriesHtml}</div>` : ''}
-                ${platformsHtml ? `<div class="mb-2">${platformsHtml}</div>` : ''}
-                
-                <div class="flex items-end justify-between text-xs mt-auto pt-1">
-                    <div class="flex flex-wrap gap-2">
-                        ${websiteLink}
-                        ${sourceLink}
-                        ${demoLink}
-                        ${detailsLink}
-                    </div>
+
+                <!-- Category + platform badges -->
+                ${categoriesHtml ? `<div class="flex flex-wrap gap-1 mb-1.5">${categoriesHtml}</div>` : ''}
+                ${platformsHtml ? `<div class="flex flex-wrap gap-2 mb-2">${platformsHtml}</div>` : ''}
+
+                <!-- Action links -->
+                <div class="flex flex-wrap gap-2.5 text-xs mt-auto pt-2 border-t border-border">
+                    ${websiteLink}${sourceLink}${demoLink}${detailsLink}
                 </div>
             </div>
         `;
-        
+
         return card;
     }
 

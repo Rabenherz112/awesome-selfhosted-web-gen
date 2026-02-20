@@ -5,22 +5,53 @@
         initializeMobileMenu();
         initializeScrollToTop();
         initializeBanner();
+        initializeNavScroll();
     });
     
-    // Mobile menu functionality
+    // Mobile menu functionality with slide-down animation
     function initializeMobileMenu() {
+        // Initializes the mobile hamburger menu with animated open/close
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        
+        const openIcon = document.getElementById('mobile-menu-open-icon');
+        const closeIcon = document.getElementById('mobile-menu-close-icon');
+
         if (mobileMenuButton && mobileMenu) {
+            let isOpen = false;
+
+            function toggleMenu(open) {
+                // Toggles the mobile menu open or closed
+                isOpen = open;
+                if (open) {
+                    mobileMenu.classList.remove('hidden');
+                    // Allow the DOM to update before animating
+                    requestAnimationFrame(function() {
+                        mobileMenu.style.maxHeight = mobileMenu.scrollHeight + 'px';
+                    });
+                } else {
+                    mobileMenu.style.maxHeight = '0';
+                    mobileMenu.addEventListener('transitionend', function handler() {
+                        if (!isOpen) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                        mobileMenu.removeEventListener('transitionend', handler);
+                    });
+                }
+                // Toggle hamburger/close icons
+                if (openIcon && closeIcon) {
+                    openIcon.classList.toggle('hidden', open);
+                    closeIcon.classList.toggle('hidden', !open);
+                }
+            }
+
             mobileMenuButton.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');
+                toggleMenu(!isOpen);
             });
-            
+
             // Close mobile menu when clicking outside
             document.addEventListener('click', function(event) {
-                if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
-                    mobileMenu.classList.add('hidden');
+                if (isOpen && !mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                    toggleMenu(false);
                 }
             });
         }
@@ -31,7 +62,7 @@
         // Create scroll to top button
         const scrollButton = document.createElement('button');
         scrollButton.innerHTML = '↑';
-        scrollButton.className = 'fixed bottom-6 right-6 bg-primary text-surface p-3 rounded-full shadow-lg hover:bg-primary transition-all duration-300 transform translate-y-16 opacity-0 z-50';
+        scrollButton.className = 'scroll-to-top-btn fixed bottom-6 right-6 bg-primary text-surface rounded-full shadow-lg hover:bg-primary transition-all duration-300 transform translate-y-16 opacity-0 z-50';
         scrollButton.setAttribute('aria-label', 'Scroll to top');
         document.body.appendChild(scrollButton);
         
@@ -82,11 +113,21 @@
             if (searchResults) {
                 searchResults.classList.add('hidden');
             }
-            
-            // Close mobile menu
+
+            // Close mobile menu via animated toggle
             const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenu) {
-                mobileMenu.classList.add('hidden');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.style.maxHeight = '0';
+                const openIcon = document.getElementById('mobile-menu-open-icon');
+                const closeIcon = document.getElementById('mobile-menu-close-icon');
+                if (openIcon && closeIcon) {
+                    openIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                }
+                mobileMenu.addEventListener('transitionend', function handler() {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.removeEventListener('transitionend', handler);
+                });
             }
         }
     });
@@ -135,17 +176,65 @@
         });
     }
     
-    // Add smooth hover effects
-    const cards = document.querySelectorAll('.hover\\:shadow-lg');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px)';
+    // Navigation scroll effect - adds blur/shadow on scroll
+    function initializeNavScroll() {
+        // Adds backdrop blur and shadow to the nav bar when scrolled
+        const nav = document.getElementById('main-nav');
+        if (!nav) return;
+
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    if (window.scrollY > 10) {
+                        nav.classList.add('nav-scrolled');
+                    } else {
+                        nav.classList.remove('nav-scrolled');
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
         });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-    });
+    }
+
+    /**
+     * Generate a deterministic background color from a string (app name).
+     * Returns an HSL color string suitable for letter avatars.
+     */
+    window.getLetterAvatarColor = function(name) {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            hash = hash & hash;
+        }
+        const hue = Math.abs(hash) % 360;
+        return 'hsl(' + hue + ', 45%, 55%)';
+    };
+
+    /**
+     * Generate the HTML for an application icon element.
+     * Returns an <img> if icon_url is set, otherwise a letter avatar <div>.
+     * Returns empty string if project icons are disabled via config.
+     */
+    window.getAppIconHtml = function(app, sizeClass) {
+        var showIcons = document.querySelector('meta[name="show-project-icons"]');
+        if (showIcons && showIcons.content.toLowerCase() === 'false') {
+            return '';
+        }
+
+        if (!sizeClass) sizeClass = 'sm';
+        const avatarClass = sizeClass === 'lg' ? 'letter-avatar letter-avatar-lg' : 'letter-avatar letter-avatar-sm';
+        const imgClass = sizeClass === 'lg' ? 'app-icon-lg' : 'app-icon';
+
+        if (app.icon_url) {
+            return '<img src="' + app.icon_url + '" alt="" class="' + imgClass + '" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">'
+                 + '<div class="' + avatarClass + '" style="display:none;background:' + window.getLetterAvatarColor(app.name) + ';">'
+                 + app.name.charAt(0).toUpperCase() + '</div>';
+        }
+        return '<div class="' + avatarClass + '" style="background:' + window.getLetterAvatarColor(app.name) + ';">'
+             + app.name.charAt(0).toUpperCase() + '</div>';
+    };
 
     // Banner functionality
     function initializeBanner() {
@@ -207,5 +296,5 @@
         }
     }
 
-    console.log('✅ ASWG initialized');
+    console.log('[OK] ASWG initialized');
 })(); 

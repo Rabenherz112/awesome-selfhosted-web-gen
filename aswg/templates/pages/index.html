@@ -19,25 +19,25 @@
 {% for section in sections %}
 
   {% if section == 'hero' %}
-    <!-- Configurable Hero Section -->
+    <!-- Hero Section -->
     {% set hero_config = hero_config %}
     <div class="bg-gradient-to-br from-surface-alt to-surface">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div class="text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-text mb-6">
+                <h1 class="text-4xl md:text-6xl font-bold text-text mb-6 tracking-tight">
                     {{ hero_config.get('title', 'Awesome Self-Hosted') }}
                 </h1>
-                
+
                 {% if hero_config.get('subtitle') %}
                 <p class="text-2xl font-semibold text-hero-description mb-6">
                     {{ hero_config.subtitle }}
                 </p>
                 {% endif %}
-                
+
                 <div class="text-xl text-text-muted mb-8 max-w-4xl mx-auto leading-relaxed">
                     {{ style_description_links(hero_config.get('description', 'Explore ' + total_applications|string + ' carefully curated selfhosted applications. Find the perfect tools to take control of your data and build your own cloud.')) | safe }}
                 </div>
-                
+
                 <!-- Badges -->
                 {% if hero_config.get('badges') %}
                 <div class="flex flex-wrap justify-center items-center gap-2 mb-8">
@@ -48,13 +48,13 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                
+
                 <!-- CTA Buttons -->
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8">
                     {% for button in hero_config.get('cta_buttons', [
                         {'name': 'Browse All Applications', 'url': '/browse.html', 'style': 'primary', 'icon': 'grid'}
                     ]) %}
-                    <a href="{{ url_for(button.url) }}"{{ get_link_target_attrs(url_for(button.url), true) | safe }} class="inline-flex items-center px-8 py-3 {% if button.style == 'primary' %}bg-cta hover:bg-cta-hover text-white{% else %}bg-surface text-cta border border-cta hover:bg-cta/10{% endif %} font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                    <a href="{{ url_for(button.url) }}"{{ get_link_target_attrs(url_for(button.url), true) | safe }} class="inline-flex items-center justify-center px-8 py-3 {% if button.style == 'primary' %}bg-cta hover:bg-cta-hover text-white{% else %}bg-surface text-cta border border-cta hover:bg-cta/10{% endif %} font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                         {% if button.icon == 'grid' %}
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="-5 -2 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path d='M9 14v-2.298l.856-.597a5 5 0 1 0-5.712 0l.856.597V14h1V6a1 1 0 1 1 2 0v8h1zm0 2H5v2h4v-2zM0 7a7 7 0 1 1 11 5.745V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5.255A6.992 6.992 0 0 1 0 7z'/>
@@ -68,7 +68,7 @@
                     </a>
                     {% endfor %}
                 </div>
-                
+
                 <!-- Additional Links -->
                 {% if hero_config.get('links') %}
                 <div class="flex flex-wrap justify-center gap-6 text-sm">
@@ -94,7 +94,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-text mb-4">
-                    🌟 Most Popular Applications
+                    Most Popular Applications
                 </h2>
                 <p class="text-lg text-text-muted">
                     Highly-starred applications loved by the community
@@ -103,56 +103,58 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {% for app in popular_apps %}
-                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full">
-                    <div class="p-6 flex flex-col h-full">
-                        <div class="flex items-start justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-text">
-                                <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-primary">
+                <div class="app-card {{ get_card_bg_class() }} rounded-lg border border-border shadow-sm overflow-hidden flex flex-col h-full">
+                    <div class="p-5 flex flex-col h-full">
+                        <!-- Icon + Name row -->
+                        <div class="flex items-center gap-2.5 mb-2">
+                            {{ get_app_icon_html(app, 'sm') | safe }}
+                            <h3 class="text-base font-semibold text-text truncate leading-tight">
+                                <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-link">
                                     {{ app.name }}
                                 </a>
                             </h3>
                             {% if app.stars %}
-                            <div class="flex items-center text-star">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <span class="inline-flex items-center text-star ml-auto flex-shrink-0">
+                                <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                 </svg>
-                                <span class="text-sm font-medium">{{ format_stars(app.stars) }}</span>
-                            </div>
+                                <span class="text-xs font-medium">{{ format_stars(app.stars) }}</span>
+                            </span>
                             {% endif %}
                         </div>
-                        
-                        <p class="text-text-muted mb-4 text-sm flex-grow">
+
+                        <p class="text-text-muted text-sm mb-3 flex-grow leading-relaxed">
                             {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 70)) }}
                         </p>
-                        
+
                         <!-- Categories -->
                         <div class="mt-auto">
                             {% if app.categories %}
-                            <div class="mb-4">
+                            <div class="flex flex-wrap gap-1 mb-2.5">
                                 {% for category in app.categories[:2] %}
-                                <span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-1 rounded-full mr-1 mb-1">
+                                <span class="inline-block bg-badge-bg text-badge-text text-xs px-2 py-0.5 rounded-full">
                                     {{ category }}
                                 </span>
                                 {% endfor %}
                                 {% if app.categories|length > 2 %}
-                                <span class="inline-block bg-surface-alt text-text-muted text-xs px-2 py-1 rounded-full mr-1 mb-1">
+                                <span class="inline-block bg-secondary text-secondary-text text-xs px-2 py-0.5 rounded-full">
                                     +{{ app.categories|length - 2 }}
                                 </span>
                                 {% endif %}
                             </div>
                             {% endif %}
-                            
+
                             <!-- Footer -->
-                            <div class="flex items-center justify-between text-xs">
+                            <div class="flex items-center justify-between text-xs pt-2 border-t border-border">
                                 {% if app.platforms %}
                                 <div class="flex items-center text-text-muted">
-                                    <div class="w-3 h-3 rounded-full mr-2" style="background-color: {{ get_platform_color(app.platforms[0]) }};"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full mr-1.5" style="background-color: {{ get_platform_color(app.platforms[0]) }};"></div>
                                     {{ app.platforms[0] }}
                                 </div>
                                 {% endif %}
-                                
+
                                 <a href="{{ url_for(get_app_url(app.id)) }}" class="text-link hover:text-link-hover font-medium">
-                                    View Details →
+                                    View Details &rarr;
                                 </a>
                             </div>
                         </div>
@@ -175,20 +177,23 @@
                     Applications with recent development activity
                 </p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {% for app in recent_apps %}
-                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 flex flex-col h-full">
-                    <h3 class="text-lg font-semibold text-text mb-2">
-                        <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-primary">
-                            {{ app.name }}
-                        </a>
-                    </h3>
-                    
-                    <p class="text-sm text-text-muted mb-3 flex-grow">
+                <div class="app-card {{ get_card_bg_class() }} rounded-lg border border-border shadow-sm p-5 flex flex-col h-full">
+                    <div class="flex items-center gap-2.5 mb-2">
+                        {{ get_app_icon_html(app, 'sm') | safe }}
+                        <h3 class="text-base font-semibold text-text truncate leading-tight">
+                            <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-link">
+                                {{ app.name }}
+                            </a>
+                        </h3>
+                    </div>
+
+                    <p class="text-sm text-text-muted mb-3 flex-grow leading-relaxed">
                         {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 70)) }}
                     </p>
-                    
+
                     {% if app.last_updated %}
                     <div class="text-xs text-success font-medium mt-auto">
                         Updated {{ format_date(app.last_updated) }}
@@ -212,32 +217,33 @@
                     Quality applications you might have missed
                 </p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for app in random_picks %}
-                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col h-full">
-                    <div class="flex items-start justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-text">
-                            <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-primary">
+                <div class="app-card {{ get_card_bg_class() }} rounded-lg border border-border shadow-sm p-5 flex flex-col h-full">
+                    <div class="flex items-center gap-2.5 mb-2.5">
+                        {{ get_app_icon_html(app, 'sm') | safe }}
+                        <h3 class="text-base font-semibold text-text truncate leading-tight flex-1">
+                            <a href="{{ url_for(get_app_url(app.id)) }}" class="hover:text-link">
                                 {{ app.name }}
                             </a>
                         </h3>
                         {% if app.stars %}
-                        <div class="flex items-center text-star">
-                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <span class="inline-flex items-center text-star flex-shrink-0">
+                            <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                             </svg>
-                            <span class="text-sm font-medium">{{ format_stars(app.stars) }}</span>
-                        </div>
+                            <span class="text-xs font-medium">{{ format_stars(app.stars) }}</span>
+                        </span>
                         {% endif %}
                     </div>
-                    
-                    <p class="text-text-muted mb-4 text-sm flex-grow">
+
+                    <p class="text-text-muted text-sm mb-3 flex-grow leading-relaxed">
                         {{ truncate_description(app.description, ui_config.get('truncation', {}).get('homepage_description_length', 70)) }}
                     </p>
-                    
+
                     <a href="{{ url_for(get_app_url(app.id)) }}" class="text-link hover:text-link-hover font-medium text-sm mt-auto self-start">
-                        Discover →
+                        Discover &rarr;
                     </a>
                 </div>
                 {% endfor %}
@@ -257,57 +263,55 @@
                     Find selfhosted alternatives to popular software
                 </p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for software_name, apps in alternatives %}
-                <div class="{{ get_card_bg_class() }} rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col h-full">
-                    <div class="flex items-start justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-text">
-                            <a href="{{ url_for('/alternatives.html') }}#{{ software_name|slugify }}" class="hover:text-primary transition-colors">
+                <div class="app-card {{ get_card_bg_class() }} rounded-lg border border-border shadow-sm p-5 flex flex-col h-full">
+                    <div class="flex items-start justify-between mb-3">
+                        <h3 class="text-base font-semibold text-text">
+                            <a href="{{ url_for('/alternatives.html') }}#{{ software_name|slugify }}" class="hover:text-link transition-colors">
                                 {{ software_name }}
                             </a>
                         </h3>
-                        <div class="flex items-center text-primary">
-                            <span class="text-sm font-medium">{{ apps|length }} alternatives</span>
-                        </div>
+                        <span class="text-xs font-medium text-primary bg-primary-light px-2 py-1 rounded-full">{{ apps|length }} alternatives</span>
                     </div>
-                    
-                    <div class="space-y-2 mb-4 flex-grow">
+
+                    <div class="space-y-1.5 mb-3 flex-grow">
                         {% for app in apps[:3] %}
                         <div class="flex items-center text-sm">
-                            <a href="{{ url_for(get_app_url(app.id)) }}" class="text-text-muted hover:text-primary">
+                            <a href="{{ url_for(get_app_url(app.id)) }}" class="text-text-muted hover:text-link truncate">
                                 {{ app.name }}
                             </a>
                             {% if app.stars %}
-                            <div class="ml-4 flex items-center text-star">
-                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <span class="ml-auto flex items-center text-star flex-shrink-0">
+                                <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                 </svg>
                                 <span class="text-xs">{{ format_stars(app.stars) }}</span>
-                            </div>
+                            </span>
                             {% endif %}
                         </div>
                         {% endfor %}
                         {% if apps|length > 3 %}
-                        <div class="text-xs text-text-muted text-center pt-2">
+                        <div class="text-xs text-text-muted pt-1">
                             +{{ apps|length - 3 }} more alternatives
                         </div>
                         {% endif %}
                     </div>
-                    
-                    <div class="text-center mt-auto">
+
+                    <div class="mt-auto pt-2 border-t border-border">
                         <a href="{{ url_for('/alternatives.html') }}#{{ software_name|slugify }}" class="text-link hover:text-link-hover font-medium text-sm">
-                            View All Alternatives →
+                            View All &rarr;
                         </a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            
-            <div class="text-center mt-12">
+
+            <div class="text-center mt-10">
                 <a href="{{ url_for('/alternatives.html') }}"{{ get_link_target_attrs(url_for('/alternatives.html'), true) | safe }} class="inline-flex items-center px-8 py-3 bg-cta hover:bg-cta-hover text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     Explore All Alternatives
-                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </a>
@@ -327,24 +331,24 @@
                     Explore applications by category
                 </p>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {% for category in categories %}
-                <a href="{{ url_for(category.url) }}"{{ get_link_target_attrs(url_for(category.url), true) | safe }} class="group {{ get_card_bg_class() }} hover:bg-primary-light rounded-lg p-6 text-center transition-colors duration-200 shadow-md hover:shadow-lg border border-border">
-                    <div class="text-2xl font-bold text-hero-description group-hover:text-hero-description-hover">
+                <a href="{{ url_for(category.url) }}"{{ get_link_target_attrs(url_for(category.url), true) | safe }} class="group app-card bg-surface hover:bg-primary-light rounded-lg p-5 text-center border border-border shadow-sm">
+                    <div class="text-2xl font-bold text-hero-description group-hover:text-hero-description-hover mb-1">
                         {{ category.count }}
                     </div>
-                    <div class="text-sm font-medium text-text mt-2">
+                    <div class="text-sm font-medium text-text">
                         {{ category.name }}
                     </div>
                 </a>
                 {% endfor %}
             </div>
-            
-            <div class="text-center mt-12">
+
+            <div class="text-center mt-10">
                 <a href="{{ url_for('/browse.html') }}"{{ get_link_target_attrs(url_for('/browse.html'), true) | safe }} class="inline-flex items-center px-8 py-3 bg-cta hover:bg-cta-hover text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     Browse All Categories
-                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </a>
@@ -353,124 +357,120 @@
     </div>
 
   {% elif section == 'statistics' %}
-    <!-- Detailed Statistics Section -->
+    <!-- Statistics Section -->
     <div class="{{ get_section_bg_class() }} py-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-text mb-4">
-                    Detailed Statistics
+                    Statistics
                 </h2>
                 <p class="text-lg text-text-muted">
                     Deep dive into the awesome-selfhosted ecosystem
                 </p>
             </div>
-            
-            <!-- Additional Stats Grid -->
+
             {% set total_apps = statistics.total_apps or 0 %}
             {% set interactive_demo_count = statistics.get('apps_with_demo') %}
             {% set interactive_demo_percent = (interactive_demo_count / total_apps * 100) if interactive_demo_count is not none and total_apps else None %}
             {% set new_apps_current_year = statistics.get('new_apps_current_year') %}
             {% set new_apps_current_year_label = statistics.get('new_apps_current_year_label') %}
             {% set new_apps_percent = (new_apps_current_year / total_apps * 100) if new_apps_current_year is not none and total_apps else None %}
-            {% set active_apps_last_365 = statistics.get('apps_with_recent_activity') %}
-            {% set active_apps_percent = (active_apps_last_365 / total_apps * 100) if active_apps_last_365 is not none and total_apps else None %}
+            {% set active_apps_last_180 = statistics.get('apps_with_recent_activity') %}
+            {% set active_apps_percent = (active_apps_last_180 / total_apps * 100) if active_apps_last_180 is not none and total_apps else None %}
             {% set apps_with_releases = statistics.get('apps_with_releases') %}
             {% set releases_percent = (apps_with_releases / total_apps * 100) if apps_with_releases is not none and total_apps else None %}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    {% if interactive_demo_count is not none %}
-                        <div class="text-2xl font-bold text-info mb-2">
-                            {{ interactive_demo_count }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Apps with interactive Demos
-                        </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Stat card 1 -->
+                <div class="stat-card bg-surface border border-border shadow-sm">
+                    <div class="stat-card-icon bg-info/15">
+                        <svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        {% if interactive_demo_count is not none %}
+                        <div class="stat-card-value text-info">{{ interactive_demo_count }}</div>
+                        <div class="stat-card-label">Apps with Demos</div>
                         {% if interactive_demo_percent is not none %}
-                        <div class="mt-1 text-xs text-text-muted">
-                            ≈{{ interactive_demo_percent|round(0, 'common')|int }}% of catalog
-                        </div>
+                        <div class="stat-card-sub">~{{ interactive_demo_percent|round(0, 'common')|int }}% of catalog</div>
                         {% endif %}
-                    {% else %}
-                        <div class="text-2xl font-bold text-info mb-2">
-                            {{ statistics.apps_with_multiple_licenses or 0 }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Multi-License Apps
-                        </div>
-                    {% endif %}
+                        {% else %}
+                        <div class="stat-card-value text-info">{{ statistics.apps_with_multiple_licenses or 0 }}</div>
+                        <div class="stat-card-label">Multi-License Apps</div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    {% if new_apps_current_year is not none and new_apps_current_year_label is not none %}
-                        <div class="text-2xl font-bold text-success mb-2">
-                            {{ new_apps_current_year }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            New in {{ new_apps_current_year_label }}
-                        </div>
+
+                <!-- Stat card 2 -->
+                <div class="stat-card bg-surface border border-border shadow-sm">
+                    <div class="stat-card-icon bg-success/15">
+                        <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        {% if new_apps_current_year is not none and new_apps_current_year_label is not none %}
+                        <div class="stat-card-value text-success">{{ new_apps_current_year }}</div>
+                        <div class="stat-card-label">New in {{ new_apps_current_year_label }}</div>
                         {% if new_apps_percent is not none %}
-                        <div class="mt-1 text-xs text-text-muted">
-                            ≈{{ new_apps_percent|round(0, 'common')|int }}% added this year
-                        </div>
+                        <div class="stat-card-sub">~{{ new_apps_percent|round(0, 'common')|int }}% added this year</div>
                         {% endif %}
-                    {% else %}
-                        <div class="text-2xl font-bold text-success mb-2">
-                            {{ statistics.apps_with_multiple_platforms or 0 }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Multi-Platform Apps
-                        </div>
-                    {% endif %}
+                        {% else %}
+                        <div class="stat-card-value text-success">{{ statistics.apps_with_multiple_platforms or 0 }}</div>
+                        <div class="stat-card-label">Multi-Platform Apps</div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    {% if active_apps_last_365 is not none %}
-                        <div class="text-2xl font-bold text-highlight mb-2">
-                            {{ active_apps_last_365 }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Actively maintained Apps
-                        </div>
+
+                <!-- Stat card 3 -->
+                <div class="stat-card bg-surface border border-border shadow-sm">
+                    <div class="stat-card-icon bg-highlight/15">
+                        <svg class="w-5 h-5 text-highlight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        {% if active_apps_last_180 is not none %}
+                        <div class="stat-card-value text-highlight">{{ active_apps_last_180 }}</div>
+                        <div class="stat-card-label">Actively Maintained</div>
                         {% if active_apps_percent is not none %}
-                        <div class="mt-1 text-xs text-text-muted">
-                            ≈{{ active_apps_percent|round(0, 'common')|int }}% updated in 12 months
-                        </div>
+                        <div class="stat-card-sub">~{{ active_apps_percent|round(0, 'common')|int }}% updated in 6mo</div>
                         {% endif %}
-                    {% else %}
-                        <div class="text-2xl font-bold text-highlight mb-2">
-                            {{ statistics.total_platforms or 0 }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Platforms & Technologies
-                        </div>
-                    {% endif %}
+                        {% else %}
+                        <div class="stat-card-value text-highlight">{{ statistics.total_platforms or 0 }}</div>
+                        <div class="stat-card-label">Platforms</div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="{{ get_card_bg_class() }} rounded-lg p-6 text-center shadow-md">
-                    {% if apps_with_releases is not none %}
-                        <div class="text-2xl font-bold text-warning mb-2">
-                            {{ apps_with_releases }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Apps with tagged releases
-                        </div>
+
+                <!-- Stat card 4 -->
+                <div class="stat-card bg-surface border border-border shadow-sm">
+                    <div class="stat-card-icon bg-warning/15">
+                        <svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        {% if apps_with_releases is not none %}
+                        <div class="stat-card-value text-warning">{{ apps_with_releases }}</div>
+                        <div class="stat-card-label">Tagged Releases</div>
                         {% if releases_percent is not none %}
-                        <div class="mt-1 text-xs text-text-muted">
-                            ≈{{ releases_percent|round(0, 'common')|int }}% publish releases
-                        </div>
+                        <div class="stat-card-sub">~{{ releases_percent|round(0, 'common')|int }}% publish releases</div>
                         {% endif %}
-                    {% else %}
-                        <div class="text-2xl font-bold text-warning mb-2">
-                            {{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}
-                        </div>
-                        <div class="text-sm text-text-muted">
-                            Avg Stars per App
-                        </div>
-                    {% endif %}
+                        {% else %}
+                        <div class="stat-card-value text-warning">{{ "%.1f"|format((statistics.total_stars / statistics.total_apps) if statistics.total_apps > 0 else 0) }}</div>
+                        <div class="stat-card-label">Avg Stars per App</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            
+
             <div class="text-center">
-                <a href="{{ url_for('/statistics.html') }}"{{ get_link_target_attrs(url_for('/statistics.html'), true) | safe }} class="inline-flex items-center px-6 py-3 bg-cta hover:bg-cta-hover text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
-                    View Full Statistics Dashboard
-                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="{{ url_for('/statistics.html') }}"{{ get_link_target_attrs(url_for('/statistics.html'), true) | safe }} class="inline-flex items-center px-8 py-3 bg-cta hover:bg-cta-hover text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
+                    View Full Statistics
+                    <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </a>
@@ -485,12 +485,12 @@
             <div class="text-left">
                 {{ markdown_to_html(markdown_data.footer) | safe }}
             </div>
-            
+
             <!-- Call to Action -->
-            <div class="text-center mt-12">
+            <div class="text-center mt-10">
                 <a href="{{ url_for('/browse.html') }}"{{ get_link_target_attrs(url_for('/browse.html'), true) | safe }} class="inline-flex items-center px-8 py-3 bg-cta hover:bg-cta-hover text-white font-medium rounded-lg shadow-lg transform transition hover:scale-105">
                     Start Exploring Applications
-                    <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                     </svg>
                 </a>
