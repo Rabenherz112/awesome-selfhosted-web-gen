@@ -639,7 +639,6 @@ class AlternativesPage {
 
         card.innerHTML = `
             <div class="p-4 flex flex-col flex-grow">
-                <!-- Top row: icon + name + license -->
                 <div class="flex items-center gap-2.5 mb-2.5">
                     ${iconHtml}
                     <div class="flex-1 min-w-0">
@@ -650,21 +649,17 @@ class AlternativesPage {
                     ${licenseBadge}
                 </div>
 
-                <!-- Status indicators row -->
                 <div class="flex items-center flex-wrap gap-2.5 mb-2 text-xs">
                     ${starsHtml}${clockHtml}${indicatorIcons}
                 </div>
 
-                <!-- Description -->
                 <p class="text-sm text-text-muted mb-3 flex-grow leading-relaxed">
                     ${this.truncateDescription(app.description)}
                 </p>
 
-                <!-- Category + platform badges -->
                 ${categoriesHtml ? `<div class="flex flex-wrap gap-1 mb-1.5">${categoriesHtml}</div>` : ''}
                 ${platformsHtml ? `<div class="flex flex-wrap gap-2 mb-2">${platformsHtml}</div>` : ''}
 
-                <!-- Action links -->
                 <div class="flex flex-wrap gap-2.5 text-xs mt-auto pt-2 border-t border-border">
                     ${websiteLink}${sourceLink}${demoLink}${detailsLink}
                 </div>
