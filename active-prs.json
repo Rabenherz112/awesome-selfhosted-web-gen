@@ -4,17 +4,17 @@
     "title": "fix: error handling by removing broad expections where possible",
     "author": "Rabenherz112",
     "branch": "fix-error-catchign",
-    "commit": "05e2c20",
-    "commit_full": "05e2c200e7e5f77d19eeffe7e028e500e10ddfe2",
+    "commit": "fca8aad",
+    "commit_full": "fca8aad048bf6def083009bc1de525bb50a03a13",
     "url": "pr-70/",
     "pr_url": "https://github.com/Rabenherz112/aswg/pull/70",
-    "updated": "2026-02-22T11:32:43+00:00",
+    "updated": "2026-02-22T11:35:01+00:00",
     "build": {
       "size": "33M",
       "total_files": "1337",
       "html_pages": "1322",
       "app_pages": "1318",
-      "duration": "46s"
+      "duration": "47s"
     }
   }
 ]
