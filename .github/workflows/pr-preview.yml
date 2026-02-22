@@ -429,8 +429,7 @@ jobs:
             }
 
             // Compute preview URL for success case
-            //const computedPreviewUrl = `https://${owner}.github.io/${repo}/pr-${prNumber}/`;
-            const computedPreviewUrl = `https://aswg.theravenhub.com/pr-${prNumber}/`;
+            const computedPreviewUrl = `https://${owner}.github.io/${repo}/pr-${prNumber}/`;
             const effectivePreviewUrl = isSuccess ? computedPreviewUrl : existingPreviewUrl;
 
             // Read build log (if exists) and truncate for safety
