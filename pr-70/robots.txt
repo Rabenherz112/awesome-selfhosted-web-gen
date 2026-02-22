@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /static/
 
-Sitemap: https://rabenherz112.github.io/aswg/pr-70/sitemap.xml
+Sitemap: https://aswg.theravenhub.com/aswg/pr-70/sitemap.xml
