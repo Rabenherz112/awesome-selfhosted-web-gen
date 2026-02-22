@@ -40,133 +40,66 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Record build start time
-        id: build_timer
-        run: |
-          echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
-
-      - name: Initialize build log
-        run: |
-          echo "Build log for PR #${{ github.event.number }} -- $(date -Iseconds)" > build.log
-
       - name: Clone awesome-selfhosted-data
-        shell: bash
-        run: |
-          set -o pipefail
-          git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
+        run: git clone https://github.com/awesome-selfhosted/awesome-selfhosted-data.git
 
       - name: Install Python dependencies
-        shell: bash
+        run: pip install .
+
+      - name: Pylint score (main)
+        id: pylint_main
         run: |
-          set -o pipefail
-          pip install . 2>&1 | tee -a build.log
+          pip install pylint -q
+          git fetch origin main
+          git checkout origin/main --
+          pip install . -q
+          SCORE=$(pylint aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
+          echo "score=${SCORE:-0}" >> "$GITHUB_OUTPUT"
+
+      - name: Pylint score (PR)
+        id: pylint_pr
+        run: |
+          git checkout ${{ github.event.pull_request.head.sha }} --
+          pip install . -q
+          PR_SCORE=$(pylint aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
+          PR_SCORE=${PR_SCORE:-0}
+          MAIN_SCORE=${{ steps.pylint_main.outputs.score }}
+          [ -z "$MAIN_SCORE" ] && MAIN_SCORE=0
+          DELTA=$(awk "BEGIN { d=$PR_SCORE-$MAIN_SCORE; if(d>0) printf \"+%.1f\", d; else printf \"%.1f\", d }")
+          echo "score=${PR_SCORE}" >> "$GITHUB_OUTPUT"
+          echo "delta=${DELTA}" >> "$GITHUB_OUTPUT"
+
+      - name: Record build start time
+        id: build_timer
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Generate website
-        shell: bash
         run: |
-          set -o pipefail
-          # Create a temporary config file with dynamic base_path
-          cp ./config/config-pr-preview.yml ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
-          # Update base_path to include repository name and PR number
-          sed -i 's|base_path: ""|base_path: "/aswg/pr-${{ github.event.number }}"|g' ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
-          # Generate website with the modified config
-          aswg --config ./config/config-pr-preview-temp.yml build 2>&1 | tee -a build.log
-          # Clean up temporary config file
-          rm -f ./config/config-pr-preview-temp.yml 2>&1 | tee -a build.log
+          cp ./config/config-pr-preview.yml ./config/config-pr-preview-temp.yml
+          sed -i 's|base_path: ""|base_path: "/aswg/pr-${{ github.event.number }}"|g' ./config/config-pr-preview-temp.yml
+          aswg --config ./config/config-pr-preview-temp.yml build
+          rm -f ./config/config-pr-preview-temp.yml
 
       - name: Collect build statistics
-        if: ${{ success() }}
+        if: success()
         id: build_stats
-        shell: bash
         run: |
-          set -o pipefail
           OUTPUT_DIR="output"
-
-          # Calculate build duration
           BUILD_END=$(date +%s)
           BUILD_START=${{ steps.build_timer.outputs.start }}
           DURATION_SECS=$((BUILD_END - BUILD_START))
           DURATION_MIN=$((DURATION_SECS / 60))
           DURATION_REM=$((DURATION_SECS % 60))
-          if [ "$DURATION_MIN" -gt 0 ]; then
-            DURATION_STR="${DURATION_MIN}m ${DURATION_REM}s"
-          else
-            DURATION_STR="${DURATION_SECS}s"
-          fi
-
-          # Count files by type
-          TOTAL_FILES=$(find "$OUTPUT_DIR" -type f | wc -l)
-          HTML_FILES=$(find "$OUTPUT_DIR" -name '*.html' -type f | wc -l)
-
-          # Count app detail pages
-          APP_PAGES=0
-          if [ -d "$OUTPUT_DIR/apps" ]; then
-            APP_PAGES=$(find "$OUTPUT_DIR/apps" -name '*.html' -type f | wc -l)
-          fi
-
-          # Total deployment size (human readable)
-          TOTAL_SIZE=$(du -sh "$OUTPUT_DIR" | cut -f1)
-
-          # Export all stats as step outputs
-          {
-            echo "duration=${DURATION_STR}"
-            echo "total_files=${TOTAL_FILES}"
-            echo "html_files=${HTML_FILES}"
-            echo "app_pages=${APP_PAGES}"
-            echo "total_size=${TOTAL_SIZE}"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Gather PR changed files summary
-        if: ${{ success() }}
-        id: pr_changes
-        shell: bash
-        run: |
-          set -o pipefail
-          # Get the list of changed files in this PR
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD 2>/dev/null || true)
-          FILE_COUNT=$(echo "$CHANGED_FILES" | grep -c '.' || true)
-
-          # Categorize changed files
-          TEMPLATE_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.html$' || true)
-          PYTHON_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.py$' || true)
-          STYLE_CHANGES=$(echo "$CHANGED_FILES" | grep -cE '\.(css|scss|less)$' || true)
-          JS_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.js$' || true)
-          CONFIG_CHANGES=$(echo "$CHANGED_FILES" | grep -cE '\.(yml|yaml|toml|cfg|ini)$' || true)
-          DOC_CHANGES=$(echo "$CHANGED_FILES" | grep -c '\.md$' || true)
-
-          # Build a brief summary string
-          SUMMARY_PARTS=""
-          [ "$PYTHON_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${PYTHON_CHANGES} Python, "
-          [ "$TEMPLATE_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${TEMPLATE_CHANGES} Template, "
-          [ "$STYLE_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${STYLE_CHANGES} Style, "
-          [ "$JS_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${JS_CHANGES} JS, "
-          [ "$CONFIG_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${CONFIG_CHANGES} Config, "
-          [ "$DOC_CHANGES" -gt 0 ] 2>/dev/null && SUMMARY_PARTS="${SUMMARY_PARTS}${DOC_CHANGES} Docs, "
-          # Trim trailing comma+space
-          SUMMARY_PARTS=$(echo "$SUMMARY_PARTS" | sed 's/, $//')
-          [ -z "$SUMMARY_PARTS" ] && SUMMARY_PARTS="${FILE_COUNT} files"
-
-          {
-            echo "file_count=${FILE_COUNT}"
-            echo "summary=${SUMMARY_PARTS}"
-            echo "template_changes=${TEMPLATE_CHANGES}"
-            echo "style_changes=${STYLE_CHANGES}"
-          } >> "$GITHUB_OUTPUT"
-
-          # Save full list for the comment (truncated if very large)
-          echo "$CHANGED_FILES" | head -30 > changed_files.txt
-          REMAINING=$((FILE_COUNT - 30))
-          if [ "$REMAINING" -gt 0 ]; then
-            echo "... and ${REMAINING} more files" >> changed_files.txt
-          fi
+          [ "$DURATION_MIN" -gt 0 ] && DURATION_STR="${DURATION_MIN}m ${DURATION_REM}s" || DURATION_STR="${DURATION_SECS}s"
+          echo "duration=${DURATION_STR}" >> "$GITHUB_OUTPUT"
+          echo "total_files=$(find "$OUTPUT_DIR" -type f | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+          echo "html_files=$(find "$OUTPUT_DIR" -name '*.html' -type f | wc -l | tr -d ' ')" >> "$GITHUB_OUTPUT"
+          echo "total_size=$(du -sh "$OUTPUT_DIR" | cut -f1)" >> "$GITHUB_OUTPUT"
 
       # Deploy only if everything above succeeded
       - name: Deploy to GitHub Pages branch
-        if: ${{ success() }}
-        shell: bash
+        if: success()
         run: |
-          set -o pipefail
-          # Configure git
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
@@ -175,42 +108,32 @@ jobs:
 
           # Check if gh-pages branch exists remotely
           if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
-            # Branch exists, fetch and checkout
-            git fetch origin gh-pages:gh-pages 
-            git checkout gh-pages 
+            git fetch origin gh-pages:gh-pages
+            git checkout gh-pages
           else
             # Branch doesn't exist, create orphan branch
             git checkout --orphan gh-pages 
             git rm -rf . 
             echo "# PR Previews" > README.md
-            git add README.md 
-            git commit -m "Initialize gh-pages branch for PR previews" 
-            git push origin gh-pages 
+            git add README.md
+            git commit -m "Initialize gh-pages branch for PR previews"
+            git push origin gh-pages
           fi
 
           # Create PR directory and copy files
           mkdir -p pr-${{ github.event.number }} 
           cp -r ${WORK_DIR}/output/* pr-${{ github.event.number }}/ 
 
-          # Update or create active PRs JSON file
-          if [ ! -f active-prs.json ]; then
-            echo "[]" > active-prs.json
-          fi
+          [ ! -f active-prs.json ] && echo "[]" > active-prs.json
 
           # Add/refresh this PR entry with rich metadata
           python3 << 'PYTHON_SCRIPT'
           import json, os
-
           pr_number = int(os.environ.get('PR_NUMBER', '0'))
           pr_title = os.environ.get('PR_TITLE', f'PR #{pr_number}')
           pr_author = os.environ.get('PR_AUTHOR', 'unknown')
           pr_branch = os.environ.get('PR_BRANCH', '')
           pr_commit = os.environ.get('PR_COMMIT', '')
-          build_size = os.environ.get('BUILD_SIZE', 'N/A')
-          build_files = os.environ.get('BUILD_FILES', 'N/A')
-          build_html = os.environ.get('BUILD_HTML', 'N/A')
-          build_apps = os.environ.get('BUILD_APPS', 'N/A')
-          build_duration = os.environ.get('BUILD_DURATION', 'N/A')
           repo_url = os.environ.get('REPO_URL', '')
 
           try:
@@ -234,11 +157,10 @@ jobs:
               'pr_url': f'{repo_url}/pull/{pr_number}',
               'updated': os.popen('date -Iseconds').read().strip(),
               'build': {
-                  'size': build_size,
-                  'total_files': build_files,
-                  'html_pages': build_html,
-                  'app_pages': build_apps,
-                  'duration': build_duration,
+                  'duration': os.environ.get('BUILD_DURATION', 'N/A'),
+                  'total_files': os.environ.get('BUILD_FILES', 'N/A'),
+                  'html_pages': os.environ.get('BUILD_HTML', 'N/A'),
+                  'size': os.environ.get('BUILD_SIZE', 'N/A'),
               }
           })
 
@@ -255,16 +177,12 @@ jobs:
           BUILD_SIZE: ${{ steps.build_stats.outputs.total_size }}
           BUILD_FILES: ${{ steps.build_stats.outputs.total_files }}
           BUILD_HTML: ${{ steps.build_stats.outputs.html_files }}
-          BUILD_APPS: ${{ steps.build_stats.outputs.app_pages }}
           BUILD_DURATION: ${{ steps.build_stats.outputs.duration }}
           REPO_URL: https://github.com/${{ github.repository }}
 
       - name: Commit & push preview
-        if: ${{ success() }}
-        shell: bash
+        if: success()
         run: |
-          set -o pipefail
-          # Write/refresh index.html -- minimal dashboard
           cat > index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html lang="en">
@@ -311,11 +229,7 @@ jobs:
           function render(prs){
             var c=document.getElementById('content');
             var f=document.getElementById('filter');
-            if(!prs||!prs.length){
-              f.style.display='none';
-              c.innerHTML='<div class="empty">No active PR previews. Open a pull request to generate one.</div>';
-              return;
-            }
+            if(!prs||!prs.length){ f.style.display='none'; c.innerHTML='<div class="empty">No active PR previews. Open a pull request to generate one.</div>'; return; }
             f.style.display=prs.length>=2?'':'none';
             var h='<table><thead><tr><th>Pull Request</th><th>Build</th><th>Links</th></tr></thead><tbody>';
             prs.forEach(function(pr){
@@ -325,10 +239,8 @@ jobs:
               var stats=[];
               if(b.duration&&b.duration!=='N/A') stats.push(esc(b.duration));
               if(b.size&&b.size!=='N/A') stats.push(esc(b.size));
-              if(b.html_pages&&b.html_pages!=='N/A') stats.push(esc(b.html_pages)+' pages');
-              if(b.app_pages&&b.app_pages!=='N/A') stats.push(esc(b.app_pages)+' apps');
+              if(b.html_pages&&b.html_pages!=='N/A') stats.push(esc(b.html_pages)+' HTML');
               if(b.total_files&&b.total_files!=='N/A') stats.push(esc(b.total_files)+' files');
-
               h+='<tr class="pr-row" data-q="'+esc(pr.number+' '+pr.title+' '+pr.author+' '+pr.branch).toLowerCase()+'">';
               h+='<td class="title"><a href="'+esc(pr.url)+'">#'+esc(String(pr.number))+' '+esc(pr.title)+'</a>';
               h+='<div class="meta">'+esc(pr.author||'')+' &middot; <code>'+esc(pr.branch||'')+'</code>';
@@ -337,191 +249,91 @@ jobs:
               h+='</div></td>';
               h+='<td class="stats">'+stats.join(' / ')+'</td>';
               h+='<td class="actions"><a href="'+esc(pr.url)+'">Preview</a>';
-              if(pr.pr_url) h+='<a href="'+esc(pr.pr_url)+'">PR</a>';
+              if(pr.pr_url) h+=' <a href="'+esc(pr.pr_url)+'">PR</a>';
               h+='</td></tr>';
             });
-            h+='</tbody></table>';
-            c.innerHTML=h;
+            h+='</tbody></table>'; c.innerHTML=h;
           }
-
           function load(){
-            return fetch('./active-prs.json?_='+Date.now())
-              .then(function(r){if(!r.ok)throw r;return r.json();})
-              .then(function(d){render(d);return d;})
-              .catch(function(){render([]);});
+            return fetch('./active-prs.json?_='+Date.now()).then(function(r){if(!r.ok)throw r;return r.json();}).then(function(d){render(d);return d;}).catch(function(){render([]);});
           }
-
-          load().then(function(){
-            document.getElementById('status').textContent=prs_length_label();
-          });
-
-          setInterval(function(){
-            load().then(function(){
-              document.getElementById('status').textContent=prs_length_label()+' -- refreshed '+new Date().toLocaleTimeString();
-            });
-          },60000);
-
-          function prs_length_label(){
-            var rows=document.querySelectorAll('.pr-row');
-            return rows.length+' active preview'+(rows.length!==1?'s':'');
-          }
-
+          load().then(function(){ document.getElementById('status').textContent=prs_length_label(); });
+          setInterval(function(){ load().then(function(){ document.getElementById('status').textContent=prs_length_label()+' -- refreshed '+new Date().toLocaleTimeString(); }); },60000);
+          function prs_length_label(){ var rows=document.querySelectorAll('.pr-row'); return rows.length+' active preview'+(rows.length!==1?'s':''); }
           document.getElementById('filter').addEventListener('input',function(){
             var q=this.value.toLowerCase().trim();
-            var rows=document.querySelectorAll('.pr-row');
-            for(var i=0;i<rows.length;i++){
-              rows[i].style.display=(!q||rows[i].getAttribute('data-q').indexOf(q)!==-1)?'':'none';
-            }
+            document.querySelectorAll('.pr-row').forEach(function(row){ row.style.display=(!q||row.getAttribute('data-q').indexOf(q)!==-1)?'':'none'; });
           });
           </script>
           </body>
           </html>
           HTMLEOF
 
-          git add pr-${{ github.event.number }}/ index.html active-prs.json 
-          [ -f README.md ] && git add README.md 
-          if git diff --staged --quiet; then
-              echo "No changes to commit" | tee -a build.log
-          else
-              git commit -m "Deploy PR #${{ github.event.number }} preview" 
-              git push origin gh-pages 
+          git add pr-${{ github.event.number }}/ index.html active-prs.json
+          [ -f README.md ] && git add README.md
+          if ! git diff --staged --quiet; then
+            git commit -m "Deploy PR #${{ github.event.number }} preview"
+            git push origin gh-pages
           fi
 
-      # Marker that only appears on successful deploys
       - name: Mark success
-        if: ${{ success() }}
+        if: success()
         run: echo "ok" > .build_succeeded
 
-      # Unified comment: update/create a single PR Preview comment on success or failure
-      - name: Comment on PR (update or create, success or failure)
-        if: ${{ always() }}
+      - name: Comment on PR
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
-            const repo  = context.repo.repo;
+            const repo = context.repo.repo;
             const headSha = context.payload.pull_request.head.sha;
             const headShaShort = headSha.substring(0, 7);
-            const runId = context.runId;
-            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
             const compareUrl = `https://github.com/${owner}/${repo}/pull/${prNumber}/files`;
-
-            // Success marker written only when deploy succeeded
-            let isSuccess = false;
-            try { isSuccess = fs.existsSync('.build_succeeded'); } catch (e) {}
-
-            // Load existing PR Preview comment if present
-            const { data: comments } = await github.rest.issues.listComments({
-              owner, repo, issue_number: prNumber,
-            });
-
+            const isSuccess = (function(){ try { return fs.existsSync('.build_succeeded'); } catch(e){ return false; } })();
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
             const PREVIEW_ANCHOR = '## PR Preview';
             let existing = comments.find(c => c.user.type === 'Bot' && c.body.includes(PREVIEW_ANCHOR));
-
-            // Reuse existing Preview URL if present (so failures keep the same link)
-            let existingPreviewUrl = undefined;
-            if (existing) {
-              const m = existing.body.match(/\*\*Preview URL\*\*\s*\|\s*(\S+)/);
-              if (m) existingPreviewUrl = m[1];
-            }
-
-            // Compute preview URL for success case
+            let existingPreviewUrl;
+            const urlMatch = existing && existing.body.match(/\*\*Preview URL\*\*\s*\|\s*(\S+)/);
+            if (urlMatch) existingPreviewUrl = urlMatch[1];
             const computedPreviewUrl = `https://${owner}.github.io/${repo}/pr-${prNumber}/`;
             const effectivePreviewUrl = isSuccess ? computedPreviewUrl : existingPreviewUrl;
-
-            // Read build log (if exists) and truncate for safety
-            let logText = '';
-            try { logText = fs.readFileSync('build.log', 'utf8'); } catch (e) {}
-            const MAX = 60000;
-            if (logText.length > MAX) {
-              logText = '... (truncated) ...\n' + logText.slice(-MAX);
-            }
-            const shownChars = Math.min(logText.length, MAX);
-
-            // Read build stats (from step outputs via env)
             const duration = process.env.BUILD_DURATION || 'N/A';
             const totalSize = process.env.BUILD_TOTAL_SIZE || 'N/A';
             const totalFiles = process.env.BUILD_TOTAL_FILES || 'N/A';
             const htmlPages = process.env.BUILD_HTML_PAGES || 'N/A';
-            const appPages = process.env.BUILD_APP_PAGES || 'N/A';
+            const pylintScore = process.env.PYLINT_SCORE || 'N/A';
+            const pylintDelta = process.env.PYLINT_DELTA || '';
 
-            // PR change summary
-            const changesSummary = process.env.PR_CHANGES_SUMMARY || '';
-            const changesFileCount = process.env.PR_CHANGES_FILE_COUNT || '0';
-            const templateChanges = parseInt(process.env.PR_TEMPLATE_CHANGES || '0', 10);
-            const styleChanges = parseInt(process.env.PR_STYLE_CHANGES || '0', 10);
-
-            // Read changed files list
-            let changedFilesList = '';
-            try { changedFilesList = fs.readFileSync('changed_files.txt', 'utf8').trim(); } catch (e) {}
-
-            // Build the comment body
-            let body = `## PR Preview\n\n`;
-
+            let body = '## PR Preview\n\n';
             if (isSuccess) {
-              // --- SUCCESS COMMENT ---
-              body += `| | |\n|---|---|\n`;
+              body += '| | |\n|---|---|\n';
               body += `| **Preview URL** | ${effectivePreviewUrl} |\n`;
               body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
-              body += `| **Build** | ${duration} -- ${totalSize} |\n`;
-              body += `| **Pages** | ${htmlPages} HTML (${appPages} apps) -- ${totalFiles} total files |\n\n`;
-
-              // Warning: template changes without style changes
-              if (templateChanges > 0 && styleChanges === 0) {
-                body += `> **Warning**\n`;
-                body += `> This PR contains template changes but no CSS changes. `;
-                body += `If you modified Tailwind classes, you may need to run \`npm run build-css\` to regenerate the stylesheet.\n\n`;
-              }
-
-              // PR changes section
-              if (changedFilesList) {
-                body += `**Changes** (${changesFileCount} files: ${changesSummary})\n\n`;
-                body += `<details>\n<summary>Changed files</summary>\n\n\`\`\`\n${changedFilesList}\n\`\`\`\n</details>\n\n`;
-              }
-
-              body += `---\n`;
-              body += `[View workflow run](${runUrl}) | [View PR diff](${compareUrl})\n\n`;
-              body += `*This comment updates automatically on each push. Preview is removed when the PR is closed.*`;
-
+              body += `| **Build** | ${duration} | ${totalSize} | ${totalFiles} files | ${htmlPages} HTML |\n`;
+              body += `| **PyLint Score** | ${pylintScore}${pylintDelta ? ` (${pylintDelta} from main)` : ''} |\n\n`;
+              body += `---\n[View workflow run](${runUrl}) | [View PR diff](${compareUrl})\n\n*Comment updates on each push. Preview removed when PR is closed.*`;
             } else {
-              // --- FAILURE COMMENT ---
-              body += `### Build Failed\n\n`;
-              body += `| | |\n|---|---|\n`;
+              body += '### Build Failed\n\n';
+              body += '| | |\n|---|---|\n';
               if (effectivePreviewUrl) body += `| **Last Working Preview** | ${effectivePreviewUrl} |\n`;
-              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n\n`;
-
-              body += `The build failed and the preview was not deployed. Check the build log below for details.\n\n`;
-
-              body += `<details>\n<summary>Build log (last ${shownChars} characters)</summary>\n\n\`\`\`\n${logText || 'No build log available.'}\n\`\`\`\n</details>\n\n`;
-
-              body += `---\n`;
-              body += `[View workflow run](${runUrl}) | [View PR diff](${compareUrl})\n\n`;
-              body += `*This comment updates automatically on each push. Fix the errors and push again to deploy.*`;
+              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
+              if (pylintScore !== 'N/A') body += `| **PyLint Score** | ${pylintScore}${pylintDelta ? ` (${pylintDelta} from main)` : ''} |\n`;
+              body += '\nBuild failed. See [workflow run](' + runUrl + ') for details.\n\n---\n[View PR diff](' + compareUrl + ')';
             }
-
-            // Update or create the single comment
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner, repo, comment_id: existing.id, body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number: prNumber, body
-              });
-            }
+            if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
         env:
           BUILD_DURATION: ${{ steps.build_stats.outputs.duration }}
           BUILD_TOTAL_SIZE: ${{ steps.build_stats.outputs.total_size }}
           BUILD_TOTAL_FILES: ${{ steps.build_stats.outputs.total_files }}
           BUILD_HTML_PAGES: ${{ steps.build_stats.outputs.html_files }}
-          BUILD_APP_PAGES: ${{ steps.build_stats.outputs.app_pages }}
-          PR_CHANGES_SUMMARY: ${{ steps.pr_changes.outputs.summary }}
-          PR_CHANGES_FILE_COUNT: ${{ steps.pr_changes.outputs.file_count }}
-          PR_TEMPLATE_CHANGES: ${{ steps.pr_changes.outputs.template_changes }}
-          PR_STYLE_CHANGES: ${{ steps.pr_changes.outputs.style_changes }}
+          PYLINT_SCORE: ${{ steps.pylint_pr.outputs.score }}
+          PYLINT_DELTA: ${{ steps.pylint_pr.outputs.delta }}
 
   cleanup-preview:
     if: github.event.action == 'closed'
@@ -538,22 +350,21 @@ jobs:
 
       - name: Remove PR preview directory
         run: |
-          # Configure git
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-          # Check if gh-pages branch exists and checkout
-          if git ls-remote --heads origin gh-pages | grep -q gh-pages; then
-            git fetch origin gh-pages:gh-pages
-            git checkout gh-pages
-
-            # Remove PR directory if it exists
-            if [ -d "pr-${{ github.event.number }}" ]; then
-              rm -rf pr-${{ github.event.number }}
-              
-              # Update active PRs JSON file to remove this PR
-              if [ -f active-prs.json ]; then
-                python3 << 'PYTHON_SCRIPT'
+          if ! git ls-remote --heads origin gh-pages | grep -q gh-pages; then
+            echo "gh-pages branch does not exist"
+            exit 0
+          fi
+          git fetch origin gh-pages:gh-pages
+          git checkout gh-pages
+          if [ ! -d "pr-${{ github.event.number }}" ]; then
+            echo "PR directory not found"
+            exit 0
+          fi
+          rm -rf pr-${{ github.event.number }}
+          if [ -f active-prs.json ]; then
+            python3 << 'PYEOF'
           import json
           pr_number = ${{ github.event.number }}
           try:
@@ -564,24 +375,16 @@ jobs:
           active_prs = [pr for pr in active_prs if pr.get('number') != pr_number]
           with open('active-prs.json', 'w') as f:
               json.dump(active_prs, f, indent=2)
-          PYTHON_SCRIPT
-              fi
-              
-              git add pr-${{ github.event.number }} active-prs.json
-              if git diff --staged --quiet; then
-                echo "No changes to commit"
-              else
-                git commit -m "Remove PR #${{ github.event.number }} preview (PR closed)"
-                git push origin gh-pages
-              fi
-            else
-              echo "PR directory pr-${{ github.event.number }} not found"
-            fi
-          else
-            echo "gh-pages branch does not exist"
+          PYEOF
+          fi
+          git add pr-${{ github.event.number }} active-prs.json
+          if ! git diff --staged --quiet; then
+            git commit -m "Remove PR #${{ github.event.number }} preview (PR closed)"
+            git push origin gh-pages
           fi
 
-      - name: Update comment and remove label on closed PR
+      - name: Update PR comment (closed)
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -592,32 +395,14 @@ jobs:
             const mergedBy = isMerged ? (context.payload.pull_request.merged_by?.login || 'unknown') : null;
             const headBranch = context.payload.pull_request.head.ref;
             const baseBranch = context.payload.pull_request.base.ref;
-
-            const comments = await github.rest.issues.listComments({
-              owner, repo, issue_number: prNumber,
-            });
-
-            const botComment = comments.data.find(c =>
-              c.user.type === 'Bot' && c.body.includes('## PR Preview')
-            );
-
-            if (botComment) {
-              let body = `## PR Preview *(${isMerged ? 'Merged' : 'Closed'})*\n\n`;
-              body += `| | |\n|---|---|\n`;
-              body += `| **Branch** | \`${headBranch}\` -> \`${baseBranch}\` |\n`;
-              body += `| **Status** | ${isMerged ? `Merged by @${mergedBy}` : 'Closed without merging'} |\n\n`;
-
-              body += `The preview deployment has been cleaned up.\n\n`;
-
-              if (isMerged) {
-                body += `Changes from this PR are now part of \`${baseBranch}\`. `;
-                body += `The production site will update on the next deployment.\n\n`;
-              }
-
-              body += `---\n`;
-              body += `*Preview was previously available at \`pr-${prNumber}/\`*`;
-
-              await github.rest.issues.updateComment({
-                owner, repo, comment_id: botComment.id, body
-              });
-            }
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: prNumber });
+            const botComment = comments.find(c => c.user.type === 'Bot' && c.body.includes('## PR Preview'));
+            if (!botComment) return;
+            let body = `## PR Preview *(${isMerged ? 'Merged' : 'Closed'})*\n\n`;
+            body += `| | |\n|---|---|\n`;
+            body += `| **Branch** | \`${headBranch}\` -> \`${baseBranch}\` |\n`;
+            body += `| **Status** | ${isMerged ? `Merged by @${mergedBy}` : 'Closed without merging'} |\n\n`;
+            body += `Preview deployment cleaned up.`;
+            if (isMerged) body += ` Changes are part of \`${baseBranch}\`.`;
+            body += `\n\n---\n*Preview was at \`pr-${prNumber}/\`*`;
+            await github.rest.issues.updateComment({ owner, repo, comment_id: botComment.id, body });
