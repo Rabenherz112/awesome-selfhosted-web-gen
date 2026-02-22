@@ -679,7 +679,7 @@ class SiteGenerator:
             if MINIFY_AVAILABLE:
                 try:
                     return minify(html_content, minify_js=True, minify_css=True)
-                except Exception as e:
+                except (TypeError, ValueError) as e:
                     print(f"Warning: HTML minification failed: {e}")
                     return html_content
             else:

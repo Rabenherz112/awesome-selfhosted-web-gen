@@ -138,7 +138,7 @@ class DataProcessor:
                         # Add the filename (without extension) as ID
                         app_data["id"] = yaml_file.stem
                         apps_data.append(app_data)
-            except Exception as e:
+            except (yaml.YAMLError, OSError) as e:
                 print(f"Error loading {yaml_file}: {e}")
 
         return apps_data
@@ -166,7 +166,7 @@ class DataProcessor:
                             "description": tag_data.get("description", ""),
                             "external_links": tag_data.get("external_links", []),
                         }
-            except Exception as e:
+            except (yaml.YAMLError, OSError) as e:
                 print(f"Error loading {yaml_file}: {e}")
 
         return categories_data
@@ -193,7 +193,7 @@ class DataProcessor:
                             "name": platform_data.get("name", platform_id),
                             "description": platform_data.get("description", ""),
                         }
-            except Exception as e:
+            except (yaml.YAMLError, OSError) as e:
                 print(f"Error loading {yaml_file}: {e}")
 
         return platforms_data
@@ -219,7 +219,7 @@ class DataProcessor:
                                     "url": license_info.get("url", ""),
                                     "free": True,
                                 }
-            except Exception as e:
+            except (yaml.YAMLError, OSError) as e:
                 print(f"Error loading {licenses_file}: {e}")
         else:
             print(f"Warning: Licenses file not found: {licenses_file}")
@@ -239,7 +239,7 @@ class DataProcessor:
                                     "url": license_info.get("url", ""),
                                     "free": False,
                                 }
-            except Exception as e:
+            except (yaml.YAMLError, OSError) as e:
                 print(f"Error loading {licenses_nonfree_file}: {e}")
         else:
             print(f"Note: Non-free licenses file not found: {licenses_nonfree_file}")
@@ -327,7 +327,7 @@ class DataProcessor:
             if scheme not in ("http", "https"):
                 return None
             return html.escape(value, quote=True)
-        except Exception:
+        except (TypeError, ValueError):
             return None
 
     def _create_app_id(self, name: str) -> str:
@@ -657,7 +657,7 @@ class DataProcessor:
                 with open(footer_file, "r", encoding="utf-8") as f:
                     content = f.read()
                     markdown_files["footer"] = content
-            except Exception as e:
+            except OSError as e:
                 print(f"Error loading footer.md: {e}")
                 markdown_files["footer"] = ""
         else:
@@ -696,7 +696,7 @@ class DataProcessor:
                 filename = normalized_path[9:-4]  # Remove 'software/' and '.yml'
                 return filename
             return None
-        except Exception as e:
+        except (UnicodeDecodeError, UnicodeEncodeError, ValueError) as e:
             print(f"Debug: Error extracting ID from path '{file_path}': {e}")
             return None
 
@@ -734,7 +734,7 @@ class DataProcessor:
             
             return addition_dates
             
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             print(f"Error collecting git data: {e}")
             return {}
 
@@ -766,7 +766,7 @@ class DataProcessor:
         except subprocess.TimeoutExpired:
             print("Git command timed out - repository might be too large")
             return {}
-        except Exception as e:
+        except (subprocess.SubprocessError, OSError, ValueError) as e:
             print(f"Error running git command: {e}")
             return {}
 

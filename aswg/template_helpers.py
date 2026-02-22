@@ -282,7 +282,7 @@ class TemplateHelpers:
             return ""
 
         # Create a simple template from string
-        from jinja2 import Template
+        from jinja2 import Template, TemplateError
 
         # Merge with site config by default
         full_context = {
@@ -295,7 +295,7 @@ class TemplateHelpers:
         try:
             template = Template(template_str)
             return template.render(**full_context)
-        except Exception as e:
+        except TemplateError as e:
             print(f"Warning: Could not render template string '{template_str}': {e}")
             return template_str
 
@@ -605,7 +605,7 @@ class TemplateHelpers:
                             enabled = self.config.get('alternatives.enabled', False)
                             if not enabled:
                                 continue
-                    except Exception:
+                    except (AttributeError, KeyError, TypeError):
                         # If template evaluation fails, default to enabled
                         pass
                 elif isinstance(enabled_condition, bool) and not enabled_condition:
