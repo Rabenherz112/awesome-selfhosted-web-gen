@@ -91,13 +91,13 @@ def print_build_stats(output_dir: Path) -> None:
     total_size = get_directory_size(output_dir)
     total_files = sum(stats.values())
 
-    print(f"\nBuild Statistics:")
+    print("\nBuild Statistics:")
     print(f"   Total files: {total_files}")
     print(f"   Total size: {format_bytes(total_size)}")
     print(f"   Output directory: {output_dir}")
 
     if stats:
-        print(f"\n   File types:")
+        print("\n   File types:")
         for ext, count in sorted(stats.items()):
             ext_display = ext if ext else "no extension"
             print(f"     {ext_display}: {count}")

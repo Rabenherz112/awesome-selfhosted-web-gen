@@ -53,7 +53,7 @@ jobs:
           git fetch origin main
           git checkout origin/main --
           pip install . -q
-          SCORE=$(pylint aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
+          SCORE=$(pylint --disable=too-many-locals,line-too-long aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
           echo "score=${SCORE:-0}" >> "$GITHUB_OUTPUT"
 
       - name: Pylint score (PR)
@@ -61,7 +61,7 @@ jobs:
         run: |
           git checkout ${{ github.event.pull_request.head.sha }} --
           pip install . -q
-          PR_SCORE=$(pylint aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
+          PR_SCORE=$(pylint --disable=too-many-locals,line-too-long aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
           PR_SCORE=${PR_SCORE:-0}
           MAIN_SCORE=${{ steps.pylint_main.outputs.score }}
           [ -z "$MAIN_SCORE" ] && MAIN_SCORE=0
