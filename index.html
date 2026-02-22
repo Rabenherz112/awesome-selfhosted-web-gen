@@ -43,11 +43,7 @@ var repoBase='https://github.com/rabenherz112/aswg';
 function render(prs){
   var c=document.getElementById('content');
   var f=document.getElementById('filter');
-  if(!prs||!prs.length){
-    f.style.display='none';
-    c.innerHTML='<div class="empty">No active PR previews. Open a pull request to generate one.</div>';
-    return;
-  }
+  if(!prs||!prs.length){ f.style.display='none'; c.innerHTML='<div class="empty">No active PR previews. Open a pull request to generate one.</div>'; return; }
   f.style.display=prs.length>=2?'':'none';
   var h='<table><thead><tr><th>Pull Request</th><th>Build</th><th>Links</th></tr></thead><tbody>';
   prs.forEach(function(pr){
@@ -57,10 +53,8 @@ function render(prs){
     var stats=[];
     if(b.duration&&b.duration!=='N/A') stats.push(esc(b.duration));
     if(b.size&&b.size!=='N/A') stats.push(esc(b.size));
-    if(b.html_pages&&b.html_pages!=='N/A') stats.push(esc(b.html_pages)+' pages');
-    if(b.app_pages&&b.app_pages!=='N/A') stats.push(esc(b.app_pages)+' apps');
+    if(b.html_pages&&b.html_pages!=='N/A') stats.push(esc(b.html_pages)+' HTML');
     if(b.total_files&&b.total_files!=='N/A') stats.push(esc(b.total_files)+' files');
-
     h+='<tr class="pr-row" data-q="'+esc(pr.number+' '+pr.title+' '+pr.author+' '+pr.branch).toLowerCase()+'">';
     h+='<td class="title"><a href="'+esc(pr.url)+'">#'+esc(String(pr.number))+' '+esc(pr.title)+'</a>';
     h+='<div class="meta">'+esc(pr.author||'')+' &middot; <code>'+esc(pr.branch||'')+'</code>';
@@ -69,41 +63,20 @@ function render(prs){
     h+='</div></td>';
     h+='<td class="stats">'+stats.join(' / ')+'</td>';
     h+='<td class="actions"><a href="'+esc(pr.url)+'">Preview</a>';
-    if(pr.pr_url) h+='<a href="'+esc(pr.pr_url)+'">PR</a>';
+    if(pr.pr_url) h+=' <a href="'+esc(pr.pr_url)+'">PR</a>';
     h+='</td></tr>';
   });
-  h+='</tbody></table>';
-  c.innerHTML=h;
+  h+='</tbody></table>'; c.innerHTML=h;
 }
-
 function load(){
-  return fetch('./active-prs.json?_='+Date.now())
-    .then(function(r){if(!r.ok)throw r;return r.json();})
-    .then(function(d){render(d);return d;})
-    .catch(function(){render([]);});
+  return fetch('./active-prs.json?_='+Date.now()).then(function(r){if(!r.ok)throw r;return r.json();}).then(function(d){render(d);return d;}).catch(function(){render([]);});
 }
-
-load().then(function(){
-  document.getElementById('status').textContent=prs_length_label();
-});
-
-setInterval(function(){
-  load().then(function(){
-    document.getElementById('status').textContent=prs_length_label()+' -- refreshed '+new Date().toLocaleTimeString();
-  });
-},60000);
-
-function prs_length_label(){
-  var rows=document.querySelectorAll('.pr-row');
-  return rows.length+' active preview'+(rows.length!==1?'s':'');
-}
-
+load().then(function(){ document.getElementById('status').textContent=prs_length_label(); });
+setInterval(function(){ load().then(function(){ document.getElementById('status').textContent=prs_length_label()+' -- refreshed '+new Date().toLocaleTimeString(); }); },60000);
+function prs_length_label(){ var rows=document.querySelectorAll('.pr-row'); return rows.length+' active preview'+(rows.length!==1?'s':''); }
 document.getElementById('filter').addEventListener('input',function(){
   var q=this.value.toLowerCase().trim();
-  var rows=document.querySelectorAll('.pr-row');
-  for(var i=0;i<rows.length;i++){
-    rows[i].style.display=(!q||rows[i].getAttribute('data-q').indexOf(q)!==-1)?'':'none';
-  }
+  document.querySelectorAll('.pr-row').forEach(function(row){ row.style.display=(!q||row.getAttribute('data-q').indexOf(q)!==-1)?'':'none'; });
 });
 </script>
 </body>
