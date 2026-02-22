@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "number": 72,
+    "title": "refactor: clean up code for pylint",
+    "author": "Rabenherz112",
+    "branch": "pylint-score",
+    "commit": "18cb679",
+    "commit_full": "18cb6791238c651417492ddd430e83513106b393",
+    "url": "pr-72/",
+    "pr_url": "https://github.com/Rabenherz112/aswg/pull/72",
+    "updated": "2026-02-22T12:13:37+00:00",
+    "build": {
+      "duration": "31s",
+      "total_files": "1337",
+      "html_pages": "1322",
+      "size": "33M"
+    }
+  }
+]
