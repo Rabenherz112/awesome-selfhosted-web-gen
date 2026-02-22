@@ -4,6 +4,7 @@ Awesome Self-Hosted Website Generator
 Command-line interface for generating a static website from awesome-selfhosted data.
 """
 
+import json
 import sys
 import time
 import argparse
@@ -111,7 +112,7 @@ def cmd_fetch(config, verbose=False):
         
         print(f"Cached processed data to {cache_file}")
         
-    except Exception as e:
+    except (OSError, TypeError, ValueError) as e:
         print(f"Error fetching data: {e}", file=sys.stderr)
         if verbose:
             import traceback
@@ -136,7 +137,6 @@ def cmd_build(config, fetch_first=False, verbose=False):
             cmd_fetch(config, verbose)
         
         # Load the data
-        import json
         with open(cache_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
@@ -164,7 +164,7 @@ def cmd_build(config, fetch_first=False, verbose=False):
         
         print(f"Website generated successfully!")
         
-    except Exception as e:
+    except (OSError, json.JSONDecodeError, TypeError, KeyError, ValueError) as e:
         print(f"Error building site: {e}", file=sys.stderr)
         if verbose:
             import traceback
@@ -333,7 +333,6 @@ def cmd_info(config):
     # Cached Data Information
     cache_file = config.data_cache_dir / 'processed_data.json'
     if cache_file.exists():
-        import json
         try:
             with open(cache_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -359,7 +358,7 @@ def cmd_info(config):
                 print(f"   Platforms count: {stats.get('platforms_count', 0)}")
                 print(f"   Licenses count: {stats.get('licenses_count', 0)}")
                 
-        except Exception as e:
+        except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
             print(f"\nCached Data: Corrupted ({str(e)})")
     else:
         print(f"\nCached Data: Not found")
