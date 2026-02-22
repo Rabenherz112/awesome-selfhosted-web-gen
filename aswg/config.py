@@ -2,11 +2,10 @@
 Configuration management for the site generator.
 """
 
-import os
-import yaml
+import importlib.resources
 from pathlib import Path
 from typing import Dict, Any
-
+import yaml
 
 class Config:
     """Configuration management class."""
@@ -79,7 +78,6 @@ class Config:
             return template_path
         # Try to find templates in package data
         try:
-            import importlib.resources
             # Use files() API for Python 3.9+
             template_ref = importlib.resources.files("aswg") / "templates"
             # Convert Traversable to string path (works for both files and dirs)
@@ -97,7 +95,6 @@ class Config:
             return static_path
         # Try to find static files in package data
         try:
-            import importlib.resources
             # Use files() API for Python 3.9+
             static_ref = importlib.resources.files("aswg") / "static"
             # Convert Traversable to string path (works for both files and dirs)

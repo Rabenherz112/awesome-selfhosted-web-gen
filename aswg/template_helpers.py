@@ -5,10 +5,11 @@ Template helper functions for Jinja2 templates.
 import re
 from datetime import datetime
 from typing import List, Any
+from jinja2 import Template, TemplateError
 from .config import Config
 
 
-class TemplateHelpers:
+class TemplateHelpers:  # pylint: disable=too-many-public-methods
     """Helper functions for Jinja2 templates."""
 
     def __init__(self, config: Config, licenses_data: dict = None):
@@ -281,9 +282,6 @@ class TemplateHelpers:
         if not template_str:
             return ""
 
-        # Create a simple template from string
-        from jinja2 import Template, TemplateError
-
         # Merge with site config by default
         full_context = {
             "site": self.config.get_site_config(),
@@ -369,8 +367,6 @@ class TemplateHelpers:
         """Convert markdown text to HTML for footer content."""
         if not markdown_text:
             return ""
-
-        import re
 
         html = markdown_text
 
@@ -509,8 +505,6 @@ class TemplateHelpers:
 
     def style_description_links(self, description: str) -> str:
         """Add proper styling to links in description text."""
-        import re
-
         if not description:
             return ""
 
@@ -542,8 +536,6 @@ class TemplateHelpers:
 
     def process_banner_text(self, text: str) -> str:
         """Process banner text to handle markdown-style bold formatting."""
-        import re
-
         if not text:
             return ""
 
@@ -611,7 +603,7 @@ class TemplateHelpers:
                 elif isinstance(enabled_condition, bool) and not enabled_condition:
                     # Skip disabled items
                     continue
-                
+
             # Item is enabled, add to filtered list
             filtered_items.append(item)
 

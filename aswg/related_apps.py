@@ -3,17 +3,17 @@ Related applications finding algorithms and similarity calculations.
 """
 
 import re
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 from .data_processor import Application
 
 
 class RelatedAppsFinder:
     """Finds related applications using various similarity metrics."""
-    
+
     def __init__(self, config: Dict, licenses_data: Dict = None):
         """
         Initialize the RelatedAppsFinder.
-        
+
         Args:
             config: Configuration dictionary with scoring and filtering settings
             licenses_data: Optional dictionary of license data for non-free checking
@@ -22,12 +22,12 @@ class RelatedAppsFinder:
         self.licenses_data = licenses_data
         self._cached_app_phrases: Optional[Dict[str, Set[str]]] = None
         self._cached_app_list_id: Optional[int] = None
-    
+
     def clear_cache(self):
         """Clear the cached phrase data. Useful for testing or when app list changes."""
         self._cached_app_phrases = None
         self._cached_app_list_id = None
-    
+
     def find_related_apps(
         self,
         target_app: Application,
@@ -37,7 +37,7 @@ class RelatedAppsFinder:
         related = []
         scoring_config = self.config.get("scoring", {})
         debug = self.config.get("debug", False)
-        
+
         if debug:
             print(f"\n=== Finding related apps for {target_app.name} ===")
 
@@ -186,7 +186,7 @@ class RelatedAppsFinder:
     def _calculate_semantic_similarity(
         self, target_app: Application, app: Application, app_phrases: Dict[str, Set[str]]
     ) -> int:
-        """Calculate semantic similarity using automatic phrase detection and pre-computed phrase sets."""
+        """Calculate semantic similarity from phrase detection and pre-computed phrase sets."""
         target_phrases = app_phrases.get(target_app.id, set())
         app_phrases_set = app_phrases.get(app.id, set())
 

@@ -3,15 +3,15 @@ Data processing module for fetching and processing awesome-selfhosted data.
 """
 
 import html
-import yaml
+import re
 import subprocess
 import unicodedata
+from dataclasses import dataclass
+from datetime import datetime, date, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
-from dataclasses import dataclass
-from datetime import datetime, date, timedelta, timezone
-
+import yaml
 from .config import Config
 
 
@@ -56,7 +56,7 @@ class Application:
             self.alternative_to = []
 
 
-class DataProcessor:
+class DataProcessor:  # pylint: disable=too-many-instance-attributes
     """Data processor for awesome-selfhosted dataset."""
 
     def __init__(self, config: Config):
@@ -315,7 +315,7 @@ class DataProcessor:
         return applications
 
     def _validate_url(self, url: Optional[Any]) -> Optional[str]:
-        """Validate icon_url is a well-formed HTTP/HTTPS URL and return it HTML-escaped for safe embedding in attributes."""
+        """Validate icon_url is a well-formed HTTP/HTTPS URL; return it HTML-escaped for attributes."""
         if url is None or not isinstance(url, str):
             return None
         value = url.strip()
@@ -332,16 +332,12 @@ class DataProcessor:
 
     def _create_app_id(self, name: str) -> str:
         """Create a unique ID from application name."""
-        import re
-
         # Convert to lowercase, replace spaces/special chars with hyphens
         app_id = re.sub(r"[^a-z0-9]+", "-", name.lower().strip())
         return app_id.strip("-")
 
     def _parse_description_annotations(self, description: str) -> Dict[str, Any]:
         """Parse special annotations from description and return cleaned description with extracted data."""
-        import re
-
         if not description:
             return {
                 "description": "",
@@ -611,7 +607,7 @@ class DataProcessor:
     def generate_alternatives_data(self, applications: List[Application]) -> Dict[str, Any]:
         """Generate alternatives data for the alternatives page."""
         alternatives_map = {}
-        
+
         for app in applications:
             if app.alternative_to:
                 for alternative in app.alternative_to:
@@ -621,7 +617,7 @@ class DataProcessor:
                         if alt_key not in alternatives_map:
                             alternatives_map[alt_key] = []
                         alternatives_map[alt_key].append(app)
-        
+
         # Sort alternatives by name and sort apps within each alternative by stars
         sorted_alternatives = {}
         for alt_name in sorted(alternatives_map.keys(), key=str.lower):
@@ -629,12 +625,12 @@ class DataProcessor:
             # Sort apps by stars (descending), then by name
             sorted_apps = sorted(apps, key=lambda x: (-(x.stars or 0), x.name.lower()))
             sorted_alternatives[alt_name] = sorted_apps
-        
+
         # Calculate statistics
         total_alternatives = len(sorted_alternatives)
         total_alternative_apps = len([app for app in applications if app.alternative_to])
         most_alternatives = max(len(apps) for apps in sorted_alternatives.values()) if sorted_alternatives else 0
-        
+
         return {
             'alternatives': sorted_alternatives,
             'statistics': {
@@ -674,14 +670,14 @@ class DataProcessor:
                 # Remove surrounding quotes if present
                 if filename.startswith('"') and filename.endswith('"'):
                     filename = filename[1:-1]
-                
+
                 # Decode octal sequences
                 decoded = filename.encode('utf-8').decode('unicode_escape').encode('latin1').decode('utf-8')
                 filename = decoded
             except (UnicodeDecodeError, UnicodeEncodeError):
                 # If decoding fails, use original filename
                 pass
-        
+
         # Normalize Unicode to NFC form (canonical composition)
         normalized = unicodedata.normalize('NFC', filename)
         return normalized
@@ -707,8 +703,7 @@ class DataProcessor:
                 return False
 
             # Check if the directory is a git repository
-            subprocess.run(['git', 'rev-parse', '--git-dir'], 
-                         capture_output=True, check=True, cwd=data_dir)
+            subprocess.run(['git', 'rev-parse', '--git-dir'], capture_output=True, check=True, cwd=data_dir)
 
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
@@ -724,16 +719,16 @@ class DataProcessor:
 
         if self._git_addition_dates_cache:
             return self._git_addition_dates_cache
-        
+
         try:
             # Get all software files and their first commit dates efficiently
             addition_dates = self._get_file_addition_dates(data_dir)
-            
+
             # Cache the results
             self._git_addition_dates_cache = addition_dates
-            
+
             return addition_dates
-            
+
         except (subprocess.SubprocessError, OSError, ValueError) as e:
             print(f"Error collecting git data: {e}")
             return {}
@@ -741,28 +736,28 @@ class DataProcessor:
     def _get_file_addition_dates(self, data_dir: Path) -> Dict[str, str]:
         """Get the first commit date for each software file."""
         addition_dates = {}
-        
+
         try:
             # First, get all additions
             additions = self._get_git_log_data(data_dir, '--diff-filter=A')
             addition_dates.update(additions)
-            
+
             # Then, get renames to catch files that were moved/renamed
             renames = self._get_git_log_data(data_dir, '--diff-filter=R', check_renames=True)
-            
+
             # For renames, we want the earliest date (either original or renamed)
-            for software_id, date in renames.items():
+            for software_id, iso_date_str in renames.items():
                 if software_id not in addition_dates:
-                    addition_dates[software_id] = date
+                    addition_dates[software_id] = iso_date_str
                 else:
                     # Keep the earlier date
                     existing_date = datetime.fromisoformat(addition_dates[software_id])
-                    new_date = datetime.fromisoformat(date)
+                    new_date = datetime.fromisoformat(iso_date_str)
                     if new_date < existing_date:
-                        addition_dates[software_id] = date
-            
+                        addition_dates[software_id] = iso_date_str
+
             return addition_dates
-            
+
         except subprocess.TimeoutExpired:
             print("Git command timed out - repository might be too large")
             return {}
@@ -773,7 +768,7 @@ class DataProcessor:
     def _get_git_log_data(self, data_dir: Path, diff_filter: str, check_renames: bool = False) -> Dict[str, str]:
         """Get git log data with specified diff filter."""
         addition_dates = {}
-        
+
         cmd = [
             'git', 'log', 
             diff_filter,
@@ -781,7 +776,7 @@ class DataProcessor:
             '--pretty=format:%H|%ci',  # Hash|ISO date
             '--', 'software/'
         ]
-        
+
         if check_renames:
             # For renames, we also want to see the rename information
             cmd = [
@@ -791,30 +786,29 @@ class DataProcessor:
                 '--pretty=format:%H|%ci',
                 '--', 'software/'
             ]
-        
+
         # Set environment to handle Unicode filenames properly
         env = {'LC_ALL': 'C.UTF-8', 'LANG': 'C.UTF-8'}
-        result = subprocess.run(cmd, capture_output=True, text=True, 
-                              cwd=data_dir, timeout=30, env=env)
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=data_dir, timeout=30, env=env)
         
         if result.returncode != 0:
             print(f"Git command failed: {result.stderr}")
             return {}
-        
+
         # Parse the output
         lines = result.stdout.strip().split('\n')
         current_commit_info = None
-        
+
         for line in lines:
             line = line.strip()
             if not line:
                 continue
-            
+
             # Check if this is a commit info line (contains |)
             if '|' in line and not line.startswith('software/') and not line.startswith('R'):
                 current_commit_info = line
                 continue
-            
+
             # Handle renames (format: R100	old_name	new_name)
             if check_renames and line.startswith('R') and '\t' in line:
                 if current_commit_info:
@@ -822,7 +816,7 @@ class DataProcessor:
                     if len(parts) >= 3:
                         old_file = parts[1]
                         new_file = parts[2]
-                        
+
                         # We want the new filename (current name)
                         software_id = self._extract_software_id_from_path(new_file)
                         if software_id:
@@ -831,12 +825,12 @@ class DataProcessor:
                             try:
                                 commit_date = datetime.fromisoformat(date_str.strip().replace(' ', 'T'))
                                 iso_date = commit_date.strftime('%Y-%m-%d')
-                                
+
                                 if software_id not in addition_dates:
                                     addition_dates[software_id] = iso_date
                             except ValueError:
                                 continue
-            
+
             # Handle regular additions/files
             else:
                 software_id = self._extract_software_id_from_path(line)
@@ -846,11 +840,11 @@ class DataProcessor:
                     try:
                         commit_date = datetime.fromisoformat(date_str.strip().replace(' ', 'T'))
                         iso_date = commit_date.strftime('%Y-%m-%d')
-                        
+
                         # Only store if we don't have this software yet (first occurrence)
                         if software_id not in addition_dates:
                             addition_dates[software_id] = iso_date
                     except ValueError:
                         continue
-        
+
         return addition_dates
