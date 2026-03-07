@@ -5,6 +5,7 @@ Site generation module using Jinja2 templates.
 import json
 import random
 import shutil
+from dataclasses import asdict
 from datetime import datetime
 from typing import Dict, List, Any
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -28,6 +29,7 @@ class SiteGenerator:  # pylint: disable=too-few-public-methods
     def __init__(self, config: Config):
         """Initialize site generator with configuration."""
         self.config = config
+        self.licenses_data = None
         self.template_helpers = TemplateHelpers(config)
         self.related_apps_config = self.config.get("related_apps", {})
         self.related_apps_finder = RelatedAppsFinder(self.related_apps_config)
@@ -336,9 +338,6 @@ class SiteGenerator:  # pylint: disable=too-few-public-methods
         # This has been deprecated in favor of _generate_homepage, however I will keep it here for now for reference and future use
         template = self.jinja_env.get_template("pages/browse.html")
 
-        # Sort applications by name by default for initial display
-        sorted_apps = sorted(applications, key=lambda x: x.name.lower())
-
         # Generate single page with empty applications (JavaScript will populate)
         content = template.render(
             applications=[],  # Empty - JavaScript will handle all rendering
@@ -362,9 +361,6 @@ class SiteGenerator:  # pylint: disable=too-few-public-methods
 
     def _generate_alternatives_page(self, applications: List[Application]):
         """Generate the alternatives page."""
-        from .data_processor import DataProcessor
-        from dataclasses import asdict
-
         processor = DataProcessor(self.config)
         alternatives_data = processor.generate_alternatives_data(applications)
 
@@ -510,9 +506,6 @@ class SiteGenerator:  # pylint: disable=too-few-public-methods
 
     def _generate_alternatives_data_file(self, applications: List[Application]) -> Dict[str, Any]:
         """Generate alternatives data JSON file for client-side alternatives page."""
-        from .data_processor import DataProcessor
-        from dataclasses import asdict
-        
         processor = DataProcessor(self.config)
         alternatives_data = processor.generate_alternatives_data(applications)
 
@@ -651,7 +644,7 @@ class SiteGenerator:  # pylint: disable=too-few-public-methods
             content.append("# If the request has a .html extension")
             content.append("RewriteCond %{THE_REQUEST} \\.html")
             content.append("# Redirect to the same URL without .html extension")
-            content.append("RewriteRule ^(.*)\.html$ /$1 [R=301,L]")
+            content.append(r"RewriteRule ^(.*)\.html$ /$1 [R=301,L]")
             content.append("")
 
             # Add .html internally when accessing URLs without extension

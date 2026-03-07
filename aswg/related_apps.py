@@ -149,7 +149,7 @@ class RelatedAppsFinder:
         tiebreakers = self.config.get("tiebreakers", ["stars", "name"])
 
         def sort_key(item):
-            app, score, breakdown = item
+            app, score, breakdown = item # pylint: disable=unused-variable
             key = [-score]  # Negative for descending order
 
             for tiebreaker in tiebreakers:
@@ -164,7 +164,7 @@ class RelatedAppsFinder:
 
         # Return only the apps, limited by max_results
         max_results = self.config.get("max_results", 6)
-        result_apps = [app for app, score, breakdown in related[:max_results]]
+        result_apps = [app for app, score, breakdown in related[:max_results]] # pylint: disable=unused-variable
 
         if debug:
             print(f"  -> Returning {len(result_apps)} related apps")
@@ -412,7 +412,6 @@ class RelatedAppsFinder:
             "supports",
             # Common advertisement words
             "best",
-            "new",
             "free",
             "powerful",
             "easy",
@@ -549,11 +548,10 @@ class RelatedAppsFinder:
         """Categorize applications by popularity tier based on star count."""
         if stars >= 10000:
             return "mega"  # 10k+ stars
-        elif stars >= 5000:
+        if stars >= 5000:
             return "highly"  # 5k-10k stars
-        elif stars >= 1000:
+        if stars >= 1000:
             return "popular"  # 1k-5k stars
-        elif stars >= 100:
+        if stars >= 100:
             return "moderate"  # 100-1k stars
-        else:
-            return "emerging"  # <100 stars
+        return "emerging"  # <100 stars

@@ -88,15 +88,16 @@ class TemplateHelpers:  # pylint: disable=too-many-public-methods
             print(f"Warning: Could not parse date '{date_str}': {e}")
             return date_str
 
-    def truncate_description(self, description: str, length: int = None) -> str:
-        """Truncate description to specified length."""
+    def truncate_description(self, description: str, length: int = None, show_full: bool = None) -> str:
+        """Truncate description to specified length with configurable behavior."""
         if not description:
             return ""
 
         truncation_config = self.config.get("ui.truncation", {})
         if length is None:
             length = truncation_config.get("default_description_length", 150)
-        show_full = truncation_config.get("browse_description_full", False)
+        if show_full is None:
+            show_full = truncation_config.get("browse_description_full", False)
 
         if show_full or len(description) <= length:
             return description
@@ -111,6 +112,7 @@ class TemplateHelpers:  # pylint: disable=too-many-public-methods
 
     def get_app_url(self, app_id: str) -> str:
         """Get URL for application detail page."""
+        # Don't use url_for here as it will be called from templates
         return f"/apps/{app_id}.html"
 
     def format_license(self, license_name: str) -> str:
@@ -333,36 +335,6 @@ class TemplateHelpers:  # pylint: disable=too-many-public-methods
 
         return target_attrs
 
-    def truncate_description(
-        self, description: str, length: int = None, show_full: bool = None
-    ) -> str:
-        """Truncate description to specified length with configurable behavior."""
-        if not description:
-            return ""
-
-        # Get truncation config from UI config
-        truncation_config = self.config.get("ui.truncation", {})
-
-        # Use provided length or fall back to config default
-        if length is None:
-            length = truncation_config.get("default_description_length", 150)
-
-        # Check if full description should be shown
-        if show_full is None:
-            show_full = truncation_config.get("browse_description_full", False)
-
-        if show_full or len(description) <= length:
-            return description
-
-        # Find the last space before the limit
-        truncated = description[:length]
-        last_space = truncated.rfind(" ")
-
-        if last_space > 0:
-            truncated = truncated[:last_space]
-
-        return truncated + "..."
-
     def markdown_to_html(self, markdown_text: str) -> str:
         """Convert markdown text to HTML for footer content."""
         if not markdown_text:
@@ -572,11 +544,6 @@ class TemplateHelpers:  # pylint: disable=too-many-public-methods
 
         base_path = self.get_base_path()
         return f"{base_path}/{path}"
-
-    def get_app_url(self, app_id: str) -> str:
-        """Get URL for application detail page."""
-        # Don't use url_for here as it will be called from templates
-        return f"/apps/{app_id}.html"
 
     def filter_navigation(self, navigation_items: list) -> list:
         """Filter navigation items based on enabled conditions."""

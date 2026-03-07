@@ -582,7 +582,7 @@ class DataProcessor:  # pylint: disable=too-many-instance-attributes
         return {
             "total_apps": len(applications),
             "categories_count": len([c for c in categories.values() if c["count"] > 0]),
-            "categories_count": len(categories),
+            # "categories_count": len(categories),
             "total_platforms": len(platform_counts),
             "total_licenses": len(license_counts),
             "top_platforms": sorted(
@@ -789,8 +789,8 @@ class DataProcessor:  # pylint: disable=too-many-instance-attributes
 
         # Set environment to handle Unicode filenames properly
         env = {'LC_ALL': 'C.UTF-8', 'LANG': 'C.UTF-8'}
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=data_dir, timeout=30, env=env)
-        
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=data_dir, timeout=30, env=env, check=False)
+
         if result.returncode != 0:
             print(f"Git command failed: {result.stderr}")
             return {}
@@ -814,7 +814,7 @@ class DataProcessor:  # pylint: disable=too-many-instance-attributes
                 if current_commit_info:
                     parts = line.split('\t')
                     if len(parts) >= 3:
-                        old_file = parts[1]
+                        #old_file = parts[1]
                         new_file = parts[2]
 
                         # We want the new filename (current name)
