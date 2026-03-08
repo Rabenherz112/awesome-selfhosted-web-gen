@@ -16,25 +16,10 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
-try:
-    from importlib.metadata import version as _pkg_version
-except ImportError:
-    _pkg_version = None
-
 from .config import Config
 from .data_processor import DataProcessor, Application
 from .site_generator import SiteGenerator
 from .utils import format_bytes, get_directory_size, print_build_stats
-
-
-def _get_version():
-    """Return ASWG package version from metadata or __version__."""
-    if _pkg_version is not None:
-        try:
-            return _pkg_version("aswg")
-        except Exception:
-            pass
-    return getattr(__import__("aswg"), "__version__", "unknown")
 
 
 def create_parser():
@@ -263,7 +248,6 @@ def cmd_info(config):  # pylint: disable=too-many-locals,too-many-statements
 
     # Version and environment
     print("Version and environment:")
-    print(f"   ASWG version: {_get_version()}")
     print(f"   Python version: {sys.version.split()[0]}")
     print(f"   Platform: {platform.platform()}")
     print(f"   Architecture: {platform.architecture()[0]}")
