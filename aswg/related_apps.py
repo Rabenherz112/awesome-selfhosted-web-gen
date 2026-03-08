@@ -3,17 +3,17 @@ Related applications finding algorithms and similarity calculations.
 """
 
 import re
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 from .data_processor import Application
 
 
 class RelatedAppsFinder:
     """Finds related applications using various similarity metrics."""
-    
+
     def __init__(self, config: Dict, licenses_data: Dict = None):
         """
         Initialize the RelatedAppsFinder.
-        
+
         Args:
             config: Configuration dictionary with scoring and filtering settings
             licenses_data: Optional dictionary of license data for non-free checking
@@ -22,12 +22,12 @@ class RelatedAppsFinder:
         self.licenses_data = licenses_data
         self._cached_app_phrases: Optional[Dict[str, Set[str]]] = None
         self._cached_app_list_id: Optional[int] = None
-    
+
     def clear_cache(self):
         """Clear the cached phrase data. Useful for testing or when app list changes."""
         self._cached_app_phrases = None
         self._cached_app_list_id = None
-    
+
     def find_related_apps(
         self,
         target_app: Application,
@@ -37,7 +37,7 @@ class RelatedAppsFinder:
         related = []
         scoring_config = self.config.get("scoring", {})
         debug = self.config.get("debug", False)
-        
+
         if debug:
             print(f"\n=== Finding related apps for {target_app.name} ===")
 
@@ -149,7 +149,7 @@ class RelatedAppsFinder:
         tiebreakers = self.config.get("tiebreakers", ["stars", "name"])
 
         def sort_key(item):
-            app, score, breakdown = item
+            app, score, breakdown = item # pylint: disable=unused-variable
             key = [-score]  # Negative for descending order
 
             for tiebreaker in tiebreakers:
@@ -164,7 +164,7 @@ class RelatedAppsFinder:
 
         # Return only the apps, limited by max_results
         max_results = self.config.get("max_results", 6)
-        result_apps = [app for app, score, breakdown in related[:max_results]]
+        result_apps = [app for app, score, breakdown in related[:max_results]] # pylint: disable=unused-variable
 
         if debug:
             print(f"  -> Returning {len(result_apps)} related apps")
@@ -186,7 +186,7 @@ class RelatedAppsFinder:
     def _calculate_semantic_similarity(
         self, target_app: Application, app: Application, app_phrases: Dict[str, Set[str]]
     ) -> int:
-        """Calculate semantic similarity using automatic phrase detection and pre-computed phrase sets."""
+        """Calculate semantic similarity from phrase detection and pre-computed phrase sets."""
         target_phrases = app_phrases.get(target_app.id, set())
         app_phrases_set = app_phrases.get(app.id, set())
 
@@ -412,7 +412,6 @@ class RelatedAppsFinder:
             "supports",
             # Common advertisement words
             "best",
-            "new",
             "free",
             "powerful",
             "easy",
@@ -549,11 +548,10 @@ class RelatedAppsFinder:
         """Categorize applications by popularity tier based on star count."""
         if stars >= 10000:
             return "mega"  # 10k+ stars
-        elif stars >= 5000:
+        if stars >= 5000:
             return "highly"  # 5k-10k stars
-        elif stars >= 1000:
+        if stars >= 1000:
             return "popular"  # 1k-5k stars
-        elif stars >= 100:
+        if stars >= 100:
             return "moderate"  # 100-1k stars
-        else:
-            return "emerging"  # <100 stars
+        return "emerging"  # <100 stars

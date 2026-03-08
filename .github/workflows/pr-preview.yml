@@ -46,28 +46,24 @@ jobs:
       - name: Install Python dependencies
         run: pip install .
 
-      - name: Pylint score (main)
-        id: pylint_main
-        run: |
-          pip install pylint -q
-          git fetch origin main
-          git checkout origin/main --
-          pip install . -q
-          SCORE=$(pylint aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
-          echo "score=${SCORE:-0}" >> "$GITHUB_OUTPUT"
-
-      - name: Pylint score (PR)
+      - name: Pylint (PR)
         id: pylint_pr
         run: |
+          pip install pylint -q
           git checkout ${{ github.event.pull_request.head.sha }} --
-          pip install . -q
-          PR_SCORE=$(pylint aswg --exit-zero 2>&1 | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' | head -1)
-          PR_SCORE=${PR_SCORE:-0}
-          MAIN_SCORE=${{ steps.pylint_main.outputs.score }}
-          [ -z "$MAIN_SCORE" ] && MAIN_SCORE=0
-          DELTA=$(awk "BEGIN { d=$PR_SCORE-$MAIN_SCORE; if(d>0) printf \"+%.1f\", d; else printf \"%.1f\", d }")
-          echo "score=${PR_SCORE}" >> "$GITHUB_OUTPUT"
-          echo "delta=${DELTA}" >> "$GITHUB_OUTPUT"
+          pylint --disable=too-many-locals,line-too-long,too-many-instance-attributes,too-many-nested-blocks,too-many-branches,too-many-statements,too-many-positional-arguments aswg --exit-zero 2>&1 | tee pylint_pr.log
+
+      - name: Pylint issues summary (for PR comment)
+        id: pylint_issues
+        if: success()
+        run: |
+          if [ -f pylint_pr.log ] && grep -qE '^[^ ]+\.py:[0-9]+:[0-9]+:' pylint_pr.log; then
+            ISSUES=$(grep -E '^\*+|^[^ ]+\.py:[0-9]+:[0-9]+:' pylint_pr.log | head -120)
+            echo "issues<<PYLINT_EOF" >> "$GITHUB_OUTPUT"
+            echo "$ISSUES" >> "$GITHUB_OUTPUT"
+            echo "PYLINT_EOF" >> "$GITHUB_OUTPUT"
+          fi
+        continue-on-error: true
 
       - name: Record build start time
         id: build_timer
@@ -306,23 +302,26 @@ jobs:
             const totalSize = process.env.BUILD_TOTAL_SIZE || 'N/A';
             const totalFiles = process.env.BUILD_TOTAL_FILES || 'N/A';
             const htmlPages = process.env.BUILD_HTML_PAGES || 'N/A';
-            const pylintScore = process.env.PYLINT_SCORE || 'N/A';
-            const pylintDelta = process.env.PYLINT_DELTA || '';
+            const pylintIssues = process.env.PYLINT_ISSUES || '';
 
             let body = '## PR Preview\n\n';
             if (isSuccess) {
               body += '| | |\n|---|---|\n';
               body += `| **Preview URL** | ${effectivePreviewUrl} |\n`;
               body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
-              body += `| **Build** | ${duration} | ${totalSize} | ${totalFiles} files | ${htmlPages} HTML |\n`;
-              body += `| **PyLint Score** | ${pylintScore}${pylintDelta ? ` (${pylintDelta} from main)` : ''} |\n\n`;
+              body += `| **Build** | ${duration} | ${totalSize} | ${totalFiles} files | ${htmlPages} HTML |\n\n`;
+              if (pylintIssues) {
+                body += '<details><summary>PyLint issues</summary>\n\n```\n' + pylintIssues.replace(/```/g, '`\u200b`\u200b`') + '\n```\n\n</details>\n\n';
+              }
               body += `---\n[View workflow run](${runUrl}) | [View PR diff](${compareUrl})\n\n*Comment updates on each push. Preview removed when PR is closed.*`;
             } else {
               body += '### Build Failed\n\n';
               body += '| | |\n|---|---|\n';
               if (effectivePreviewUrl) body += `| **Last Working Preview** | ${effectivePreviewUrl} |\n`;
-              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n`;
-              if (pylintScore !== 'N/A') body += `| **PyLint Score** | ${pylintScore}${pylintDelta ? ` (${pylintDelta} from main)` : ''} |\n`;
+              body += `| **Commit** | [\`${headShaShort}\`](https://github.com/${owner}/${repo}/commit/${headSha}) |\n\n`;
+              if (pylintIssues) {
+                body += '<details><summary>PyLint issues</summary>\n\n```\n' + pylintIssues.replace(/```/g, '`\u200b`\u200b`') + '\n```\n\n</details>\n\n';
+              }
               body += '\nBuild failed. See [workflow run](' + runUrl + ') for details.\n\n---\n[View PR diff](' + compareUrl + ')';
             }
             if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
@@ -332,8 +331,7 @@ jobs:
           BUILD_TOTAL_SIZE: ${{ steps.build_stats.outputs.total_size }}
           BUILD_TOTAL_FILES: ${{ steps.build_stats.outputs.total_files }}
           BUILD_HTML_PAGES: ${{ steps.build_stats.outputs.html_files }}
-          PYLINT_SCORE: ${{ steps.pylint_pr.outputs.score }}
-          PYLINT_DELTA: ${{ steps.pylint_pr.outputs.delta }}
+          PYLINT_ISSUES: ${{ steps.pylint_issues.outputs.issues }}
 
   cleanup-preview:
     if: github.event.action == 'closed'

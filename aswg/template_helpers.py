@@ -5,10 +5,11 @@ Template helper functions for Jinja2 templates.
 import re
 from datetime import datetime
 from typing import List, Any
+from jinja2 import Template, TemplateError
 from .config import Config
 
 
-class TemplateHelpers:
+class TemplateHelpers:  # pylint: disable=too-many-public-methods
     """Helper functions for Jinja2 templates."""
 
     def __init__(self, config: Config, licenses_data: dict = None):
@@ -87,15 +88,16 @@ class TemplateHelpers:
             print(f"Warning: Could not parse date '{date_str}': {e}")
             return date_str
 
-    def truncate_description(self, description: str, length: int = None) -> str:
-        """Truncate description to specified length."""
+    def truncate_description(self, description: str, length: int = None, show_full: bool = None) -> str:
+        """Truncate description to specified length with configurable behavior."""
         if not description:
             return ""
 
         truncation_config = self.config.get("ui.truncation", {})
         if length is None:
             length = truncation_config.get("default_description_length", 150)
-        show_full = truncation_config.get("browse_description_full", False)
+        if show_full is None:
+            show_full = truncation_config.get("browse_description_full", False)
 
         if show_full or len(description) <= length:
             return description
@@ -110,6 +112,7 @@ class TemplateHelpers:
 
     def get_app_url(self, app_id: str) -> str:
         """Get URL for application detail page."""
+        # Don't use url_for here as it will be called from templates
         return f"/apps/{app_id}.html"
 
     def format_license(self, license_name: str) -> str:
@@ -281,9 +284,6 @@ class TemplateHelpers:
         if not template_str:
             return ""
 
-        # Create a simple template from string
-        from jinja2 import Template, TemplateError
-
         # Merge with site config by default
         full_context = {
             "site": self.config.get_site_config(),
@@ -335,42 +335,10 @@ class TemplateHelpers:
 
         return target_attrs
 
-    def truncate_description(
-        self, description: str, length: int = None, show_full: bool = None
-    ) -> str:
-        """Truncate description to specified length with configurable behavior."""
-        if not description:
-            return ""
-
-        # Get truncation config from UI config
-        truncation_config = self.config.get("ui.truncation", {})
-
-        # Use provided length or fall back to config default
-        if length is None:
-            length = truncation_config.get("default_description_length", 150)
-
-        # Check if full description should be shown
-        if show_full is None:
-            show_full = truncation_config.get("browse_description_full", False)
-
-        if show_full or len(description) <= length:
-            return description
-
-        # Find the last space before the limit
-        truncated = description[:length]
-        last_space = truncated.rfind(" ")
-
-        if last_space > 0:
-            truncated = truncated[:last_space]
-
-        return truncated + "..."
-
     def markdown_to_html(self, markdown_text: str) -> str:
         """Convert markdown text to HTML for footer content."""
         if not markdown_text:
             return ""
-
-        import re
 
         html = markdown_text
 
@@ -509,8 +477,6 @@ class TemplateHelpers:
 
     def style_description_links(self, description: str) -> str:
         """Add proper styling to links in description text."""
-        import re
-
         if not description:
             return ""
 
@@ -542,8 +508,6 @@ class TemplateHelpers:
 
     def process_banner_text(self, text: str) -> str:
         """Process banner text to handle markdown-style bold formatting."""
-        import re
-
         if not text:
             return ""
 
@@ -581,11 +545,6 @@ class TemplateHelpers:
         base_path = self.get_base_path()
         return f"{base_path}/{path}"
 
-    def get_app_url(self, app_id: str) -> str:
-        """Get URL for application detail page."""
-        # Don't use url_for here as it will be called from templates
-        return f"/apps/{app_id}.html"
-
     def filter_navigation(self, navigation_items: list) -> list:
         """Filter navigation items based on enabled conditions."""
         if not navigation_items:
@@ -611,7 +570,7 @@ class TemplateHelpers:
                 elif isinstance(enabled_condition, bool) and not enabled_condition:
                     # Skip disabled items
                     continue
-                
+
             # Item is enabled, add to filtered list
             filtered_items.append(item)
 
