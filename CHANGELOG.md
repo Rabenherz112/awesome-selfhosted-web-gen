@@ -16,11 +16,13 @@ All notable changes to this project will be documented in this file. The format 
 - Fixed scroll-to-top button a circle shape
 - Fixed (hopefully) the issue some users had issue with truncation of the app name happening too early
 - Fixed broken link to browse page on statistics page
+- Fixed incorrectly shown information in `aswg info` command
 
 ### Other changes
 
 - Slightly changed overall design to match icon support
 - Added pylint checks and formatted code accordingly
+- Updated TailwindCSS to version 4.2.0
 
 ## [2.1.0] - 2025-12-27
 

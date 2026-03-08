@@ -16,10 +16,25 @@ from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 
+try:
+    from importlib.metadata import version as _pkg_version
+except ImportError:
+    _pkg_version = None
+
 from .config import Config
 from .data_processor import DataProcessor, Application
 from .site_generator import SiteGenerator
 from .utils import format_bytes, get_directory_size, print_build_stats
+
+
+def _get_version():
+    """Return ASWG package version from metadata or __version__."""
+    if _pkg_version is not None:
+        try:
+            return _pkg_version("aswg")
+        except Exception:
+            pass
+    return getattr(__import__("aswg"), "__version__", "unknown")
 
 
 def create_parser():
@@ -243,132 +258,36 @@ def cmd_clean(config):
 
 def cmd_info(config):  # pylint: disable=too-many-locals,too-many-statements
     """Show comprehensive configuration and system information."""
-    print("Configuration Information:")
-    print(f"   Config file: {config.config_path}")
-    print(f"   Template directory: {config.template_dir}")
-    print(f"   Static directory: {config.static_dir}")
-    print(f"   Output directory: {config.output_dir}")
-    print(f"   Data cache directory: {config.data_cache_dir}")
+    data_config = config.get_data_config()
+    generation_config = config.get_generation_config()
 
-    # System Information
-    print("\nSystem Information:")
+    # Version and environment
+    print("Version and environment:")
+    print(f"   ASWG version: {_get_version()}")
     print(f"   Python version: {sys.version.split()[0]}")
     print(f"   Platform: {platform.platform()}")
     print(f"   Architecture: {platform.architecture()[0]}")
     print(f"   Working directory: {os.getcwd()}")
+    print(f"   Config file: {config.config_path}")
 
-    # Site Configuration
+    # Site configuration
     site_config = config.get_site_config()
-    print("\nSite Configuration:")
+    print("\nSite configuration:")
     print(f"   Title: {site_config.get('title', 'N/A')}")
     print(f"   Description: {site_config.get('description', 'N/A')}")
     print(f"   URL: {site_config.get('url', 'N/A')}")
     print(f"   Author: {site_config.get('author', 'N/A')}")
     print(f"   Base path: {site_config.get('base_path', 'N/A')}")
 
-    # Build Configuration
-    build_config = config.get_build_config()
-    print("\nBuild Configuration:")
-    print(f"   Output directory: {build_config.get('output_dir', 'output')}")
-    print(f"   Template directory: {build_config.get('template_dir', 'templates')}")
-    print(f"   Static directory: {build_config.get('static_dir', 'static')}")
-    print(f"   Data cache directory: {build_config.get('data_cache_dir', 'data')}")
-
-    # Generation Configuration
-    generation_config = config.get_generation_config()
-    alternatives_config = config.get_alternatives_config()
-    print("\nGeneration Options:")
-    print(f"   Items per page: {generation_config.get('items_per_page', 60)}")
-    print(f"   Enable search index: {generation_config.get('enable_search_index', True)}")
-    print(f"   Enable alternatives: {alternatives_config.get('enabled', False)}")
-    print(f"   Minify HTML: {generation_config.get('minify_html', False)}")
-    print(f"   Generate sitemap: {generation_config.get('generate_sitemap', True)}")
-    print(f"   Enable pagination: {generation_config.get('enable_pagination', True)}")
-
-    # Search Configuration
-    search_config = config.get_search_config()
-    print("\nSearch Configuration:")
-    print(f"   Fuzzy threshold: {search_config.get('fuzzy_threshold', 0.3)}")
-    print(f"   Max results: {search_config.get('max_results', 8)}")
-    print(f"   Min query length: {search_config.get('min_query_length', 3)}")
-    print(f"   Search fields: {', '.join(search_config.get('search_fields', []))}")
-
-    # Data Configuration
-    data_config = config.get_data_config()
-    print("\nData Configuration:")
-    print(f"   Awesome data directory: {data_config.get('data_dir', 'awesome-selfhosted-data')}")
-    print(f"   Software directory: {data_config.get('software_dir', 'software')}")
-    print(f"   Categories directory: {data_config.get('categories_dir', 'tags')}")
-    print(f"   Platforms directory: {data_config.get('platforms_dir', 'platforms')}")
-    print(f"   Licenses file: {data_config.get('licenses_file', 'licenses.yml')}")
-
-    # Directory Status and Sizes
-    print("\nDirectory Status:")
-    directories = [
-        ('Templates', config.template_dir),
-        ('Static files', config.static_dir),
-        ('Output', config.output_dir),
-        ('Data cache', config.data_cache_dir),
-    ]
-
-    for name, path in directories:
-        if path.exists():
-            size = get_directory_size(path)
-            file_count = len(list(path.rglob('*'))) if path.is_dir() else 1
-            print(f"   {name}: Exists ({format_bytes(size)}, {file_count} items)")
-        else:
-            print(f"   {name}: X Missing ({path})")
-
-    # Cached Data Information
-    cache_file = config.data_cache_dir / 'processed_data.json'
-    if cache_file.exists():
-        try:
-            with open(cache_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-
-            # Get file stats
-            stat = cache_file.stat()
-            file_size = format_bytes(stat.st_size)
-            modified_time = datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
-
-            print("\nCached Data:")
-            print(f"   Applications: {len(data.get('applications', []))}")
-            print(f"   Categories: {len(data.get('categories', {}))}")
-            print(f"   Licenses: {len(data.get('licenses', {}))}")
-            print(f"   File size: {file_size}")
-            print(f"   Last modified: {modified_time}")
-            print(f"   Processed at: {data.get('processed_at', 'Unknown')}")
-
-            # Show statistics if available
-            stats = data.get('statistics', {})
-            if stats:
-                print(f"   Total apps: {stats.get('total_apps', 0)}")
-                print(f"   Categories count: {stats.get('categories_count', 0)}")
-                print(f"   Platforms count: {stats.get('platforms_count', 0)}")
-                print(f"   Licenses count: {stats.get('licenses_count', 0)}")
-
-        except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
-            print(f"\nCached Data: Corrupted ({str(e)})")
-    else:
-        print("\nCached Data: Not found")
-
-    # Output Directory Analysis
-    if config.output_dir.exists():
-        print("\nOutput Analysis:")
-        print_build_stats(config.output_dir)
-
-    # Data Source Status
+    # Data source
     data_dir = Path(data_config.get('data_dir', 'awesome-selfhosted-data'))
+    print("\nData source:")
+    print(f"   Source directory: {data_dir}")
     if data_dir.exists():
-        print("\nData Source:")
-        print(f"   Source directory: {data_dir}")
         print("   Status: Available")
-
-        # Check for key directories
         software_dir = data_dir / data_config.get('software_dir', 'software')
         categories_dir = data_dir / data_config.get('categories_dir', 'tags')
         platforms_dir = data_dir / data_config.get('platforms_dir', 'platforms')
-
         sw_count = len(list(software_dir.glob('*.yml'))) if software_dir.exists() else 0
         cat_count = len(list(categories_dir.glob('*.yml'))) if categories_dir.exists() else 0
         plat_count = len(list(platforms_dir.glob('*.yml'))) if platforms_dir.exists() else 0
@@ -376,37 +295,107 @@ def cmd_info(config):  # pylint: disable=too-many-locals,too-many-statements
         print(f"   Category files: {cat_count}")
         print(f"   Platforms files: {plat_count}")
     else:
-        print("\nData Source:")
-        print(f"   Source directory: {data_dir}")
         print("   Status: Not found")
         print("   Run 'aswg fetch' to download data")
 
-    # Performance Configuration
-    performance_config = config.get_performance_config()
-    print("\nPerformance Configuration:")
-    print(f"   Lazy load images: {performance_config.get('lazy_load_images', True)}")
-    print(f"   Generate WebP: {performance_config.get('generate_webp', False)}")
-    print(f"   Inline critical CSS: {performance_config.get('inline_critical_css', True)}")
+    print("\nData configuration:")
+    print(f"   Awesome data directory: {data_config.get('data_dir', 'awesome-selfhosted-data')}")
+    print(f"   Software directory: {data_config.get('software_dir', 'software')}")
+    print(f"   Categories directory: {data_config.get('categories_dir', 'tags')}")
+    print(f"   Platforms directory: {data_config.get('platforms_dir', 'platforms')}")
+    print(f"   Licenses file: {data_config.get('licenses_file', 'licenses.yml')}")
+    print(f"   Licenses nonfree file: {data_config.get('licenses_nonfree_file', 'licenses-nonfree.yml')}")
+    print(f"   Use git data: {generation_config.get('use_git_data', True)}")
 
-    # Links Configuration
+    # Cached data
+    cache_file = config.data_cache_dir / 'processed_data.json'
+    if cache_file.exists():
+        try:
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            stat = cache_file.stat()
+            file_size = format_bytes(stat.st_size)
+            modified_time = datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+            print("\nCached data:")
+            print(f"   File: {cache_file}")
+            print(f"   File size: {file_size}")
+            print(f"   Last modified: {modified_time}")
+            print(f"   Processed at: {data.get('processed_at', 'Unknown')}")
+            print(f"   Applications: {len(data.get('applications', []))}")
+            print(f"   Categories: {len(data.get('categories', {}))}")
+            print(f"   Licenses: {len(data.get('licenses', {}))}")
+            stats = data.get('statistics', {})
+            if stats:
+                print(f"   Total apps: {stats.get('total_apps', 0)}")
+                print(f"   Categories count: {stats.get('categories_count', 0)}")
+                print(f"   Platforms count: {stats.get('total_platforms', 0)}")
+                print(f"   Licenses count: {stats.get('total_licenses', 0)}")
+        except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
+            print(f"\nCached data: Corrupted ({str(e)})")
+    else:
+        print("\nCached data: Not found")
+
+    # Build paths and directory status
+    build_config = config.get_build_config()
+    print("\nBuild configuration:")
+    print(f"   Output directory: {build_config.get('output_dir', 'output')}")
+    print(f"   Template directory: {build_config.get('template_dir', 'templates')}")
+    print(f"   Static directory: {build_config.get('static_dir', 'static')}")
+    print(f"   Data cache directory: {build_config.get('data_cache_dir', 'data')}")
+
+    print("\nDirectory status:")
+    directories = [
+        ('Templates', config.template_dir),
+        ('Static files', config.static_dir),
+        ('Output', config.output_dir),
+        ('Data cache', config.data_cache_dir),
+    ]
+    for name, path in directories:
+        if path.exists():
+            size = get_directory_size(path)
+            file_count = len(list(path.rglob('*'))) if path.is_dir() else 1
+            print(f"   {name}: Exists ({format_bytes(size)}, {file_count} items)")
+        else:
+            print(f"   {name}: Missing ({path})")
+
+    # Generation options and search
+    alternatives_config = config.get_alternatives_config()
+    print("\nGeneration options:")
+    print(f"   Enable pagination: {generation_config.get('enable_pagination', True)}")
+    if generation_config.get('enable_pagination', True):
+        print(f"   Items per page: {generation_config.get('items_per_page', 60)}")
+        print(f"   Let user choose pagination size: {generation_config.get('let_user_choose_pagination_size', False)}")
+    print(f"   Enable search index: {generation_config.get('enable_search_index', True)}")
+    print(f"   Enable alternatives: {alternatives_config.get('enabled', False)}")
+    print(f"   Generate sitemap: {generation_config.get('generate_sitemap', True)}")
+    print(f"   Minify HTML: {generation_config.get('minify_html', False)}")
+
+    search_config = config.get_search_config()
+    print("\nSearch configuration:")
+    print(f"   Fuzzy threshold: {search_config.get('fuzzy_threshold', 0.3)}")
+    print(f"   Max results: {search_config.get('max_results', 8)}")
+    print(f"   Min query length: {search_config.get('min_query_length', 3)}")
+    print(f"   Search fields: {', '.join(search_config.get('search_fields', []))}")
+
+    # Links, robots, htaccess, build statistics
     links_config = config.get('links', {})
-    print("\nLinks Configuration:")
+    print("\nLinks configuration:")
     print(f"   Open internal links in new tab: {links_config.get('open_in_new_tab_for_internal_links', False)}")
     print(f"   Open external links in new tab: {links_config.get('open_in_new_tab_for_external_links', False)}")
 
-    # Robots Configuration
     robots_config = config.get('robots', {})
-    print("\nRobots Configuration:")
+    print("\nRobots configuration:")
     print(f"   Generate robots.txt: {robots_config.get('generate', True)}")
     print(f"   User agent: {robots_config.get('user_agent', '*')}")
     print(f"   Sitemap URL: {robots_config.get('sitemap_url', '/sitemap.xml')}")
 
-    # Htaccess Configuration
     htaccess_config = config.get('htaccess', {})
-    print("\nHtaccess Configuration:")
+    print("\nHtaccess configuration:")
     print(f"   Generate .htaccess: {htaccess_config.get('generate', False)}")
     print(f"   Remove HTML extension: {htaccess_config.get('remove_html_extension', True)}")
 
+    if config.output_dir.exists():
+        print_build_stats(config.output_dir)
 
 def main():
     """Main entry point."""
